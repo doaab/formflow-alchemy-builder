@@ -17,7 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { CalendarIcon, Eye } from "lucide-react";
+import { CalendarIcon, Eye, Frown, MehIcon, Smile, SmileIcon, Star } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { FormData, FormElement } from "@/types/formBuilder";
 import { Calendar } from "@/components/ui/calendar";
@@ -242,6 +242,80 @@ function renderFieldByType(element: FormElement, value: any, onChange: (value: a
             />
           </PopoverContent>
         </Popover>
+      );
+
+    case 'star':
+      const maxStars = element.maxStars || 5;
+      const selectedRating = value || 0;
+      
+      return (
+        <div className="flex items-center gap-1 py-2">
+          {Array.from({length: maxStars}).map((_, i) => (
+            <button
+              type="button"
+              key={`star-${i}`}
+              className="text-yellow-400 hover:text-yellow-500 focus:outline-none"
+              onClick={() => onChange(i + 1)}
+            >
+              <Star 
+                className={cn(
+                  "h-6 w-6", 
+                  selectedRating >= i + 1 ? "fill-current" : "fill-none"
+                )}
+              />
+            </button>
+          ))}
+          <span className="ml-2 text-sm text-gray-500">{selectedRating > 0 ? `${selectedRating}/${maxStars}` : ''}</span>
+        </div>
+      );
+      
+    case 'face':
+      const selectedFace = value || 0;
+      
+      return (
+        <div className="flex items-center justify-center gap-4 py-2">
+          <button
+            type="button"
+            className={cn(
+              "p-2 rounded-full hover:bg-red-100", 
+              selectedFace === 1 && "bg-red-100"
+            )}
+            onClick={() => onChange(1)}
+          >
+            <Frown className={cn(
+              "h-8 w-8", 
+              selectedFace === 1 ? "text-red-500" : "text-gray-400"
+            )} />
+          </button>
+          
+          <button
+            type="button"
+            className={cn(
+              "p-2 rounded-full hover:bg-yellow-100", 
+              selectedFace === 2 && "bg-yellow-100"
+            )}
+            onClick={() => onChange(2)}
+          >
+            <MehIcon className={cn(
+              "h-8 w-8", 
+              selectedFace === 2 ? "text-yellow-500" : "text-gray-400"
+            )} />
+          </button>
+          
+          <button
+            type="button"
+            className={cn(
+              "p-2 rounded-full hover:bg-green-100", 
+              selectedFace === 3 && "bg-green-100"
+            )}
+            onClick={() => onChange(3)}
+          >
+            <Smile className={cn(
+              "h-8 w-8", 
+              selectedFace === 3 ? "text-green-500" : "text-gray-400"
+            )} />
+          </button>
+        </div>
       );
       
     default:

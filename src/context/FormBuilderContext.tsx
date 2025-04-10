@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { FormData, FormElementTypes, QuestionType } from '../types/formBuilder';
 import { v4 as uuidv4 } from 'uuid';
@@ -72,6 +71,15 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
           ],
         };
       case 'date':
+        return {
+          ...baseElement,
+        };
+      case 'star':
+        return {
+          ...baseElement,
+          maxStars: 5,
+        };
+      case 'face':
         return {
           ...baseElement,
         };

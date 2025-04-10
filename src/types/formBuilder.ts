@@ -8,6 +8,8 @@ export type QuestionType =
   | 'radio'
   | 'checkbox'
   | 'date'
+  | 'face'
+  | 'star'
   | 'section'
   | 'break';
 
@@ -31,6 +33,7 @@ export interface FormElement {
     label: string;
     value: string;
   }>;
+  maxStars?: number; // For star rating
   conditionalLogic?: {
     enabled: boolean;
     action: 'show' | 'hide';

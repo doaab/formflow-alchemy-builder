@@ -11,6 +11,7 @@ import { Switch } from '../ui/switch';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import ElementConditions from './ElementConditions';
+import { Slider } from '../ui/slider';
 
 interface ElementEditorProps {
   element: FormElementTypes;
@@ -110,6 +111,23 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
                 value={element.placeholder || ''}
                 onChange={(e) => handleChange('placeholder', e.target.value)}
               />
+            </div>
+          )}
+
+          {element.type === 'star' && (
+            <div className="space-y-2">
+              <Label htmlFor="max-stars">Maximum Number of Stars</Label>
+              <div className="flex items-center gap-4">
+                <Slider 
+                  id="max-stars" 
+                  min={1} 
+                  max={10} 
+                  step={1} 
+                  value={[element.maxStars || 5]} 
+                  onValueChange={(value) => handleChange('maxStars', value[0])}
+                />
+                <span className="w-8 text-center">{element.maxStars || 5}</span>
+              </div>
             </div>
           )}
           

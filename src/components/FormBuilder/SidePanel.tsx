@@ -16,7 +16,9 @@ import {
   Calendar,
   SectionIcon,
   ArrowDown,
-  PlusCircle
+  PlusCircle,
+  Star,
+  Smile
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -63,16 +65,16 @@ const SidePanel = () => {
             <div>
               <h3 className="mb-2 text-sm font-medium">Basic Fields</h3>
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('text' as QuestionType)}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('text')}>
                   <FileText className="mr-2 h-4 w-4" /> Text
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('paragraph' as QuestionType)}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('paragraph')}>
                   <AlignLeft className="mr-2 h-4 w-4" /> Paragraph
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('number' as QuestionType)}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('number')}>
                   <Hash className="mr-2 h-4 w-4" /> Number
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('email' as QuestionType)}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('email')}>
                   <Mail className="mr-2 h-4 w-4" /> Email
                 </Button>
               </div>
@@ -83,17 +85,31 @@ const SidePanel = () => {
             <div>
               <h3 className="mb-2 text-sm font-medium">Choice Fields</h3>
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('dropdown' as QuestionType)}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('dropdown')}>
                   <List className="mr-2 h-4 w-4" /> Dropdown
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('radio' as QuestionType)}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('radio')}>
                   <CircleCheckBig className="mr-2 h-4 w-4" /> Multiple Choice
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('checkbox' as QuestionType)}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('checkbox')}>
                   <CheckSquare className="mr-2 h-4 w-4" /> Checkboxes
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('date' as QuestionType)}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('date')}>
                   <Calendar className="mr-2 h-4 w-4" /> Date
+                </Button>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <h3 className="mb-2 text-sm font-medium">Rating Fields</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('star')}>
+                  <Star className="mr-2 h-4 w-4" /> Star Rating
+                </Button>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('face')}>
+                  <Smile className="mr-2 h-4 w-4" /> Face Rating
                 </Button>
               </div>
             </div>
@@ -103,10 +119,10 @@ const SidePanel = () => {
             <div>
               <h3 className="mb-2 text-sm font-medium">Layout Elements</h3>
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('section' as QuestionType)}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('section')}>
                   <SectionIcon className="mr-2 h-4 w-4" /> Section
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('break' as QuestionType)}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('break')}>
                   <ArrowDown className="mr-2 h-4 w-4" /> Page Break
                 </Button>
               </div>
@@ -124,23 +140,23 @@ const SidePanel = () => {
               <div>
                 <h3 className="mb-2 text-sm font-medium">Add More Elements</h3>
                 <div className="grid grid-cols-3 gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleAddElement('text' as QuestionType)}>
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('text')}>
                     <FileText className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleAddElement('paragraph' as QuestionType)}>
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('paragraph')}>
                     <AlignLeft className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleAddElement('number' as QuestionType)}>
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('number')}>
                     <Hash className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleAddElement('dropdown' as QuestionType)}>
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('dropdown')}>
                     <List className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleAddElement('radio' as QuestionType)}>
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('radio')}>
                     <CircleCheckBig className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleAddElement('section' as QuestionType)}>
-                    <SectionIcon className="h-4 w-4" />
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('star')}>
+                    <Star className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

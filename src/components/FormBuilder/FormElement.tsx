@@ -16,7 +16,9 @@ import {
   CircleCheckBig, 
   Calendar, 
   SectionIcon,
-  ArrowDown
+  ArrowDown,
+  Star,
+  Smile
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -35,6 +37,8 @@ const getQuestionIcon = (type: string) => {
     case 'date': return <Calendar className="h-4 w-4" />;
     case 'section': return <SectionIcon className="h-4 w-4" />;
     case 'break': return <ArrowDown className="h-4 w-4" />;
+    case 'star': return <Star className="h-4 w-4" />;
+    case 'face': return <Smile className="h-4 w-4" />;
     default: return <FileText className="h-4 w-4" />;
   }
 };
@@ -51,6 +55,8 @@ const getHumanReadableType = (type: string) => {
     case 'date': return 'Date Question';
     case 'section': return 'Section';
     case 'break': return 'Page Break';
+    case 'star': return 'Star Rating';
+    case 'face': return 'Face Rating';
     default: return type.charAt(0).toUpperCase() + type.slice(1);
   }
 };
