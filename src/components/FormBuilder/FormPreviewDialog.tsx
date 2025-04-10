@@ -67,6 +67,11 @@ const FormPreviewDialog = () => {
             ) : (
               formData.elements.map((element, index) => {
                 // Make sure element is defined before evaluation
+                if (!element) {
+                  console.warn("Undefined element found at index", index);
+                  return null;
+                }
+                
                 const shouldShow = evaluateCondition(element, responses);
                 
                 if (!shouldShow) {
@@ -76,7 +81,7 @@ const FormPreviewDialog = () => {
                 if (element.type === 'section') {
                   return (
                     <div key={element.id} className="py-2">
-                      <h3 className="text-lg font-medium">{element.label}</h3>
+                      <h3 className="text-lg font-medium">{element.label || "Untitled Section"}</h3>
                       {'description' in element && element.description && (
                         <p className="text-sm text-muted-foreground mt-1">{element.description}</p>
                       )}
@@ -124,6 +129,11 @@ const FormPreviewDialog = () => {
 };
 
 function renderFieldByType(element: FormElement, value: any, onChange: (value: any) => void) {
+  if (!element || !element.type) {
+    console.warn('Invalid element passed to renderFieldByType:', element);
+    return null;
+  }
+  
   switch (element.type) {
     case 'text':
     case 'email':
