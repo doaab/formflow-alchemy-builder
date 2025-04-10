@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { CalendarIcon, Eye, Frown, MehIcon, Smile, SmileIcon, Star, ChevronDown, ChevronUp } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { FormData, FormElement, AddressElement } from "@/types/formBuilder";
+import { FormData, FormElement, AddressElement, PhoneElement } from "@/types/formBuilder";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -27,7 +26,6 @@ import { evaluateCondition } from "@/utils/formUtils";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 
-// Expanded list of countries
 const countries = [
   { code: 'AF', name: 'Afghanistan' },
   { code: 'AX', name: 'Åland Islands' },
@@ -581,9 +579,13 @@ function renderFieldByType(
       const addressValue = value || {};
       const allowedAddressCountries = addressElement.allowedCountries || ['US', 'CA', 'GB'];
       
+      const shouldShowToggle = !addressElement.expanded;
+      
+      const shouldShowFields = addressElement.expanded || addressExpanded;
+      
       return (
-        <Collapsible open={addressExpanded} onOpenChange={toggleAddress}>
-          <div className="flex justify-between items-center">
+        <div>
+          {shouldShowToggle && (
             <Button
               variant="outline"
               className="mb-2 w-full justify-between"
@@ -592,97 +594,99 @@ function renderFieldByType(
               <span>{addressExpanded ? "Hide Address Fields" : "Show Address Fields"}</span>
               {addressExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </Button>
-          </div>
+          )}
           
-          <CollapsibleContent className="space-y-2">
-            {fields.street1 && (
-              <div className="space-y-1">
-                <Label>Street Address</Label>
-                <Input 
-                  value={addressValue.street1 || ''} 
-                  onChange={(e) => handleAddressFieldChange('street1', e.target.value)}
-                  placeholder="Street Address"
-                  required={element.required && fields.street1}
-                />
-              </div>
-            )}
-            
-            {fields.street2 && (
-              <div className="space-y-1">
-                <Label>Street Address 2</Label>
-                <Input 
-                  value={addressValue.street2 || ''} 
-                  onChange={(e) => handleAddressFieldChange('street2', e.target.value)}
-                  placeholder="Apartment, suite, unit, etc."
-                />
-              </div>
-            )}
-            
-            <div className="grid grid-cols-2 gap-2">
-              {fields.city && (
+          {shouldShowFields && (
+            <div className="space-y-2">
+              {fields.street1 && (
                 <div className="space-y-1">
-                  <Label>City</Label>
+                  <Label>Street Address</Label>
                   <Input 
-                    value={addressValue.city || ''} 
-                    onChange={(e) => handleAddressFieldChange('city', e.target.value)}
-                    placeholder="City"
-                    required={element.required && fields.city}
+                    value={addressValue.street1 || ''} 
+                    onChange={(e) => handleAddressFieldChange('street1', e.target.value)}
+                    placeholder="Street Address"
+                    required={element.required && fields.street1}
                   />
                 </div>
               )}
               
-              {fields.state && (
+              {fields.street2 && (
                 <div className="space-y-1">
-                  <Label>State/Province</Label>
+                  <Label>Street Address 2</Label>
                   <Input 
-                    value={addressValue.state || ''} 
-                    onChange={(e) => handleAddressFieldChange('state', e.target.value)}
-                    placeholder="State/Province"
-                    required={element.required && fields.state}
-                  />
-                </div>
-              )}
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2">
-              {fields.zipCode && (
-                <div className="space-y-1">
-                  <Label>Zip/Postal Code</Label>
-                  <Input 
-                    value={addressValue.zipCode || ''} 
-                    onChange={(e) => handleAddressFieldChange('zipCode', e.target.value)}
-                    placeholder="Zip/Postal Code"
-                    required={element.required && fields.zipCode}
+                    value={addressValue.street2 || ''} 
+                    onChange={(e) => handleAddressFieldChange('street2', e.target.value)}
+                    placeholder="Apartment, suite, unit, etc."
                   />
                 </div>
               )}
               
-              {fields.country && (
-                <div className="space-y-1">
-                  <Label>Country</Label>
-                  <Select
-                    value={addressValue.country || ''}
-                    onValueChange={(value) => handleAddressFieldChange('country', value)}
-                    required={element.required && fields.country}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries
-                        .filter(country => allowedAddressCountries.includes(country.code))
-                        .map(country => (
-                          <SelectItem key={country.code} value={country.code}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              <div className="grid grid-cols-2 gap-2">
+                {fields.city && (
+                  <div className="space-y-1">
+                    <Label>City</Label>
+                    <Input 
+                      value={addressValue.city || ''} 
+                      onChange={(e) => handleAddressFieldChange('city', e.target.value)}
+                      placeholder="City"
+                      required={element.required && fields.city}
+                    />
+                  </div>
+                )}
+                
+                {fields.state && (
+                  <div className="space-y-1">
+                    <Label>State/Province</Label>
+                    <Input 
+                      value={addressValue.state || ''} 
+                      onChange={(e) => handleAddressFieldChange('state', e.target.value)}
+                      placeholder="State/Province"
+                      required={element.required && fields.state}
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2">
+                {fields.zipCode && (
+                  <div className="space-y-1">
+                    <Label>Zip/Postal Code</Label>
+                    <Input 
+                      value={addressValue.zipCode || ''} 
+                      onChange={(e) => handleAddressFieldChange('zipCode', e.target.value)}
+                      placeholder="Zip/Postal Code"
+                      required={element.required && fields.zipCode}
+                    />
+                  </div>
+                )}
+                
+                {fields.country && (
+                  <div className="space-y-1">
+                    <Label>Country</Label>
+                    <Select
+                      value={addressValue.country || ''}
+                      onValueChange={(value) => handleAddressFieldChange('country', value)}
+                      required={element.required && fields.country}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countries
+                          .filter(country => allowedAddressCountries.includes(country.code))
+                          .map(country => (
+                            <SelectItem key={country.code} value={country.code}>
+                              {country.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
             </div>
-          </CollapsibleContent>
-        </Collapsible>
+          )}
+        </div>
       );
 
     case 'star':
