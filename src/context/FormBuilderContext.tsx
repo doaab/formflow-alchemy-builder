@@ -1,6 +1,12 @@
 
 import React, { createContext, useContext, useState } from 'react';
-import { FormData, FormElementTypes, QuestionType } from '../types/formBuilder';
+import { 
+  FormData, 
+  FormElementTypes, 
+  QuestionType, 
+  AddressElement,
+  PhoneElement
+} from '../types/formBuilder';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from '../hooks/use-toast';
 
@@ -87,13 +93,15 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
       case 'phone':
         return {
           ...baseElement,
+          type: 'phone',
           placeholder: 'Enter phone number',
           defaultCountry: 'US',
           allowedCountries: ['US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP', 'IN', 'BR', 'MX'],
-        };
+        } as PhoneElement;
       case 'address':
         return {
           ...baseElement,
+          type: 'address',
           expanded: false,
           fields: {
             street1: true,
@@ -104,7 +112,7 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
             country: true,
           },
           allowedCountries: ['US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP', 'IN', 'BR', 'MX'],
-        };
+        } as AddressElement;
       case 'section':
         return {
           ...baseElement,

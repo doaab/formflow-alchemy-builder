@@ -23,6 +23,7 @@ export interface Condition {
   value: string;
 }
 
+// Base FormElement interface
 export interface FormElement {
   id: string;
   type: QuestionType;
@@ -36,8 +37,6 @@ export interface FormElement {
     value: string;
   }>;
   maxStars?: number; // For star rating
-  allowedCountries?: string[]; // For phone input
-  defaultCountry?: string; // For phone input
   conditionalLogic?: {
     enabled: boolean;
     action: 'show' | 'hide';
@@ -46,7 +45,16 @@ export interface FormElement {
   };
 }
 
-export interface AddressField {
+// Phone specific properties
+export interface PhoneElement extends FormElement {
+  type: 'phone';
+  allowedCountries?: string[];
+  defaultCountry?: string;
+}
+
+// Address specific properties
+export interface AddressElement extends FormElement {
+  type: 'address';
   expanded: boolean;
   fields: {
     street1: boolean;
@@ -68,7 +76,13 @@ export interface FormBreak extends FormElement {
   type: 'break';
 }
 
-export type FormElementTypes = FormElement | FormSection | FormBreak;
+// Union type of all possible form elements
+export type FormElementTypes = 
+  | FormElement 
+  | FormSection 
+  | FormBreak 
+  | PhoneElement 
+  | AddressElement;
 
 export interface FormData {
   title: string;

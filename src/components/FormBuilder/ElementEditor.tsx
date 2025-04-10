@@ -1,6 +1,10 @@
-
 import { useFormBuilder } from '@/context/FormBuilderContext';
-import { FormElement, FormElementTypes } from '@/types/formBuilder';
+import { 
+  FormElement, 
+  FormElementTypes, 
+  AddressElement,
+  PhoneElement
+} from '@/types/formBuilder';
 import { useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -21,7 +25,6 @@ interface ElementEditorProps {
   element: FormElementTypes;
 }
 
-// Common country codes and names
 const countries = [
   { code: 'US', name: 'United States' },
   { code: 'CA', name: 'Canada' },
@@ -48,7 +51,7 @@ const countries = [
 const ElementEditor = ({ element }: ElementEditorProps) => {
   const { updateElement } = useFormBuilder();
   const [activeTab, setActiveTab] = useState("basic");
-  const [addressCollapsed, setAddressCollapsed] = useState(!(element.type === 'address' && (element as any).expanded));
+  const [addressCollapsed, setAddressCollapsed] = useState(!(element.type === 'address' && (element as AddressElement).expanded));
 
   const handleChange = (field: string, value: any) => {
     updateElement(element.id, { [field]: value });
@@ -88,26 +91,29 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
   const handleAddressFieldChange = (field: string, value: boolean) => {
     if (element.type !== 'address') return;
     
+    const addressElement = element as AddressElement;
     updateElement(element.id, {
       fields: {
-        ...(element as any).fields,
+        ...addressElement.fields,
         [field]: value
       }
-    });
+    } as Partial<AddressElement>);
   };
 
   const toggleAddressExpanded = () => {
     if (element.type !== 'address') return;
     
-    const newValue = !(element as any).expanded;
+    const newValue = !(element as AddressElement).expanded;
     setAddressCollapsed(!newValue);
-    updateElement(element.id, { expanded: newValue });
+    updateElement(element.id, { expanded: newValue } as Partial<AddressElement>);
   };
 
   const handleCountryAllowedChange = (country: string, allowed: boolean) => {
     if (!['phone', 'address'].includes(element.type)) return;
     
-    let currentAllowed = (element as any).allowedCountries || [];
+    let currentAllowed = element.type === 'phone' 
+      ? (element as PhoneElement).allowedCountries || []
+      : (element as AddressElement).allowedCountries || [];
     
     if (allowed && !currentAllowed.includes(country)) {
       currentAllowed = [...currentAllowed, country];
@@ -115,7 +121,7 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
       currentAllowed = currentAllowed.filter((c: string) => c !== country);
     }
     
-    updateElement(element.id, { allowedCountries: currentAllowed });
+    updateElement(element.id, { allowedCountries: currentAllowed } as Partial<PhoneElement | AddressElement>);
   };
 
   if (['section', 'break'].includes(element.type)) {
