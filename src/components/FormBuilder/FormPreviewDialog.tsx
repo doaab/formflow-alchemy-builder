@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +26,6 @@ import { evaluateCondition } from "@/utils/formUtils";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 
-// Common country codes and names
 const countries = [
   { code: 'US', name: 'United States' },
   { code: 'CA', name: 'Canada' },
@@ -112,7 +110,6 @@ const FormPreviewDialog = () => {
               </div>
             ) : (
               formData.elements.map((element, index) => {
-                // Make sure element is defined before evaluation
                 if (!element) {
                   console.warn("Undefined element found at index", index);
                   return null;
@@ -342,7 +339,8 @@ function renderFieldByType(
       );
 
     case 'address':
-      const fields = (element as any).fields || {
+      const addressElement = element as AddressElement;
+      const fields = addressElement.fields || {
         street1: true,
         street2: true,
         city: true,
@@ -352,7 +350,7 @@ function renderFieldByType(
       };
       
       const addressValue = value || {};
-      const allowedAddressCountries = (element as any).allowedCountries || ['US', 'CA', 'GB'];
+      const allowedAddressCountries = addressElement.allowedCountries || ['US', 'CA', 'GB'];
       
       return (
         <Collapsible open={addressExpanded} onOpenChange={toggleAddress}>
@@ -375,7 +373,7 @@ function renderFieldByType(
                   value={addressValue.street1 || ''} 
                   onChange={(e) => handleAddressFieldChange('street1', e.target.value)}
                   placeholder="Street Address"
-                  required={element.required}
+                  required={element.required && fields.street1}
                 />
               </div>
             )}

@@ -188,7 +188,7 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
                 <div className="space-y-2">
                   <Label htmlFor="default-country">Default Country</Label>
                   <Select 
-                    value={(element as any).defaultCountry || 'US'}
+                    value={(element as PhoneElement).defaultCountry || 'US'}
                     onValueChange={(value) => handleChange('defaultCountry', value)}
                   >
                     <SelectTrigger>
@@ -232,7 +232,7 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
                         <div className="flex items-center space-x-2">
                           <Checkbox 
                             id="street1" 
-                            checked={(element as any).fields?.street1 !== false}
+                            checked={(element as AddressElement).fields?.street1 !== false}
                             onCheckedChange={(checked) => handleAddressFieldChange('street1', !!checked)} 
                           />
                           <Label htmlFor="street1">Street Address</Label>
@@ -240,7 +240,7 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
                         <div className="flex items-center space-x-2">
                           <Checkbox 
                             id="street2" 
-                            checked={(element as any).fields?.street2 !== false}
+                            checked={(element as AddressElement).fields?.street2 !== false}
                             onCheckedChange={(checked) => handleAddressFieldChange('street2', !!checked)} 
                           />
                           <Label htmlFor="street2">Street Address 2</Label>
@@ -248,7 +248,7 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
                         <div className="flex items-center space-x-2">
                           <Checkbox 
                             id="city" 
-                            checked={(element as any).fields?.city !== false}
+                            checked={(element as AddressElement).fields?.city !== false}
                             onCheckedChange={(checked) => handleAddressFieldChange('city', !!checked)} 
                           />
                           <Label htmlFor="city">City</Label>
@@ -256,7 +256,7 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
                         <div className="flex items-center space-x-2">
                           <Checkbox 
                             id="state" 
-                            checked={(element as any).fields?.state !== false}
+                            checked={(element as AddressElement).fields?.state !== false}
                             onCheckedChange={(checked) => handleAddressFieldChange('state', !!checked)} 
                           />
                           <Label htmlFor="state">State/Province</Label>
@@ -264,7 +264,7 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
                         <div className="flex items-center space-x-2">
                           <Checkbox 
                             id="zipCode" 
-                            checked={(element as any).fields?.zipCode !== false}
+                            checked={(element as AddressElement).fields?.zipCode !== false}
                             onCheckedChange={(checked) => handleAddressFieldChange('zipCode', !!checked)} 
                           />
                           <Label htmlFor="zipCode">Zip/Postal Code</Label>
@@ -272,7 +272,7 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
                         <div className="flex items-center space-x-2">
                           <Checkbox 
                             id="country" 
-                            checked={(element as any).fields?.country !== false}
+                            checked={(element as AddressElement).fields?.country !== false}
                             onCheckedChange={(checked) => handleAddressFieldChange('country', !!checked)} 
                           />
                           <Label htmlFor="country">Country</Label>
