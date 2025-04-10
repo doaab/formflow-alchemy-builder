@@ -2,11 +2,12 @@
 import { FormData, FormElement, FormElementTypes } from "@/types/formBuilder";
 
 export const evaluateCondition = (
-  element: FormElementTypes,
+  element: FormElementTypes | undefined,
   formResponses: Record<string, any>
 ): boolean => {
-  if (!element.conditionalLogic || !element.conditionalLogic.enabled || element.conditionalLogic.conditions.length === 0) {
-    return true; // No conditions, so element should be shown
+  // Return true if element is undefined or has no conditional logic
+  if (!element || !element.conditionalLogic || !element.conditionalLogic.enabled || element.conditionalLogic.conditions.length === 0) {
+    return true; // No conditions or no element, so it should be shown
   }
 
   const { action, conditions, logicGate } = element.conditionalLogic;

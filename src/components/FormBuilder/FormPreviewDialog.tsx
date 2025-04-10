@@ -66,6 +66,7 @@ const FormPreviewDialog = () => {
               </div>
             ) : (
               formData.elements.map((element, index) => {
+                // Make sure element is defined before evaluation
                 const shouldShow = evaluateCondition(element, responses);
                 
                 if (!shouldShow) {
