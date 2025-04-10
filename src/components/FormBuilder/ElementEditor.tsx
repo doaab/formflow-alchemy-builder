@@ -8,19 +8,47 @@ import { Label } from '../ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Textarea } from '../ui/textarea';
 import { Switch } from '../ui/switch';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, ChevronDown, ChevronUp, Phone, Home } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import ElementConditions from './ElementConditions';
 import { Slider } from '../ui/slider';
 import { ScrollArea } from '../ui/scroll-area';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Checkbox } from '../ui/checkbox';
 
 interface ElementEditorProps {
   element: FormElementTypes;
 }
 
+// Common country codes and names
+const countries = [
+  { code: 'US', name: 'United States' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'IN', name: 'India' },
+  { code: 'BR', name: 'Brazil' },
+  { code: 'MX', name: 'Mexico' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'CN', name: 'China' },
+  { code: 'KR', name: 'South Korea' },
+  { code: 'ZA', name: 'South Africa' },
+  { code: 'RU', name: 'Russia' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'NO', name: 'Norway' },
+  { code: 'SG', name: 'Singapore' },
+];
+
 const ElementEditor = ({ element }: ElementEditorProps) => {
   const { updateElement } = useFormBuilder();
   const [activeTab, setActiveTab] = useState("basic");
+  const [addressCollapsed, setAddressCollapsed] = useState(!(element.type === 'address' && (element as any).expanded));
 
   const handleChange = (field: string, value: any) => {
     updateElement(element.id, { [field]: value });
@@ -55,6 +83,39 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
     
     const updatedOptions = element.options.filter(option => option.id !== optionId);
     updateElement(element.id, { options: updatedOptions });
+  };
+
+  const handleAddressFieldChange = (field: string, value: boolean) => {
+    if (element.type !== 'address') return;
+    
+    updateElement(element.id, {
+      fields: {
+        ...(element as any).fields,
+        [field]: value
+      }
+    });
+  };
+
+  const toggleAddressExpanded = () => {
+    if (element.type !== 'address') return;
+    
+    const newValue = !(element as any).expanded;
+    setAddressCollapsed(!newValue);
+    updateElement(element.id, { expanded: newValue });
+  };
+
+  const handleCountryAllowedChange = (country: string, allowed: boolean) => {
+    if (!['phone', 'address'].includes(element.type)) return;
+    
+    let currentAllowed = (element as any).allowedCountries || [];
+    
+    if (allowed && !currentAllowed.includes(country)) {
+      currentAllowed = [...currentAllowed, country];
+    } else if (!allowed && currentAllowed.includes(country)) {
+      currentAllowed = currentAllowed.filter((c: string) => c !== country);
+    }
+    
+    updateElement(element.id, { allowedCountries: currentAllowed });
   };
 
   if (['section', 'break'].includes(element.type)) {
@@ -106,7 +167,7 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
                 />
               </div>
               
-              {['text', 'paragraph', 'email', 'number'].includes(element.type) && (
+              {['text', 'paragraph', 'email', 'number', 'phone'].includes(element.type) && (
                 <div className="space-y-2">
                   <Label htmlFor="placeholder">Placeholder Text</Label>
                   <Input
@@ -114,6 +175,105 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
                     value={element.placeholder || ''}
                     onChange={(e) => handleChange('placeholder', e.target.value)}
                   />
+                </div>
+              )}
+
+              {element.type === 'phone' && (
+                <div className="space-y-2">
+                  <Label htmlFor="default-country">Default Country</Label>
+                  <Select 
+                    value={(element as any).defaultCountry || 'US'}
+                    onValueChange={(value) => handleChange('defaultCountry', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select default country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((country) => (
+                        <SelectItem key={country.code} value={country.code}>
+                          {country.name} ({country.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {element.type === 'address' && (
+                <div className="space-y-2">
+                  <Collapsible 
+                    open={!addressCollapsed}
+                    onOpenChange={(isOpen) => {
+                      setAddressCollapsed(!isOpen);
+                      toggleAddressExpanded();
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <Label>Address Fields</Label>
+                      <CollapsibleTrigger asChild>
+                        <Button variant="ghost" size="sm" className="w-9 p-0">
+                          {addressCollapsed ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronUp className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </CollapsibleTrigger>
+                    </div>
+                    
+                    <CollapsibleContent className="space-y-2 pt-2">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="street1" 
+                            checked={(element as any).fields?.street1 !== false}
+                            onCheckedChange={(checked) => handleAddressFieldChange('street1', !!checked)} 
+                          />
+                          <Label htmlFor="street1">Street Address</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="street2" 
+                            checked={(element as any).fields?.street2 !== false}
+                            onCheckedChange={(checked) => handleAddressFieldChange('street2', !!checked)} 
+                          />
+                          <Label htmlFor="street2">Street Address 2</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="city" 
+                            checked={(element as any).fields?.city !== false}
+                            onCheckedChange={(checked) => handleAddressFieldChange('city', !!checked)} 
+                          />
+                          <Label htmlFor="city">City</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="state" 
+                            checked={(element as any).fields?.state !== false}
+                            onCheckedChange={(checked) => handleAddressFieldChange('state', !!checked)} 
+                          />
+                          <Label htmlFor="state">State/Province</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="zipCode" 
+                            checked={(element as any).fields?.zipCode !== false}
+                            onCheckedChange={(checked) => handleAddressFieldChange('zipCode', !!checked)} 
+                          />
+                          <Label htmlFor="zipCode">Zip/Postal Code</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="country" 
+                            checked={(element as any).fields?.country !== false}
+                            onCheckedChange={(checked) => handleAddressFieldChange('country', !!checked)} 
+                          />
+                          <Label htmlFor="country">Country</Label>
+                        </div>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
               )}
 
@@ -181,7 +341,27 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
                 </>
               )}
 
-              {!['dropdown', 'radio', 'checkbox'].includes(element.type) && (
+              {['phone', 'address'].includes(element.type) && (
+                <>
+                  <div className="mt-4 mb-2">
+                    <Label className="block mb-2">Allowed Countries</Label>
+                    <div className="space-y-1 max-h-64 overflow-y-auto">
+                      {countries.map((country) => (
+                        <div key={country.code} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`country-${country.code}`}
+                            checked={(element as any).allowedCountries?.includes(country.code)}
+                            onCheckedChange={(checked) => handleCountryAllowedChange(country.code, !!checked)}
+                          />
+                          <Label htmlFor={`country-${country.code}`}>{country.name} ({country.code})</Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {!['dropdown', 'radio', 'checkbox', 'phone', 'address'].includes(element.type) && (
                 <div className="text-center py-4 text-muted-foreground">
                   No options available for this question type
                 </div>

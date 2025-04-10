@@ -18,7 +18,9 @@ import {
   SectionIcon,
   ArrowDown,
   Star,
-  Smile
+  Smile,
+  Phone,
+  Home
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -39,6 +41,8 @@ const getQuestionIcon = (type: string) => {
     case 'break': return <ArrowDown className="h-4 w-4" />;
     case 'star': return <Star className="h-4 w-4" />;
     case 'face': return <Smile className="h-4 w-4" />;
+    case 'phone': return <Phone className="h-4 w-4" />;
+    case 'address': return <Home className="h-4 w-4" />;
     default: return <FileText className="h-4 w-4" />;
   }
 };
@@ -57,6 +61,8 @@ const getHumanReadableType = (type: string) => {
     case 'break': return 'Page Break';
     case 'star': return 'Star Rating';
     case 'face': return 'Face Rating';
+    case 'phone': return 'Phone Number';
+    case 'address': return 'Address';
     default: return type.charAt(0).toUpperCase() + type.slice(1);
   }
 };

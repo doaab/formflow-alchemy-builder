@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState } from 'react';
 import { FormData, FormElementTypes, QuestionType } from '../types/formBuilder';
 import { v4 as uuidv4 } from 'uuid';
@@ -82,6 +83,27 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
       case 'face':
         return {
           ...baseElement,
+        };
+      case 'phone':
+        return {
+          ...baseElement,
+          placeholder: 'Enter phone number',
+          defaultCountry: 'US',
+          allowedCountries: ['US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP', 'IN', 'BR', 'MX'],
+        };
+      case 'address':
+        return {
+          ...baseElement,
+          expanded: false,
+          fields: {
+            street1: true,
+            street2: true,
+            city: true,
+            state: true,
+            zipCode: true,
+            country: true,
+          },
+          allowedCountries: ['US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP', 'IN', 'BR', 'MX'],
         };
       case 'section':
         return {

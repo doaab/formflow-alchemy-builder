@@ -10,6 +10,8 @@ export type QuestionType =
   | 'date'
   | 'face'
   | 'star'
+  | 'phone'
+  | 'address'
   | 'section'
   | 'break';
 
@@ -34,12 +36,27 @@ export interface FormElement {
     value: string;
   }>;
   maxStars?: number; // For star rating
+  allowedCountries?: string[]; // For phone input
+  defaultCountry?: string; // For phone input
   conditionalLogic?: {
     enabled: boolean;
     action: 'show' | 'hide';
     conditions: Condition[];
     logicGate: 'all' | 'any';
   };
+}
+
+export interface AddressField {
+  expanded: boolean;
+  fields: {
+    street1: boolean;
+    street2: boolean;
+    city: boolean;
+    state: boolean;
+    zipCode: boolean;
+    country: boolean;
+  };
+  allowedCountries?: string[];
 }
 
 export interface FormSection extends FormElement {

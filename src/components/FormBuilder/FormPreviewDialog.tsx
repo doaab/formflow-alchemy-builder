@@ -17,7 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { CalendarIcon, Eye, Frown, MehIcon, Smile, SmileIcon, Star } from "lucide-react";
+import { CalendarIcon, Eye, Frown, MehIcon, Smile, SmileIcon, Star, ChevronDown, ChevronUp } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { FormData, FormElement } from "@/types/formBuilder";
 import { Calendar } from "@/components/ui/calendar";
@@ -25,16 +25,61 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { evaluateCondition } from "@/utils/formUtils";
 import { cn } from "@/lib/utils";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
+
+// Common country codes and names
+const countries = [
+  { code: 'US', name: 'United States' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'IN', name: 'India' },
+  { code: 'BR', name: 'Brazil' },
+  { code: 'MX', name: 'Mexico' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'CN', name: 'China' },
+  { code: 'KR', name: 'South Korea' },
+  { code: 'ZA', name: 'South Africa' },
+  { code: 'RU', name: 'Russia' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'NO', name: 'Norway' },
+  { code: 'SG', name: 'Singapore' },
+];
 
 const FormPreviewDialog = () => {
   const { formData } = useFormBuilder();
   const [open, setOpen] = useState(false);
   const [responses, setResponses] = useState<Record<string, any>>({});
+  const [addressExpanded, setAddressExpanded] = useState<Record<string, boolean>>({});
   
-  const handleInputChange = (elementId: string, value: string | boolean | string[] | Date) => {
+  const handleInputChange = (elementId: string, value: string | boolean | string[] | Date | Record<string, any>) => {
     setResponses(prev => ({
       ...prev,
       [elementId]: value
+    }));
+  };
+
+  const handleAddressChange = (elementId: string, field: string, value: string) => {
+    const currentValue = responses[elementId] || {};
+    
+    setResponses(prev => ({
+      ...prev,
+      [elementId]: {
+        ...currentValue,
+        [field]: value
+      }
+    }));
+  };
+  
+  const toggleAddressExpanded = (elementId: string) => {
+    setAddressExpanded(prev => ({
+      ...prev,
+      [elementId]: !prev[elementId]
     }));
   };
   
@@ -43,6 +88,7 @@ const FormPreviewDialog = () => {
     console.log("Form submitted with responses:", responses);
     setOpen(false);
     setResponses({});
+    setAddressExpanded({});
   };
   
   return (
@@ -107,7 +153,14 @@ const FormPreviewDialog = () => {
                       {element.required && <span className="text-red-500 ml-1">*</span>}
                     </Label>
                     
-                    {renderFieldByType(element, responses[element.id], (value) => handleInputChange(element.id, value))}
+                    {renderFieldByType(
+                      element, 
+                      responses[element.id], 
+                      (value) => handleInputChange(element.id, value), 
+                      addressExpanded[element.id] || (element.type === 'address' && (element as any).expanded),
+                      () => toggleAddressExpanded(element.id),
+                      (field, value) => handleAddressChange(element.id, field, value)
+                    )}
                   </div>
                 );
               })
@@ -128,7 +181,14 @@ const FormPreviewDialog = () => {
   );
 };
 
-function renderFieldByType(element: FormElement, value: any, onChange: (value: any) => void) {
+function renderFieldByType(
+  element: FormElement, 
+  value: any, 
+  onChange: (value: any) => void,
+  addressExpanded: boolean = false,
+  toggleAddress: () => void = () => {},
+  handleAddressFieldChange: (field: string, value: string) => void = () => {}
+) {
   if (!element || !element.type) {
     console.warn('Invalid element passed to renderFieldByType:', element);
     return null;
@@ -242,6 +302,160 @@ function renderFieldByType(element: FormElement, value: any, onChange: (value: a
             />
           </PopoverContent>
         </Popover>
+      );
+
+    case 'phone':
+      const allowedCountries = (element as any).allowedCountries || ['US', 'CA', 'GB'];
+      const defaultCountry = (element as any).defaultCountry || 'US';
+      
+      return (
+        <div className="flex space-x-2">
+          <Select
+            value={(value?.countryCode || defaultCountry)}
+            onValueChange={(code) => onChange({...value, countryCode: code})}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Country" />
+            </SelectTrigger>
+            <SelectContent>
+              {countries
+                .filter(country => allowedCountries.includes(country.code))
+                .map(country => (
+                  <SelectItem key={country.code} value={country.code}>
+                    {country.name}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          <Input
+            className="flex-1"
+            placeholder={element.placeholder || "Enter phone number"}
+            value={(value?.number || '')}
+            onChange={(e) => onChange({
+              ...value,
+              countryCode: value?.countryCode || defaultCountry,
+              number: e.target.value
+            })}
+            required={element.required}
+          />
+        </div>
+      );
+
+    case 'address':
+      const fields = (element as any).fields || {
+        street1: true,
+        street2: true,
+        city: true,
+        state: true,
+        zipCode: true,
+        country: true
+      };
+      
+      const addressValue = value || {};
+      const allowedAddressCountries = (element as any).allowedCountries || ['US', 'CA', 'GB'];
+      
+      return (
+        <Collapsible open={addressExpanded} onOpenChange={toggleAddress}>
+          <div className="flex justify-between items-center">
+            <Button
+              variant="outline"
+              className="mb-2 w-full justify-between"
+              onClick={() => toggleAddress()}
+            >
+              <span>{addressExpanded ? "Hide Address Fields" : "Show Address Fields"}</span>
+              {addressExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+          </div>
+          
+          <CollapsibleContent className="space-y-2">
+            {fields.street1 && (
+              <div className="space-y-1">
+                <Label>Street Address</Label>
+                <Input 
+                  value={addressValue.street1 || ''} 
+                  onChange={(e) => handleAddressFieldChange('street1', e.target.value)}
+                  placeholder="Street Address"
+                  required={element.required}
+                />
+              </div>
+            )}
+            
+            {fields.street2 && (
+              <div className="space-y-1">
+                <Label>Street Address 2</Label>
+                <Input 
+                  value={addressValue.street2 || ''} 
+                  onChange={(e) => handleAddressFieldChange('street2', e.target.value)}
+                  placeholder="Apartment, suite, unit, etc."
+                />
+              </div>
+            )}
+            
+            <div className="grid grid-cols-2 gap-2">
+              {fields.city && (
+                <div className="space-y-1">
+                  <Label>City</Label>
+                  <Input 
+                    value={addressValue.city || ''} 
+                    onChange={(e) => handleAddressFieldChange('city', e.target.value)}
+                    placeholder="City"
+                    required={element.required && fields.city}
+                  />
+                </div>
+              )}
+              
+              {fields.state && (
+                <div className="space-y-1">
+                  <Label>State/Province</Label>
+                  <Input 
+                    value={addressValue.state || ''} 
+                    onChange={(e) => handleAddressFieldChange('state', e.target.value)}
+                    placeholder="State/Province"
+                    required={element.required && fields.state}
+                  />
+                </div>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              {fields.zipCode && (
+                <div className="space-y-1">
+                  <Label>Zip/Postal Code</Label>
+                  <Input 
+                    value={addressValue.zipCode || ''} 
+                    onChange={(e) => handleAddressFieldChange('zipCode', e.target.value)}
+                    placeholder="Zip/Postal Code"
+                    required={element.required && fields.zipCode}
+                  />
+                </div>
+              )}
+              
+              {fields.country && (
+                <div className="space-y-1">
+                  <Label>Country</Label>
+                  <Select
+                    value={addressValue.country || ''}
+                    onValueChange={(value) => handleAddressFieldChange('country', value)}
+                    required={element.required && fields.country}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries
+                        .filter(country => allowedAddressCountries.includes(country.code))
+                        .map(country => (
+                          <SelectItem key={country.code} value={country.code}>
+                            {country.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       );
 
     case 'star':

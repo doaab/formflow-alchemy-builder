@@ -19,7 +19,9 @@ import {
   ArrowDown,
   PlusCircle,
   Star,
-  Smile
+  Smile,
+  Phone,
+  Home
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -78,6 +80,12 @@ const SidePanel = () => {
                   </Button>
                   <Button variant="outline" className="justify-start" onClick={() => handleAddElement('email')}>
                     <Mail className="mr-2 h-4 w-4" /> Email
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('phone')}>
+                    <Phone className="mr-2 h-4 w-4" /> Phone
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('address')}>
+                    <Home className="mr-2 h-4 w-4" /> Address
                   </Button>
                 </div>
               </div>
@@ -147,14 +155,14 @@ const SidePanel = () => {
                   <Button variant="outline" size="sm" onClick={() => handleAddElement('paragraph')}>
                     <AlignLeft className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleAddElement('number')}>
-                    <Hash className="h-4 w-4" />
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('phone')}>
+                    <Phone className="h-4 w-4" />
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => handleAddElement('dropdown')}>
                     <List className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleAddElement('radio')}>
-                    <CircleCheckBig className="h-4 w-4" />
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('address')}>
+                    <Home className="h-4 w-4" />
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => handleAddElement('star')}>
                     <Star className="h-4 w-4" />
