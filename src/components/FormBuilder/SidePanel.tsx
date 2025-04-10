@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import ElementEditor from "./ElementEditor";
+import { ScrollArea } from "../ui/scroll-area";
 import { 
   FileText,
   AlignLeft,
@@ -60,84 +61,84 @@ const SidePanel = () => {
           <TabsTrigger value="properties" disabled={!activeElement || !selectedElement}>Properties</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="add" className="p-4 flex-1 overflow-auto">
-          <div className="space-y-4">
-            <div>
-              <h3 className="mb-2 text-sm font-medium">Basic Fields</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('text')}>
-                  <FileText className="mr-2 h-4 w-4" /> Text
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('paragraph')}>
-                  <AlignLeft className="mr-2 h-4 w-4" /> Paragraph
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('number')}>
-                  <Hash className="mr-2 h-4 w-4" /> Number
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('email')}>
-                  <Mail className="mr-2 h-4 w-4" /> Email
-                </Button>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            <div>
-              <h3 className="mb-2 text-sm font-medium">Choice Fields</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('dropdown')}>
-                  <List className="mr-2 h-4 w-4" /> Dropdown
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('radio')}>
-                  <CircleCheckBig className="mr-2 h-4 w-4" /> Multiple Choice
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('checkbox')}>
-                  <CheckSquare className="mr-2 h-4 w-4" /> Checkboxes
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('date')}>
-                  <Calendar className="mr-2 h-4 w-4" /> Date
-                </Button>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            <div>
-              <h3 className="mb-2 text-sm font-medium">Rating Fields</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('star')}>
-                  <Star className="mr-2 h-4 w-4" /> Star Rating
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('face')}>
-                  <Smile className="mr-2 h-4 w-4" /> Face Rating
-                </Button>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            <div>
-              <h3 className="mb-2 text-sm font-medium">Layout Elements</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('section')}>
-                  <SectionIcon className="mr-2 h-4 w-4" /> Section
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('break')}>
-                  <ArrowDown className="mr-2 h-4 w-4" /> Page Break
-                </Button>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="properties" className="flex-1 overflow-auto">
-          {selectedElement ? (
+        <TabsContent value="add" className="flex-1">
+          <ScrollArea className="h-[calc(100vh-120px)]">
             <div className="p-4 space-y-4">
-              <ElementEditor element={selectedElement as FormElementTypes} />
+              <div>
+                <h3 className="mb-2 text-sm font-medium">Basic Fields</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('text')}>
+                    <FileText className="mr-2 h-4 w-4" /> Text
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('paragraph')}>
+                    <AlignLeft className="mr-2 h-4 w-4" /> Paragraph
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('number')}>
+                    <Hash className="mr-2 h-4 w-4" /> Number
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('email')}>
+                    <Mail className="mr-2 h-4 w-4" /> Email
+                  </Button>
+                </div>
+              </div>
               
               <Separator />
               
               <div>
+                <h3 className="mb-2 text-sm font-medium">Choice Fields</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('dropdown')}>
+                    <List className="mr-2 h-4 w-4" /> Dropdown
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('radio')}>
+                    <CircleCheckBig className="mr-2 h-4 w-4" /> Multiple Choice
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('checkbox')}>
+                    <CheckSquare className="mr-2 h-4 w-4" /> Checkboxes
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('date')}>
+                    <Calendar className="mr-2 h-4 w-4" /> Date
+                  </Button>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <h3 className="mb-2 text-sm font-medium">Rating Fields</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('star')}>
+                    <Star className="mr-2 h-4 w-4" /> Star Rating
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('face')}>
+                    <Smile className="mr-2 h-4 w-4" /> Face Rating
+                  </Button>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <h3 className="mb-2 text-sm font-medium">Layout Elements</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('section')}>
+                    <SectionIcon className="mr-2 h-4 w-4" /> Section
+                  </Button>
+                  <Button variant="outline" className="justify-start" onClick={() => handleAddElement('break')}>
+                    <ArrowDown className="mr-2 h-4 w-4" /> Page Break
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
+        </TabsContent>
+        
+        <TabsContent value="properties" className="flex-1">
+          {selectedElement ? (
+            <div className="flex flex-col h-full">
+              <ElementEditor element={selectedElement as FormElementTypes} />
+              
+              <div className="p-4 mt-auto border-t">
                 <h3 className="mb-2 text-sm font-medium">Add More Elements</h3>
                 <div className="grid grid-cols-3 gap-2">
                   <Button variant="outline" size="sm" onClick={() => handleAddElement('text')}>

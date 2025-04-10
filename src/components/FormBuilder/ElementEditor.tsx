@@ -12,6 +12,7 @@ import { PlusCircle, Trash2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import ElementConditions from './ElementConditions';
 import { Slider } from '../ui/slider';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface ElementEditorProps {
   element: FormElementTypes;
@@ -86,102 +87,110 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
 
   return (
     <div className="p-4">
-      <Tabs defaultValue="basic" value={activeTab} onValueChange={setActiveTab}>
+      <Tabs defaultValue="basic" value={activeTab} onValueChange={setActiveTab} className="h-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="basic">Basic</TabsTrigger>
           <TabsTrigger value="options">Options</TabsTrigger>
           <TabsTrigger value="conditions">Conditions</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="basic" className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label htmlFor="question-label">Question Label</Label>
-            <Input
-              id="question-label"
-              value={element.label}
-              onChange={(e) => handleChange('label', e.target.value)}
-            />
-          </div>
-          
-          {['text', 'paragraph', 'email', 'number'].includes(element.type) && (
-            <div className="space-y-2">
-              <Label htmlFor="placeholder">Placeholder Text</Label>
-              <Input
-                id="placeholder"
-                value={element.placeholder || ''}
-                onChange={(e) => handleChange('placeholder', e.target.value)}
-              />
-            </div>
-          )}
-
-          {element.type === 'star' && (
-            <div className="space-y-2">
-              <Label htmlFor="max-stars">Maximum Number of Stars</Label>
-              <div className="flex items-center gap-4">
-                <Slider 
-                  id="max-stars" 
-                  min={1} 
-                  max={10} 
-                  step={1} 
-                  value={[element.maxStars || 5]} 
-                  onValueChange={(value) => handleChange('maxStars', value[0])}
+        <TabsContent value="basic" className="h-full">
+          <ScrollArea className="h-[calc(100vh-250px)]">
+            <div className="space-y-4 mt-4 p-1">
+              <div className="space-y-2">
+                <Label htmlFor="question-label">Question Label</Label>
+                <Input
+                  id="question-label"
+                  value={element.label}
+                  onChange={(e) => handleChange('label', e.target.value)}
                 />
-                <span className="w-8 text-center">{element.maxStars || 5}</span>
               </div>
-            </div>
-          )}
-          
-          <div className="flex items-center space-x-2 pt-2">
-            <Switch
-              id="required"
-              checked={element.required}
-              onCheckedChange={(checked) => handleChange('required', checked)}
-            />
-            <Label htmlFor="required">Required Question</Label>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="options" className="space-y-4 mt-4">
-          {['dropdown', 'radio', 'checkbox'].includes(element.type) && element.options && (
-            <>
-              <div className="space-y-3">
-                {element.options.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-2">
-                    <Input
-                      value={option.label}
-                      onChange={(e) => handleOptionChange(option.id, 'label', e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => removeOption(option.id)}
-                      disabled={element.options?.length === 1}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex items-center"
-                onClick={addOption}
-              >
-                <PlusCircle className="mr-1 h-4 w-4" /> Add Option
-              </Button>
-            </>
-          )}
+              
+              {['text', 'paragraph', 'email', 'number'].includes(element.type) && (
+                <div className="space-y-2">
+                  <Label htmlFor="placeholder">Placeholder Text</Label>
+                  <Input
+                    id="placeholder"
+                    value={element.placeholder || ''}
+                    onChange={(e) => handleChange('placeholder', e.target.value)}
+                  />
+                </div>
+              )}
 
-          {!['dropdown', 'radio', 'checkbox'].includes(element.type) && (
-            <div className="text-center py-4 text-muted-foreground">
-              No options available for this question type
+              {element.type === 'star' && (
+                <div className="space-y-2">
+                  <Label htmlFor="max-stars">Maximum Number of Stars</Label>
+                  <div className="flex items-center gap-4">
+                    <Slider 
+                      id="max-stars" 
+                      min={1} 
+                      max={10} 
+                      step={1} 
+                      value={[element.maxStars || 5]} 
+                      onValueChange={(value) => handleChange('maxStars', value[0])}
+                    />
+                    <span className="w-8 text-center">{element.maxStars || 5}</span>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex items-center space-x-2 pt-2">
+                <Switch
+                  id="required"
+                  checked={element.required}
+                  onCheckedChange={(checked) => handleChange('required', checked)}
+                />
+                <Label htmlFor="required">Required Question</Label>
+              </div>
             </div>
-          )}
+          </ScrollArea>
         </TabsContent>
         
-        <TabsContent value="conditions" className="mt-4">
+        <TabsContent value="options" className="h-full">
+          <ScrollArea className="h-[calc(100vh-250px)]">
+            <div className="p-1">
+              {['dropdown', 'radio', 'checkbox'].includes(element.type) && element.options && (
+                <>
+                  <div className="space-y-3 mt-4">
+                    {element.options.map((option) => (
+                      <div key={option.id} className="flex items-center space-x-2">
+                        <Input
+                          value={option.label}
+                          onChange={(e) => handleOptionChange(option.id, 'label', e.target.value)}
+                          className="flex-1"
+                        />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeOption(option.id)}
+                          disabled={element.options?.length === 1}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="flex items-center mt-4"
+                    onClick={addOption}
+                  >
+                    <PlusCircle className="mr-1 h-4 w-4" /> Add Option
+                  </Button>
+                </>
+              )}
+
+              {!['dropdown', 'radio', 'checkbox'].includes(element.type) && (
+                <div className="text-center py-4 text-muted-foreground">
+                  No options available for this question type
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+        
+        <TabsContent value="conditions" className="mt-4 h-full">
           <ElementConditions element={element} />
         </TabsContent>
       </Tabs>
