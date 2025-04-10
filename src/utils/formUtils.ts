@@ -1,5 +1,5 @@
 
-import { FormData, FormElement, FormElementTypes } from "@/types/formBuilder";
+import { FormData, FormElement, FormElementTypes, Condition } from "@/types/formBuilder";
 
 export const evaluateCondition = (
   element: FormElementTypes | undefined,
@@ -63,4 +63,124 @@ export const getSavedForm = (): FormData | null => {
     console.error('Error retrieving form from localStorage:', error);
     return null;
   }
+};
+
+/**
+ * Transforms form data from the frontend format to the backend format
+ */
+export const prepareFormDataForBackend = (formData: FormData): any => {
+  // Basic form information
+  const backendForm = {
+    title: formData.title,
+    description: formData.description,
+    // The following properties would be set if this were updating an existing form
+    // slug: "custom-slug", // optional, backend will generate if not provided
+    theme: "default",
+    collect_email: false,
+    one_response_per_user: false,
+    show_progress_bar: true,
+    shuffle_questions: false,
+  };
+
+  // If we're creating a new form without elements initially
+  if (!formData.elements.length) {
+    return backendForm;
+  }
+
+  // If we're including elements with the form creation or updating elements
+  const preparedElements = formData.elements.map((element, index) => {
+    // Base element properties common to all types
+    const baseElement = {
+      element_id: element.id,
+      type: element.type,
+      label: element.label,
+      placeholder: element.placeholder || null,
+      default_value: element.defaultValue || null,
+      required: element.required,
+      order: index,
+    };
+
+    // Add type-specific properties
+    const typeSpecificProps: Record<string, any> = {};
+
+    // Handle email confirmation
+    if (element.type === 'email' && 'confirmEmail' in element) {
+      typeSpecificProps.confirm_email = element.confirmEmail;
+    }
+
+    // Handle star rating max stars
+    if (element.type === 'star' && 'maxStars' in element) {
+      typeSpecificProps.max_stars = element.maxStars;
+    }
+
+    // Handle address fields
+    if (element.type === 'address' && 'fields' in element && 'expanded' in element) {
+      const addressElement = element as any; // Type assertion for address-specific props
+      typeSpecificProps.address_expanded = addressElement.expanded;
+      typeSpecificProps.address_street1 = addressElement.fields.street1;
+      typeSpecificProps.address_street2 = addressElement.fields.street2;
+      typeSpecificProps.address_city = addressElement.fields.city;
+      typeSpecificProps.address_state = addressElement.fields.state;
+      typeSpecificProps.address_zipcode = addressElement.fields.zipCode;
+      typeSpecificProps.address_country = addressElement.fields.country;
+      
+      if (addressElement.allowedCountries) {
+        typeSpecificProps.allowed_countries = addressElement.allowedCountries;
+      }
+    }
+
+    // Handle phone fields
+    if (element.type === 'phone') {
+      const phoneElement = element as any; // Type assertion for phone-specific props
+      if (phoneElement.defaultCountry) {
+        typeSpecificProps.default_country = phoneElement.defaultCountry;
+      }
+      if (phoneElement.allowedCountries) {
+        typeSpecificProps.allowed_countries = phoneElement.allowedCountries;
+      }
+    }
+
+    // Handle section description
+    if (element.type === 'section' && 'description' in element) {
+      typeSpecificProps.description = element.description;
+    }
+
+    // Handle conditional logic
+    if (element.conditionalLogic && element.conditionalLogic.enabled) {
+      typeSpecificProps.conditional_logic_enabled = true;
+      typeSpecificProps.conditional_action = element.conditionalLogic.action;
+      typeSpecificProps.conditional_logic_gate = element.conditionalLogic.logicGate;
+      
+      // Format conditional rules
+      const conditionalRules = element.conditionalLogic.conditions.map(condition => ({
+        question_id: condition.questionId,
+        operator: condition.operator,
+        value: condition.value
+      }));
+      
+      typeSpecificProps.conditional_rules = conditionalRules;
+    }
+
+    // Handle options for dropdown, radio, checkbox
+    if (element.options && element.options.length > 0) {
+      typeSpecificProps.options = element.options.map((option, optIndex) => ({
+        option_id: option.id,
+        label: option.label,
+        value: option.value,
+        order: optIndex
+      }));
+    }
+
+    // Combine all properties
+    return {
+      ...baseElement,
+      ...typeSpecificProps
+    };
+  });
+
+  // For creating/updating a form with elements
+  return {
+    ...backendForm,
+    elements: preparedElements
+  };
 };

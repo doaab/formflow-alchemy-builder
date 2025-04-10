@@ -9,7 +9,7 @@ import FormPreviewDialog from "./FormPreviewDialog";
 import { Button } from "../ui/button";
 import { Save, Loader2, BookOpen } from "lucide-react";
 import { useEffect, useState } from "react";
-import { saveFormToLocalStorage } from "@/utils/formUtils";
+import { saveFormToLocalStorage, prepareFormDataForBackend } from "@/utils/formUtils";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 
@@ -26,7 +26,28 @@ const FormBuilder = () => {
       if (!formData) throw new Error("Form data not found");
       
       const parsedForm = JSON.parse(formData);
+      
+      // Save to localStorage for persistence during development
       saveFormToLocalStorage(parsedForm);
+      
+      // Prepare data for backend and send to API
+      const backendData = prepareFormDataForBackend(parsedForm);
+      
+      // TODO: Replace with actual API call when integrated
+      console.log("Data ready for backend submission:", backendData);
+      
+      // For now, let's simulate a successful save
+      // const response = await fetch('/api/forms', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Authorization': `Bearer ${token}`
+      //   },
+      //   body: JSON.stringify(backendData)
+      // });
+      // 
+      // if (!response.ok) throw new Error('Failed to save form');
+      // const data = await response.json();
       
       toast({
         title: "Form saved",
