@@ -165,6 +165,7 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
       return;
     }
     
+    // Create a new array and move the element
     const result = Array.from(formData.elements);
     const [removed] = result.splice(startIndex, 1);
     
@@ -176,10 +177,14 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
     
     result.splice(endIndex, 0, removed);
 
-    setFormData({
-      ...formData,
-      elements: result,
-    });
+    // Update the form data with the reordered elements
+    setFormData(prev => ({
+      ...prev,
+      elements: result
+    }));
+    
+    // Update active element to the moved element
+    setActiveElement(removed.id);
   };
 
   return (

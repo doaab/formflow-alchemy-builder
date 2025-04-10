@@ -1,3 +1,4 @@
+
 import { useFormBuilder } from "@/context/FormBuilderContext";
 import { FormElementTypes } from "@/types/formBuilder";
 import { Card } from "../ui/card";
@@ -60,15 +61,23 @@ interface FormElementProps {
 }
 
 export const FormElement = ({ element, index }: FormElementProps) => {
-  const { activeElement, setActiveElement, deleteElement, duplicateElement, isDragging } = useFormBuilder();
+  const { activeElement, setActiveElement, deleteElement, duplicateElement, setIsDragging } = useFormBuilder();
   
-  const [{ isDragging: isElementDragging }, dragRef] = useDrag(() => ({
+  const [{ isDragging }, dragRef] = useDrag(() => ({
     type: ItemTypes.ELEMENT,
-    item: { id: element.id, index },
+    item: () => {
+      // Set global dragging state when drag starts
+      setIsDragging(true);
+      return { id: element.id, index };
+    },
+    end: () => {
+      // Reset global dragging state when drag ends
+      setIsDragging(false);
+    },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
-  }));
+  }), [element.id, index, setIsDragging]);
   
   const handleClick = () => {
     setActiveElement(element.id);
@@ -83,8 +92,7 @@ export const FormElement = ({ element, index }: FormElementProps) => {
       className={cn(
         "mb-2 relative transition-all duration-200 border overflow-hidden",
         isActive && "ring-2 ring-primary ring-offset-2",
-        isElementDragging && "opacity-50",
-        isDragging && !isElementDragging && "opacity-100"
+        isDragging && "opacity-50"
       )}
       onClick={handleClick}
     >

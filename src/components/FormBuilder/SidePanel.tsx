@@ -28,6 +28,11 @@ const SidePanel = () => {
     ? formData.elements.find((element) => element && element.id === activeElement)
     : null;
 
+  // Create a wrapper function for adding elements
+  const handleAddElement = (type: string) => {
+    addElement(type);
+  };
+
   return (
     <div className="w-80 border-l bg-background flex flex-col">
       <div className="p-4 border-b">
@@ -37,6 +42,7 @@ const SidePanel = () => {
       <Tabs 
         value={activeTab} 
         className="flex flex-col flex-1"
+        defaultValue={activeTab}
       >
         <TabsList className="grid grid-cols-2">
           <TabsTrigger value="add">Add Elements</TabsTrigger>
@@ -48,16 +54,16 @@ const SidePanel = () => {
             <div>
               <h3 className="mb-2 text-sm font-medium">Basic Fields</h3>
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start" onClick={() => addElement('text')}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('text')}>
                   <FileText className="mr-2 h-4 w-4" /> Text
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => addElement('paragraph')}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('paragraph')}>
                   <AlignLeft className="mr-2 h-4 w-4" /> Paragraph
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => addElement('number')}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('number')}>
                   <Hash className="mr-2 h-4 w-4" /> Number
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => addElement('email')}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('email')}>
                   <Mail className="mr-2 h-4 w-4" /> Email
                 </Button>
               </div>
@@ -68,16 +74,16 @@ const SidePanel = () => {
             <div>
               <h3 className="mb-2 text-sm font-medium">Choice Fields</h3>
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start" onClick={() => addElement('dropdown')}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('dropdown')}>
                   <List className="mr-2 h-4 w-4" /> Dropdown
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => addElement('radio')}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('radio')}>
                   <CircleCheckBig className="mr-2 h-4 w-4" /> Multiple Choice
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => addElement('checkbox')}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('checkbox')}>
                   <CheckSquare className="mr-2 h-4 w-4" /> Checkboxes
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => addElement('date')}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('date')}>
                   <Calendar className="mr-2 h-4 w-4" /> Date
                 </Button>
               </div>
@@ -88,10 +94,10 @@ const SidePanel = () => {
             <div>
               <h3 className="mb-2 text-sm font-medium">Layout Elements</h3>
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start" onClick={() => addElement('section')}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('section')}>
                   <SectionIcon className="mr-2 h-4 w-4" /> Section
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => addElement('break')}>
+                <Button variant="outline" className="justify-start" onClick={() => handleAddElement('break')}>
                   <ArrowDown className="mr-2 h-4 w-4" /> Page Break
                 </Button>
               </div>
@@ -101,7 +107,35 @@ const SidePanel = () => {
         
         <TabsContent value="properties" className="flex-1 overflow-auto">
           {selectedElement ? (
-            <ElementEditor element={selectedElement as FormElementTypes} />
+            <div className="p-4 space-y-4">
+              <ElementEditor element={selectedElement as FormElementTypes} />
+              
+              <Separator />
+              
+              <div>
+                <h3 className="mb-2 text-sm font-medium">Add More Elements</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('text')}>
+                    <FileText className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('paragraph')}>
+                    <AlignLeft className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('number')}>
+                    <Hash className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('dropdown')}>
+                    <List className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('radio')}>
+                    <CircleCheckBig className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleAddElement('section')}>
+                    <SectionIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="p-4 text-center text-muted-foreground">
               <PlusCircle className="mx-auto h-8 w-8 mb-2" />

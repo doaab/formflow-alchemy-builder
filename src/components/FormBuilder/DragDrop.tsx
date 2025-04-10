@@ -15,18 +15,26 @@ const DragDrop = () => {
       const dragIndex = item.index;
       const hoverIndex = formData.elements.length;
       
-      // Don't replace items with themselves
-      if (dragIndex === hoverIndex) {
+      // Don't replace items with themselves or if indices are invalid
+      if (dragIndex === hoverIndex || 
+          dragIndex < 0 || 
+          dragIndex >= formData.elements.length || 
+          hoverIndex < 0 || 
+          hoverIndex > formData.elements.length) {
+        return;
+      }
+      
+      // Check if we're trying to reorder an undefined element
+      const draggedElement = formData.elements[dragIndex];
+      if (!draggedElement) {
+        console.warn("Attempted to drag undefined element");
         return;
       }
       
       // Time to actually perform the action
       reorderElements(dragIndex, hoverIndex);
       
-      // Note: we're mutating the monitor item here!
-      // Generally it's better to avoid mutations,
-      // but it's good here for the sake of performance
-      // to avoid expensive index searches.
+      // Update the index for subsequent drags
       item.index = hoverIndex;
     },
     collect: (monitor) => ({
