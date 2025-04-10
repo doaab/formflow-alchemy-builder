@@ -7,10 +7,11 @@ import FormTitle from "./FormTitle";
 import DragDrop from "./DragDrop";
 import FormPreviewDialog from "./FormPreviewDialog";
 import { Button } from "../ui/button";
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, BookOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { saveFormToLocalStorage } from "@/utils/formUtils";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 const FormBuilder = () => {
   const [isSaving, setIsSaving] = useState(false);
@@ -54,6 +55,12 @@ const FormBuilder = () => {
           <div className="flex items-center justify-between p-3 bg-white border-b">
             <h1 className="text-xl font-bold text-primary">FormFlow Alchemy</h1>
             <div className="flex items-center space-x-2">
+              <Link to="/docs">
+                <Button variant="outline" className="flex items-center">
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Documentation
+                </Button>
+              </Link>
               <FormPreviewDialog />
               <Button 
                 onClick={handleSaveForm} 

@@ -1,8 +1,14 @@
 
-import FormBuilder from "@/components/FormBuilder/FormBuilder";
+import React from "react";
+import { BrowserRouter as Router } from "react-router-dom";
+import AppRoutes from "@/routes/AppRoutes";
 
 const Index = () => {
-  return <FormBuilder />;
+  return (
+    <Router>
+      <AppRoutes />
+    </Router>
+  );
 };
 
 export default Index;
