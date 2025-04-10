@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -25,8 +26,17 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: '#8363aa',
+					foreground: '#ffffff',
+					100: '#f3edf7',
+					200: '#e7dbef',
+					300: '#d0b9e3',
+					400: '#b997d6',
+					500: '#a275ca',
+					600: '#8363aa',
+					700: '#6e5390',
+					800: '#5a4376',
+					900: '#46345c'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -84,11 +94,33 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					"0%": {
+						opacity: "0",
+						transform: "translateY(10px)"
+					},
+					"100%": {
+						opacity: "1",
+						transform: "translateY(0)"
+					}
+				},
+				'drag-start': {
+					"0%": {
+						transform: "scale(1)",
+						boxShadow: "0 0 0 rgba(131, 99, 170, 0)"
+					},
+					"100%": {
+						transform: "scale(1.02)",
+						boxShadow: "0 4px 20px rgba(131, 99, 170, 0.2)"
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'drag-start': 'drag-start 0.2s ease-out forwards'
 			}
 		}
 	},
