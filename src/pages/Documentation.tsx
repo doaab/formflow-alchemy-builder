@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
@@ -378,6 +377,52 @@ const Documentation = () => {
                         
                         <div className="space-y-6">
                           <div>
+                            <h4 className="text-md font-medium mb-2">Entity Relationship Diagram</h4>
+                            <div className="p-4 border rounded-md bg-muted overflow-auto">
+                              <pre className="whitespace-pre text-xs">
+{`+----------------+     +------------------+     +---------------------+
+|     users      |     |      forms       |     |    form_elements    |
++----------------+     +------------------+     +---------------------+
+| id             |<--->| id               |<--->| id                  |
+| name           |     | title            |     | form_id             |
+| email          |     | description      |     | element_id          |
+| password       |     | user_id          |     | type                |
+| ...            |     | is_published     |     | label               |
++----------------+     | slug             |     | placeholder         |
+                       | theme            |     | default_value       |
+                       | collect_email    |     | required            |
+                       | ...              |     | order               |
+                       +------------------+     | conditional_logic_* |
+                              |                 +---------------------+
+                              |                           |
+                              |                           v
++----------------------+      |             +------------------------+
+|   form_responses     |<-----+             | form_element_options  |
++----------------------+      |             +------------------------+
+| id                   |      |             | id                     |
+| form_id              |      |             | form_element_id        |
+| user_id              |      |             | option_id              |
+| ip_address           |      |             | label                  |
+| user_agent           |      |             | value                  |
+| respondent_email     |      |             | order                  |
+| completion_time      |      |             +------------------------+
++----------------------+      |                         |
+         |                    |                         |
+         v                    |                         |
++--------------------+        |             +-----------------------+
+|   form_answers     |        |             |   conditional_rules   |
++--------------------+        |             +-----------------------+
+| id                 |        |             | id                    |
+| form_response_id   |        +------------>| form_element_id       |
+| form_element_id    |                      | question_id           |
+| value              |                      | operator              |
++--------------------+                      | value                 |
+                                            +-----------------------+`}
+                              </pre>
+                            </div>
+                          </div>
+                          
+                          <div>
                             <h4 className="text-md font-medium mb-2">forms</h4>
                             <Table>
                               <TableHeader>
@@ -555,6 +600,40 @@ const Documentation = () => {
                         </p>
                         
                         <div className="space-y-6">
+                          <div>
+                            <h4 className="text-md font-medium mb-2">Entity Relationship Diagram</h4>
+                            <div className="p-4 border rounded-md bg-muted overflow-auto">
+                              <pre className="whitespace-pre text-xs">
+{`+----------------+       +---------------------+
+|     users      |       |        forms        |
++----------------+       +---------------------+
+| id             |<----->| id                  |
+| name           |       | title               |
+| email          |       | description         |
+| password       |       | user_id             |
+| ...            |       | settings (JSON)     |
++----------------+       | elements (JSON)     |
+                         | is_published        |
+                         | slug                |
+                         +---------------------+
+                                  |
+          +-----------------------+---------------------+
+          |                       |                     |
+          v                       v                     v
++--------------------+  +--------------------+  +---------------------+
+|   form_versions    |  |   form_responses   |  | form_response_analytics |
++--------------------+  +--------------------+  +---------------------+
+| id                 |  | id                 |  | id                  |
+| form_id            |  | form_id            |  | form_id             |
+| version_name       |  | form_version_id    |  | element_id          |
+| elements (JSON)    |  | user_id            |  | answer_value        |
+| settings (JSON)    |  | answers (JSON)     |  | count               |
+| is_active          |  | metadata (JSON)    |  +---------------------+
++--------------------+  +--------------------+`}
+                              </pre>
+                            </div>
+                          </div>
+                          
                           <div>
                             <h4 className="text-md font-medium mb-2">forms</h4>
                             <Table>
