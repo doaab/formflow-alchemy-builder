@@ -23,8 +23,9 @@ const SidePanel = () => {
   const { activeElement, formData, addElement } = useFormBuilder();
   const activeTab = activeElement ? "properties" : "add";
   
+  // Add safe check for active element
   const selectedElement = activeElement
-    ? formData.elements.find((element) => element.id === activeElement)
+    ? formData.elements.find((element) => element && element.id === activeElement)
     : null;
 
   return (
@@ -39,7 +40,7 @@ const SidePanel = () => {
       >
         <TabsList className="grid grid-cols-2">
           <TabsTrigger value="add">Add Elements</TabsTrigger>
-          <TabsTrigger value="properties" disabled={!activeElement}>Properties</TabsTrigger>
+          <TabsTrigger value="properties" disabled={!activeElement || !selectedElement}>Properties</TabsTrigger>
         </TabsList>
         
         <TabsContent value="add" className="p-4 flex-1 overflow-auto">

@@ -54,13 +54,21 @@ const DragDrop = () => {
             </div>
           )}
           
-          {formData.elements.map((element, index) => (
-            <FormElement 
-              key={element.id}
-              element={element}
-              index={index}
-            />
-          ))}
+          {formData.elements.filter(element => element !== undefined).map((element, index) => {
+            // Skip rendering if element is undefined
+            if (!element) {
+              console.warn(`Undefined element found at index ${index}`);
+              return null;
+            }
+            
+            return (
+              <FormElement 
+                key={element.id}
+                element={element}
+                index={index}
+              />
+            );
+          })}
         </div>
       </div>
     </div>

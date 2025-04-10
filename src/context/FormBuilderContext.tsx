@@ -107,7 +107,7 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setFormData(prev => ({
       ...prev,
       elements: prev.elements.map(element =>
-        element.id === id ? { ...element, ...updates } : element
+        element && element.id === id ? { ...element, ...updates } : element
       ),
     }));
   };
@@ -115,7 +115,7 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const deleteElement = (id: string) => {
     setFormData(prev => ({
       ...prev,
-      elements: prev.elements.filter(element => element.id !== id),
+      elements: prev.elements.filter(element => element && element.id !== id),
     }));
     
     if (activeElement === id) {
@@ -129,7 +129,7 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   const duplicateElement = (id: string) => {
-    const elementToDuplicate = formData.elements.find(element => element.id === id);
+    const elementToDuplicate = formData.elements.find(element => element && element.id === id);
     
     if (elementToDuplicate) {
       const duplicatedElement = {
@@ -138,7 +138,7 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
         label: `${elementToDuplicate.label} (Copy)`,
       };
       
-      const elementIndex = formData.elements.findIndex(element => element.id === id);
+      const elementIndex = formData.elements.findIndex(element => element && element.id === id);
       
       const newElements = [...formData.elements];
       newElements.splice(elementIndex + 1, 0, duplicatedElement);
@@ -158,8 +158,22 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   const reorderElements = (startIndex: number, endIndex: number) => {
+    // Make sure we have valid indices
+    if (startIndex < 0 || startIndex >= formData.elements.length || 
+        endIndex < 0 || endIndex > formData.elements.length) {
+      console.warn("Invalid indices for reordering:", startIndex, endIndex);
+      return;
+    }
+    
     const result = Array.from(formData.elements);
     const [removed] = result.splice(startIndex, 1);
+    
+    // Check if the removed element is defined
+    if (!removed) {
+      console.warn("Attempted to reorder an undefined element at index:", startIndex);
+      return;
+    }
+    
     result.splice(endIndex, 0, removed);
 
     setFormData({
