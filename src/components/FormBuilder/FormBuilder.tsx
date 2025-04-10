@@ -1,7 +1,7 @@
 
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { FormBuilderProvider } from "@/context/FormBuilderContext";
+import { FormBuilderProvider, useFormBuilder } from "@/context/FormBuilderContext";
 import SidePanel from "./SidePanel";
 import FormTitle from "./FormTitle";
 import DragDrop from "./DragDrop";

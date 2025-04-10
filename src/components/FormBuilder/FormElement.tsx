@@ -1,4 +1,3 @@
-
 import { useFormBuilder } from "@/context/FormBuilderContext";
 import { FormElementTypes } from "@/types/formBuilder";
 import { Card } from "../ui/card";
@@ -89,7 +88,6 @@ export const FormElement = ({ element, index }: FormElementProps) => {
       )}
       onClick={handleClick}
     >
-      {/* Drag handle */}
       <div 
         ref={dragRef} 
         className="absolute top-0 left-0 bottom-0 flex items-center justify-center p-2 cursor-grab bg-muted border-r"
