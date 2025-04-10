@@ -37,6 +37,7 @@ export interface FormElement {
     value: string;
   }>;
   maxStars?: number; // For star rating
+  confirmEmail?: boolean; // New property for email confirmation
   conditionalLogic?: {
     enabled: boolean;
     action: 'show' | 'hide';

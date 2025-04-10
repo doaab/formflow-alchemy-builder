@@ -281,12 +281,21 @@ const FormPreviewDialog = () => {
   const [open, setOpen] = useState(false);
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [addressExpanded, setAddressExpanded] = useState<Record<string, boolean>>({});
+  const [emailConfirmationErrors, setEmailConfirmationErrors] = useState<Record<string, string>>({});
   
   const handleInputChange = (elementId: string, value: string | boolean | string[] | Date | Record<string, any>) => {
     setResponses(prev => ({
       ...prev,
       [elementId]: value
     }));
+    
+    if (emailConfirmationErrors[elementId]) {
+      setEmailConfirmationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[elementId];
+        return newErrors;
+      });
+    }
   };
 
   const handleAddressChange = (elementId: string, field: string, value: string) => {
@@ -308,12 +317,41 @@ const FormPreviewDialog = () => {
     }));
   };
   
+  const validateEmailConfirmation = () => {
+    const confirmElements = formData.elements.filter(el => 
+      el && el.type === 'email' && el.confirmEmail
+    );
+    
+    const newErrors: Record<string, string> = {};
+    let isValid = true;
+    
+    confirmElements.forEach(element => {
+      const emailValue = responses[element.id];
+      const confirmId = `${element.id}_confirm`;
+      const confirmValue = responses[confirmId];
+      
+      if (emailValue && confirmValue && emailValue !== confirmValue) {
+        newErrors[confirmId] = "Email addresses do not match";
+        isValid = false;
+      }
+    });
+    
+    setEmailConfirmationErrors(newErrors);
+    return isValid;
+  };
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateEmailConfirmation()) {
+      return;
+    }
+    
     console.log("Form submitted with responses:", responses);
     setOpen(false);
     setResponses({});
     setAddressExpanded({});
+    setEmailConfirmationErrors({});
   };
   
   return (
@@ -370,7 +408,7 @@ const FormPreviewDialog = () => {
                   );
                 }
                 
-                return (
+                const elementOutput = (
                   <div key={element.id} className="space-y-2">
                     <Label htmlFor={element.id}>
                       {element.label}
@@ -387,6 +425,35 @@ const FormPreviewDialog = () => {
                     )}
                   </div>
                 );
+
+                if (element.type === 'email' && element.confirmEmail) {
+                  const confirmId = `${element.id}_confirm`;
+                  return (
+                    <React.Fragment key={element.id}>
+                      {elementOutput}
+                      <div className="space-y-2 mt-4">
+                        <Label htmlFor={confirmId}>
+                          Confirm {element.label}
+                          {element.required && <span className="text-red-500 ml-1">*</span>}
+                        </Label>
+                        <Input
+                          id={confirmId}
+                          type="email"
+                          value={responses[confirmId] || ''}
+                          onChange={(e) => handleInputChange(confirmId, e.target.value)}
+                          placeholder={`Confirm ${element.placeholder || 'email'}`}
+                          required={element.required}
+                          className={emailConfirmationErrors[confirmId] ? "border-red-500" : ""}
+                        />
+                        {emailConfirmationErrors[confirmId] && (
+                          <p className="text-red-500 text-sm">{emailConfirmationErrors[confirmId]}</p>
+                        )}
+                      </div>
+                    </React.Fragment>
+                  );
+                }
+                
+                return elementOutput;
               })
             )}
           </div>

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { 
   FormData, 
@@ -60,11 +59,16 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
     switch (type) {
       case 'text':
       case 'paragraph':
-      case 'email':
       case 'number':
         return {
           ...baseElement,
           placeholder: 'Enter your answer',
+        };
+      case 'email':
+        return {
+          ...baseElement,
+          placeholder: 'Enter your email',
+          confirmEmail: false, // Default to not requiring confirmation
         };
       case 'dropdown':
       case 'radio':

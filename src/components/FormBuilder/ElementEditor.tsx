@@ -1,4 +1,3 @@
-
 import { useFormBuilder } from '@/context/FormBuilderContext';
 import { 
   FormElement, 
@@ -26,7 +25,6 @@ interface ElementEditorProps {
   element: FormElementTypes;
 }
 
-// Expanded list of countries
 const countries = [
   { code: 'AF', name: 'Afghanistan' },
   { code: 'AX', name: 'Åland Islands' },
@@ -410,6 +408,17 @@ const ElementEditor = ({ element }: ElementEditorProps) => {
                     value={element.placeholder || ''}
                     onChange={(e) => handleChange('placeholder', e.target.value)}
                   />
+                </div>
+              )}
+
+              {element.type === 'email' && (
+                <div className="flex items-center space-x-2 pt-2">
+                  <Switch
+                    id="confirm-email"
+                    checked={element.confirmEmail || false}
+                    onCheckedChange={(checked) => handleChange('confirmEmail', checked)}
+                  />
+                  <Label htmlFor="confirm-email">Add confirmation field</Label>
                 </div>
               )}
 
