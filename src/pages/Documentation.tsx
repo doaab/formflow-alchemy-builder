@@ -35,6 +35,7 @@ const Documentation = () => {
               <TabsTrigger value="elements">Elements</TabsTrigger>
               <TabsTrigger value="architecture">Architecture</TabsTrigger>
               <TabsTrigger value="properties">Properties</TabsTrigger>
+              <TabsTrigger value="database">Database</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview">
@@ -349,6 +350,423 @@ const Documentation = () => {
                       </Table>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="database">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Database Schema Proposals</CardTitle>
+                  <CardDescription>
+                    Two different approaches to implementing the backend database for FormFlow Alchemy
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="normalized" className="mt-4">
+                    <TabsList>
+                      <TabsTrigger value="normalized">Proposal 1: Normalized Schema</TabsTrigger>
+                      <TabsTrigger value="document">Proposal 2: Document-Oriented Schema</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="normalized" className="space-y-6 mt-4">
+                      <div>
+                        <h3 className="text-lg font-medium mb-4">Normalized Database Schema</h3>
+                        <p className="mb-4">
+                          This approach uses a fully normalized relational database structure with separate tables for forms, elements, options, conditions, and responses.
+                        </p>
+                        
+                        <div className="space-y-6">
+                          <div>
+                            <h4 className="text-md font-medium mb-2">forms</h4>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Field</TableHead>
+                                  <TableHead>Type</TableHead>
+                                  <TableHead>Description</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell>id</TableCell>
+                                  <TableCell>bigint</TableCell>
+                                  <TableCell>Primary key</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>title</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Form title</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>description</TableCell>
+                                  <TableCell>text</TableCell>
+                                  <TableCell>Form description</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>user_id</TableCell>
+                                  <TableCell>foreign key</TableCell>
+                                  <TableCell>Owner of the form</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>is_published</TableCell>
+                                  <TableCell>boolean</TableCell>
+                                  <TableCell>Whether the form is public</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>slug</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>URL-friendly identifier</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>theme</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Visual theme of the form</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>collect_email</TableCell>
+                                  <TableCell>boolean</TableCell>
+                                  <TableCell>Whether to collect respondent emails</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>one_response_per_user</TableCell>
+                                  <TableCell>boolean</TableCell>
+                                  <TableCell>Limit responses to one per user</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>show_progress_bar</TableCell>
+                                  <TableCell>boolean</TableCell>
+                                  <TableCell>Show progress in multi-page forms</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>shuffle_questions</TableCell>
+                                  <TableCell>boolean</TableCell>
+                                  <TableCell>Randomize question order</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">form_elements</h4>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Field</TableHead>
+                                  <TableHead>Type</TableHead>
+                                  <TableHead>Description</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell>id</TableCell>
+                                  <TableCell>bigint</TableCell>
+                                  <TableCell>Primary key</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>form_id</TableCell>
+                                  <TableCell>foreign key</TableCell>
+                                  <TableCell>Form this element belongs to</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>element_id</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>UUID from frontend</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>type</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Element type (text, paragraph, etc.)</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>label</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Question label</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>placeholder</TableCell>
+                                  <TableCell>text</TableCell>
+                                  <TableCell>Placeholder text</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>default_value</TableCell>
+                                  <TableCell>text</TableCell>
+                                  <TableCell>Default field value</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>required</TableCell>
+                                  <TableCell>boolean</TableCell>
+                                  <TableCell>Is question required</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>order</TableCell>
+                                  <TableCell>integer</TableCell>
+                                  <TableCell>Display order in form</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>conditional_logic_*</TableCell>
+                                  <TableCell>various</TableCell>
+                                  <TableCell>Conditional display settings</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">Other Tables</h4>
+                            <ul className="list-disc pl-6 space-y-2">
+                              <li><strong>form_element_options</strong> - Stores options for dropdown, checkbox, and radio elements</li>
+                              <li><strong>conditional_rules</strong> - Stores conditions for showing/hiding elements</li>
+                              <li><strong>form_responses</strong> - Stores form submission metadata</li>
+                              <li><strong>form_answers</strong> - Stores individual question answers</li>
+                            </ul>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">Advantages</h4>
+                            <ul className="list-disc pl-6 space-y-1">
+                              <li>Fully normalized structure reduces data redundancy</li>
+                              <li>Clear separation of concerns between different data entities</li>
+                              <li>Efficient querying for specific elements or responses</li>
+                              <li>Simple relationship management between entities</li>
+                              <li>Better suited for complex data analysis and reporting</li>
+                            </ul>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">Disadvantages</h4>
+                            <ul className="list-disc pl-6 space-y-1">
+                              <li>More complex schema with multiple tables to manage</li>
+                              <li>Requires more joins for retrieving complete form data</li>
+                              <li>Less flexible for handling varying element properties</li>
+                              <li>May require schema changes when adding new element types</li>
+                              <li>More overhead when syncing with frontend data model</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="document" className="space-y-6 mt-4">
+                      <div>
+                        <h3 className="text-lg font-medium mb-4">Document-Oriented Schema</h3>
+                        <p className="mb-4">
+                          This approach uses a more document-oriented structure with JSON fields to store complex data, requiring fewer tables but more complex data structures.
+                        </p>
+                        
+                        <div className="space-y-6">
+                          <div>
+                            <h4 className="text-md font-medium mb-2">forms</h4>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Field</TableHead>
+                                  <TableHead>Type</TableHead>
+                                  <TableHead>Description</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell>id</TableCell>
+                                  <TableCell>bigint</TableCell>
+                                  <TableCell>Primary key</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>title</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Form title</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>description</TableCell>
+                                  <TableCell>text</TableCell>
+                                  <TableCell>Form description</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>user_id</TableCell>
+                                  <TableCell>foreign key</TableCell>
+                                  <TableCell>Owner of the form</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>settings</TableCell>
+                                  <TableCell>json</TableCell>
+                                  <TableCell>Form settings as JSON</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>elements</TableCell>
+                                  <TableCell>json</TableCell>
+                                  <TableCell>All form elements as JSON</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>is_published</TableCell>
+                                  <TableCell>boolean</TableCell>
+                                  <TableCell>Whether the form is public</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>slug</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>URL-friendly identifier</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">form_versions</h4>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Field</TableHead>
+                                  <TableHead>Type</TableHead>
+                                  <TableHead>Description</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell>id</TableCell>
+                                  <TableCell>bigint</TableCell>
+                                  <TableCell>Primary key</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>form_id</TableCell>
+                                  <TableCell>foreign key</TableCell>
+                                  <TableCell>Form this version belongs to</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>version_name</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Name of this version</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>elements</TableCell>
+                                  <TableCell>json</TableCell>
+                                  <TableCell>All form elements as JSON</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>settings</TableCell>
+                                  <TableCell>json</TableCell>
+                                  <TableCell>Version-specific settings</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>is_active</TableCell>
+                                  <TableCell>boolean</TableCell>
+                                  <TableCell>Whether this is the active version</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">form_responses</h4>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Field</TableHead>
+                                  <TableHead>Type</TableHead>
+                                  <TableHead>Description</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell>id</TableCell>
+                                  <TableCell>bigint</TableCell>
+                                  <TableCell>Primary key</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>form_id</TableCell>
+                                  <TableCell>foreign key</TableCell>
+                                  <TableCell>Form this response belongs to</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>form_version_id</TableCell>
+                                  <TableCell>foreign key</TableCell>
+                                  <TableCell>Version of the form answered</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>user_id</TableCell>
+                                  <TableCell>foreign key</TableCell>
+                                  <TableCell>User who submitted the form (optional)</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>answers</TableCell>
+                                  <TableCell>json</TableCell>
+                                  <TableCell>All form answers as JSON</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>metadata</TableCell>
+                                  <TableCell>json</TableCell>
+                                  <TableCell>Submission metadata</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">form_response_analytics</h4>
+                            <p className="mb-2">Denormalized table for analytics purposes:</p>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Field</TableHead>
+                                  <TableHead>Type</TableHead>
+                                  <TableHead>Description</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell>id</TableCell>
+                                  <TableCell>bigint</TableCell>
+                                  <TableCell>Primary key</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>form_id</TableCell>
+                                  <TableCell>foreign key</TableCell>
+                                  <TableCell>Form this analytics entry belongs to</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>element_id</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Specific form element ID</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>answer_value</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Value that was selected/entered</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>count</TableCell>
+                                  <TableCell>integer</TableCell>
+                                  <TableCell>Number of times this answer was given</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">Advantages</h4>
+                            <ul className="list-disc pl-6 space-y-1">
+                              <li>Simpler schema with fewer tables to manage</li>
+                              <li>Perfect 1:1 mapping with frontend data model</li>
+                              <li>Highly flexible for handling varying element properties</li>
+                              <li>No schema changes needed when adding new element types</li>
+                              <li>Efficient retrieval of complete form structure with minimal queries</li>
+                              <li>Support for form versioning built into the schema</li>
+                            </ul>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">Disadvantages</h4>
+                            <ul className="list-disc pl-6 space-y-1">
+                              <li>More complex JSON operations for querying specific properties</li>
+                              <li>Potential for data redundancy within JSON structures</li>
+                              <li>Less efficient for focused queries on specific elements</li>
+                              <li>May require additional analytics tables for efficient reporting</li>
+                              <li>Indexing capabilities more limited within JSON data</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
             </TabsContent>
