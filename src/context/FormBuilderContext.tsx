@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState } from 'react';
 import { 
   FormData, 
@@ -90,14 +91,19 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
           ...baseElement,
         };
       case 'phone':
+        // Default to common countries with expanded list
         return {
           ...baseElement,
           type: 'phone',
           placeholder: 'Enter phone number',
           defaultCountry: 'US',
-          allowedCountries: ['US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP', 'IN', 'BR', 'MX'],
+          allowedCountries: [
+            'US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP', 'IN', 'BR', 'MX', 
+            'ES', 'IT', 'CN', 'RU', 'ZA', 'AE', 'SG', 'CH', 'SE', 'NL'
+          ],
         } as PhoneElement;
       case 'address':
+        // Default to common countries with expanded list
         return {
           ...baseElement,
           type: 'address',
@@ -110,7 +116,10 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
             zipCode: true,
             country: true,
           },
-          allowedCountries: ['US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP', 'IN', 'BR', 'MX'],
+          allowedCountries: [
+            'US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP', 'IN', 'BR', 'MX',
+            'ES', 'IT', 'CN', 'RU', 'ZA', 'AE', 'SG', 'CH', 'SE', 'NL'
+          ],
         } as AddressElement;
       case 'section':
         return {
