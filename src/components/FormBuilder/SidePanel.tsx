@@ -18,15 +18,24 @@ import {
   ArrowDown,
   PlusCircle
 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const SidePanel = () => {
-  const { activeElement, formData, addElement } = useFormBuilder();
-  const activeTab = activeElement ? "properties" : "add";
+  const { activeElement, formData, addElement, setActiveElement } = useFormBuilder();
+  // Allow switching between tabs regardless of selection
+  const [activeTab, setActiveTab] = useState<string>(activeElement ? "properties" : "add");
   
   // Add safe check for active element
   const selectedElement = activeElement
     ? formData.elements.find((element) => element && element.id === activeElement)
     : null;
+
+  // Update tab when active element changes
+  useEffect(() => {
+    if (activeElement && selectedElement) {
+      setActiveTab("properties");
+    }
+  }, [activeElement, selectedElement]);
 
   // Create a wrapper function for adding elements with proper type casting
   const handleAddElement = (type: QuestionType) => {
@@ -42,7 +51,7 @@ const SidePanel = () => {
       <Tabs 
         value={activeTab} 
         className="flex flex-col flex-1"
-        defaultValue={activeTab}
+        onValueChange={(value) => setActiveTab(value)}
       >
         <TabsList className="grid grid-cols-2">
           <TabsTrigger value="add">Add Elements</TabsTrigger>

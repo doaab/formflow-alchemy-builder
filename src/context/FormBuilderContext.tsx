@@ -158,33 +158,41 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   const reorderElements = (startIndex: number, endIndex: number) => {
-    // Make sure we have valid indices
-    if (startIndex < 0 || startIndex >= formData.elements.length || 
-        endIndex < 0 || endIndex > formData.elements.length) {
+    // Make sure we have valid indices and they're different
+    if (
+      startIndex < 0 || 
+      startIndex >= formData.elements.length || 
+      endIndex < 0 || 
+      endIndex > formData.elements.length || 
+      startIndex === endIndex
+    ) {
       console.warn("Invalid indices for reordering:", startIndex, endIndex);
       return;
     }
     
-    // Create a new array and move the element
-    const result = Array.from(formData.elements);
-    const [removed] = result.splice(startIndex, 1);
+    // Create a new array from the existing elements
+    const updatedElements = [...formData.elements];
     
-    // Check if the removed element is defined
-    if (!removed) {
+    // Get the element to move
+    const [elementToMove] = updatedElements.splice(startIndex, 1);
+    
+    // Check if the element exists
+    if (!elementToMove) {
       console.warn("Attempted to reorder an undefined element at index:", startIndex);
       return;
     }
     
-    result.splice(endIndex, 0, removed);
-
-    // Update the form data with the reordered elements
+    // Insert the element at the new position
+    updatedElements.splice(endIndex, 0, elementToMove);
+    
+    // Update the form data
     setFormData(prev => ({
       ...prev,
-      elements: result
+      elements: updatedElements
     }));
     
     // Update active element to the moved element
-    setActiveElement(removed.id);
+    setActiveElement(elementToMove.id);
   };
 
   return (

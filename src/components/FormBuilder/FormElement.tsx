@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { useDrag } from "react-dnd";
+import { useDrag, useDrop } from "react-dnd";
 import { ItemTypes } from "./constants";
 
 const getQuestionIcon = (type: string) => {
@@ -61,7 +61,7 @@ interface FormElementProps {
 }
 
 export const FormElement = ({ element, index }: FormElementProps) => {
-  const { activeElement, setActiveElement, deleteElement, duplicateElement, setIsDragging } = useFormBuilder();
+  const { activeElement, setActiveElement, deleteElement, duplicateElement, setIsDragging, reorderElements } = useFormBuilder();
   
   const [{ isDragging }, dragRef] = useDrag(() => ({
     type: ItemTypes.ELEMENT,
@@ -79,6 +79,30 @@ export const FormElement = ({ element, index }: FormElementProps) => {
     }),
   }), [element.id, index, setIsDragging]);
   
+  const [, drop] = useDrop({
+    accept: ItemTypes.ELEMENT,
+    hover(item: { id: string, index: number }, monitor) {
+      if (!element) {
+        return;
+      }
+
+      // Don't replace items with themselves
+      const draggedIndex = item.index;
+      const hoverIndex = index;
+      
+      if (draggedIndex === hoverIndex) {
+        return;
+      }
+
+      // Time to actually perform the action
+      if (draggedIndex !== hoverIndex) {
+        reorderElements(draggedIndex, hoverIndex);
+        // Update the index for subsequent drags
+        item.index = hoverIndex;
+      }
+    },
+  });
+  
   const handleClick = () => {
     setActiveElement(element.id);
   };
@@ -89,6 +113,7 @@ export const FormElement = ({ element, index }: FormElementProps) => {
 
   return (
     <Card 
+      ref={(node) => drop(dragRef(node))}
       className={cn(
         "mb-2 relative transition-all duration-200 border overflow-hidden",
         isActive && "ring-2 ring-primary ring-offset-2",
@@ -97,7 +122,6 @@ export const FormElement = ({ element, index }: FormElementProps) => {
       onClick={handleClick}
     >
       <div 
-        ref={dragRef} 
         className="absolute top-0 left-0 bottom-0 flex items-center justify-center p-2 cursor-grab bg-muted border-r"
       >
         <GripVertical className="h-4 w-4 text-muted-foreground" />

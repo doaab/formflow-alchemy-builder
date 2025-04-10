@@ -6,7 +6,7 @@ import FormElement from "./FormElement";
 import { cn } from "@/lib/utils";
 
 const DragDrop = () => {
-  const { formData, reorderElements, setIsDragging } = useFormBuilder();
+  const { formData, reorderElements, setIsDragging, setActiveElement } = useFormBuilder();
 
   const [{ isOver, canDrop }, drop] = useDrop(() => ({
     accept: ItemTypes.ELEMENT,
@@ -43,15 +43,30 @@ const DragDrop = () => {
     }),
   }));
 
+  // Add background click handler to deselect elements
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    // Only deselect if clicking directly on the background container
+    if (e.target === e.currentTarget) {
+      setActiveElement(null);
+    }
+  };
+
   return (
-    <div className="flex-1 overflow-auto p-6 bg-gray-50">
-      <div className="container mx-auto max-w-4xl">
+    <div 
+      className="flex-1 overflow-auto p-6 bg-gray-50"
+      onClick={handleBackgroundClick}
+    >
+      <div 
+        className="container mx-auto max-w-4xl"
+        onClick={handleBackgroundClick}
+      >
         <div 
           ref={drop}
           className={cn(
             "min-h-[300px]",
             isOver && "bg-primary/5 border-2 border-dashed border-primary/40 rounded-lg"
           )}
+          onClick={handleBackgroundClick}
         >
           {formData.elements.length === 0 && (
             <div className="flex items-center justify-center h-[300px] border-2 border-dashed border-gray-300 rounded-lg">
