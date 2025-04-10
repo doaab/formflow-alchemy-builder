@@ -16,12 +16,14 @@ return new class extends Migration
             $table->id();
             $table->foreignId('form_id')->constrained()->onDelete('cascade');
             $table->string('element_id')->unique(); // UUID from frontend
-            $table->string('type'); // text, paragraph, number, email, dropdown, radio, checkbox, etc.
+            $table->string('type')->comment('Reference to question_types.slug');
             $table->string('label');
             $table->text('placeholder')->nullable();
             $table->text('default_value')->nullable();
             $table->boolean('required')->default(false);
             $table->integer('order')->default(0);
+            
+            // Type-specific properties (can be moved to JSON column for more flexibility)
             $table->boolean('confirm_email')->nullable(); // For email fields
             $table->integer('max_stars')->nullable(); // For star rating fields
             
@@ -45,6 +47,10 @@ return new class extends Migration
             $table->boolean('conditional_logic_enabled')->default(false);
             $table->enum('conditional_action', ['show', 'hide'])->nullable();
             $table->enum('conditional_logic_gate', ['all', 'any'])->nullable();
+            
+            // Advanced properties
+            $table->json('properties')->nullable()->comment('Additional type-specific properties');
+            
             $table->timestamps();
         });
     }

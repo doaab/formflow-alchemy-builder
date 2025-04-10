@@ -365,6 +365,7 @@ const Documentation = () => {
                   <Tabs defaultValue="normalized" className="mt-4">
                     <TabsList>
                       <TabsTrigger value="normalized">Proposal 1: Normalized Schema</TabsTrigger>
+                      <TabsTrigger value="normalizedWithTypes">Proposal 1b: With Question Types</TabsTrigger>
                       <TabsTrigger value="document">Proposal 2: Document-Oriented Schema</TabsTrigger>
                     </TabsList>
                     
@@ -521,37 +522,12 @@ const Documentation = () => {
                                 <TableRow>
                                   <TableCell>type</TableCell>
                                   <TableCell>string</TableCell>
-                                  <TableCell>Element type (text, paragraph, etc.)</TableCell>
+                                  <TableCell>Reference to question_types.slug</TableCell>
                                 </TableRow>
                                 <TableRow>
-                                  <TableCell>label</TableCell>
-                                  <TableCell>string</TableCell>
-                                  <TableCell>Question label</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>placeholder</TableCell>
-                                  <TableCell>text</TableCell>
-                                  <TableCell>Placeholder text</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>default_value</TableCell>
-                                  <TableCell>text</TableCell>
-                                  <TableCell>Default field value</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>required</TableCell>
-                                  <TableCell>boolean</TableCell>
-                                  <TableCell>Is question required</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>order</TableCell>
-                                  <TableCell>integer</TableCell>
-                                  <TableCell>Display order in form</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>conditional_logic_*</TableCell>
-                                  <TableCell>various</TableCell>
-                                  <TableCell>Conditional display settings</TableCell>
+                                  <TableCell>properties</TableCell>
+                                  <TableCell>json</TableCell>
+                                  <TableCell>Type-specific properties</TableCell>
                                 </TableRow>
                               </TableBody>
                             </Table>
@@ -586,6 +562,221 @@ const Documentation = () => {
                               <li>Less flexible for handling varying element properties</li>
                               <li>May require schema changes when adding new element types</li>
                               <li>More overhead when syncing with frontend data model</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="normalizedWithTypes" className="space-y-6 mt-4">
+                      <div>
+                        <h3 className="text-lg font-medium mb-4">Normalized Database Schema with Question Types</h3>
+                        <p className="mb-4">
+                          This approach builds on the normalized structure but adds a separate table for question types, adding more flexibility to manage different input types.
+                        </p>
+                        
+                        <div className="space-y-6">
+                          <div>
+                            <h4 className="text-md font-medium mb-2">Entity Relationship Diagram</h4>
+                            <div className="p-4 border rounded-md bg-muted overflow-auto">
+                              <pre className="whitespace-pre text-xs">
+{`+----------------+     +------------------+     +---------------------+     +------------------+
+|     users      |     |      forms       |     |    form_elements    |     |  question_types  |
++----------------+     +------------------+     +---------------------+     +------------------+
+| id             |<--->| id               |<--->| id                  |<--->| id               |
+| name           |     | title            |     | form_id             |     | slug             |
+| email          |     | description      |     | element_id          |     | name             |
+| password       |     | user_id          |     | type                |     | category         |
+| role           |     | is_published     |     | label               |     | description      |
+| avatar         |     | slug             |     | placeholder         |     | default_properties|
+| ...            |     | ...              |     | ...                 |     | is_active        |
++----------------+     +------------------+     +---------------------+     +------------------+
+                              |                           |
+                              |                           v
++----------------------+      |             +------------------------+
+|   form_responses     |<-----+             | form_element_options  |
++----------------------+      |             +------------------------+
+| id                   |      |             | id                     |
+| form_id              |      |             | form_element_id        |
+| user_id              |      |             | option_id              |
+| ip_address           |      |             | label                  |
+| user_agent           |      |             | value                  |
+| respondent_email     |      |             | order                  |
+| completion_time      |      |             +------------------------+
++----------------------+      |                         |
+         |                    |                         |
+         v                    |                         |
++--------------------+        |             +-----------------------+
+|   form_answers     |        |             |   conditional_rules   |
++--------------------+        |             +-----------------------+
+| id                 |        |             | id                    |
+| form_response_id   |        +------------>| form_element_id       |
+| form_element_id    |                      | question_id           |
+| value              |                      | operator              |
++--------------------+                      | value                 |
+                                            +-----------------------+`}
+                              </pre>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">question_types</h4>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Field</TableHead>
+                                  <TableHead>Type</TableHead>
+                                  <TableHead>Description</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell>id</TableCell>
+                                  <TableCell>bigint</TableCell>
+                                  <TableCell>Primary key</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>slug</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Unique identifier (e.g., 'text', 'dropdown')</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>name</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Display name (e.g., 'Text Input')</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>category</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Grouping (e.g., 'Basic Fields', 'Choice Fields')</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>description</TableCell>
+                                  <TableCell>text</TableCell>
+                                  <TableCell>Detailed description</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>default_properties</TableCell>
+                                  <TableCell>json</TableCell>
+                                  <TableCell>Default settings for this question type</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>is_active</TableCell>
+                                  <TableCell>boolean</TableCell>
+                                  <TableCell>Whether this question type can be used</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">form_elements (modified)</h4>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Field</TableHead>
+                                  <TableHead>Type</TableHead>
+                                  <TableHead>Description</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell>id</TableCell>
+                                  <TableCell>bigint</TableCell>
+                                  <TableCell>Primary key</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>form_id</TableCell>
+                                  <TableCell>foreign key</TableCell>
+                                  <TableCell>Form this element belongs to</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>element_id</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>UUID from frontend</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>type</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Reference to question_types.slug</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>properties</TableCell>
+                                  <TableCell>json</TableCell>
+                                  <TableCell>Type-specific properties</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">users (enhanced)</h4>
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Field</TableHead>
+                                  <TableHead>Type</TableHead>
+                                  <TableHead>Description</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell>id</TableCell>
+                                  <TableCell>bigint</TableCell>
+                                  <TableCell>Primary key</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>name</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>User's full name</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>email</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>User's email (unique)</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>role</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>User role (user, admin, etc.)</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>avatar</TableCell>
+                                  <TableCell>string</TableCell>
+                                  <TableCell>Profile image path</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>preferences</TableCell>
+                                  <TableCell>json</TableCell>
+                                  <TableCell>User-specific settings</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell>last_login_at</TableCell>
+                                  <TableCell>timestamp</TableCell>
+                                  <TableCell>Last login timestamp</TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">Advantages</h4>
+                            <ul className="list-disc pl-6 space-y-1">
+                              <li>Centralized management of question types</li>
+                              <li>Ability to enable/disable specific question types</li>
+                              <li>Easier to add new question types without schema changes</li>
+                              <li>Better organization of input types by category</li>
+                              <li>Default properties can be defined at the type level</li>
+                              <li>Improved user management with roles and preferences</li>
+                            </ul>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-md font-medium mb-2">Disadvantages</h4>
+                            <ul className="list-disc pl-6 space-y-1">
+                              <li>Slightly more complex schema with additional table</li>
+                              <li>Need to synchronize question types with frontend code</li>
+                              <li>May require additional logic to handle type-specific behavior</li>
                             </ul>
                           </div>
                         </div>
