@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Http\Request;
@@ -35,11 +34,11 @@ Route::middleware(['auth:sanctum'])->group(function() {
     Route::apiResource('forms', FormController::class);
     Route::post('forms/{form}/toggle-publish', [FormController::class, 'togglePublish']);
     Route::get('forms/{form}/analytics', [FormController::class, 'analytics']);
-    
+
     // Form Elements
     Route::apiResource('forms.elements', FormElementController::class);
     Route::post('forms/{form}/elements/reorder', [FormElementController::class, 'reorder']);
-    
+
     // Form Responses
     Route::apiResource('forms.responses', FormResponseController::class)->only(['index', 'show']);
     Route::get('forms/{form}/responses/export', [FormResponseController::class, 'export']);
