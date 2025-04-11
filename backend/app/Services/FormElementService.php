@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Services;
@@ -127,7 +126,7 @@ class FormElementService
             if (isset($data['options']) && is_array($data['options'])) {
                 // Delete existing options
                 $element->options()->delete();
-                
+
                 // Create new options
                 foreach ($data['options'] as $option) {
                     $element->options()->create([
@@ -143,7 +142,7 @@ class FormElementService
             if (isset($data['conditional_rules'])) {
                 // Delete existing rules
                 $element->conditionalRules()->delete();
-                
+
                 // Create new rules if there are any
                 if (is_array($data['conditional_rules'])) {
                     foreach ($data['conditional_rules'] as $rule) {

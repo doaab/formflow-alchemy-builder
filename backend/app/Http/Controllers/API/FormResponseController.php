@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\API;
@@ -26,9 +25,9 @@ class FormResponseController extends Controller
     public function index(Form $form)
     {
         $this->authorize('view', $form);
-        
+
         $responses = $this->formResponseService->getResponsesByForm($form);
-        
+
         return response()->json($responses);
     }
 
@@ -40,29 +39,29 @@ class FormResponseController extends Controller
         $form = Form::where('slug', $slug)
             ->where('is_published', true)
             ->firstOrFail();
-            
+
         // Check if one response per user is enabled and user has already submitted
         if ($form->one_response_per_user && Auth::check()) {
             $existingResponse = $form->responses()
                 ->where('user_id', Auth::id())
                 ->exists();
-                
+
             if ($existingResponse) {
                 return response()->json([
                     'message' => 'You have already submitted a response to this form'
                 ], 422);
             }
         }
-        
+
         $startTime = $request->input('start_time');
         $completionTime = null;
-        
+
         if ($startTime) {
             $completionTime = time() - $startTime;
         }
-        
+
         $response = $this->formResponseService->createResponse($form, $request->validated(), $completionTime);
-        
+
         return response()->json($response, 201);
     }
 
@@ -72,13 +71,13 @@ class FormResponseController extends Controller
     public function show(Form $form, FormResponse $response)
     {
         $this->authorize('view', $form);
-        
+
         if ($response->form_id !== $form->id) {
             return response()->json(['message' => 'Response does not belong to this form'], 404);
         }
-        
+
         $response = $this->formResponseService->getResponseWithAnswers($response);
-        
+
         return response()->json($response);
     }
 
@@ -88,19 +87,19 @@ class FormResponseController extends Controller
     public function export(Form $form)
     {
         $this->authorize('view', $form);
-        
+
         return $this->formResponseService->exportResponses($form);
     }
-    
+
     /**
      * Get statistics about form responses.
      */
     public function statistics(Form $form)
     {
         $this->authorize('view', $form);
-        
+
         $stats = $this->formResponseService->getResponseStatistics($form);
-        
+
         return response()->json($stats);
     }
 }

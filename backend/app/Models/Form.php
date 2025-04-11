@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Models;
@@ -75,14 +74,14 @@ class Form extends Model
     {
         return $this->hasMany(FormResponse::class);
     }
-    
+
     /**
      * Boot the model.
      */
     protected static function boot()
     {
         parent::boot();
-        
+
         // Generate slug before creating
         static::creating(function ($form) {
             if (empty($form->slug)) {

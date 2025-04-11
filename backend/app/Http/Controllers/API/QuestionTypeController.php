@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\API;
@@ -18,7 +17,7 @@ class QuestionTypeController extends Controller
             ->orderBy('category')
             ->orderBy('name')
             ->get();
-            
+
         return response()->json($types);
     }
 
@@ -31,7 +30,7 @@ class QuestionTypeController extends Controller
             ->orderBy('name')
             ->get()
             ->groupBy('category');
-            
+
         return response()->json($types);
     }
 }

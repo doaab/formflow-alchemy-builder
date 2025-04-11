@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\API;
@@ -26,9 +25,9 @@ class FormElementController extends Controller
     public function index(Form $form)
     {
         $this->authorize('view', $form);
-        
+
         $elements = $this->formElementService->getElementsByForm($form);
-        
+
         return response()->json($elements);
     }
 
@@ -38,9 +37,9 @@ class FormElementController extends Controller
     public function store(StoreFormElementRequest $request, Form $form)
     {
         $this->authorize('update', $form);
-        
+
         $element = $this->formElementService->createElement($form, $request->validated());
-        
+
         return response()->json($element, 201);
     }
 
@@ -50,13 +49,13 @@ class FormElementController extends Controller
     public function show(Form $form, FormElement $element)
     {
         $this->authorize('view', $form);
-        
+
         if ($element->form_id !== $form->id) {
             return response()->json(['message' => 'Element does not belong to this form'], 404);
         }
-        
+
         $element = $this->formElementService->getElementWithDetails($element);
-        
+
         return response()->json($element);
     }
 
@@ -66,13 +65,13 @@ class FormElementController extends Controller
     public function update(UpdateFormElementRequest $request, Form $form, FormElement $element)
     {
         $this->authorize('update', $form);
-        
+
         if ($element->form_id !== $form->id) {
             return response()->json(['message' => 'Element does not belong to this form'], 404);
         }
-        
+
         $element = $this->formElementService->updateElement($element, $request->validated());
-        
+
         return response()->json($element);
     }
 
@@ -82,13 +81,13 @@ class FormElementController extends Controller
     public function destroy(Form $form, FormElement $element)
     {
         $this->authorize('update', $form);
-        
+
         if ($element->form_id !== $form->id) {
             return response()->json(['message' => 'Element does not belong to this form'], 404);
         }
-        
+
         $this->formElementService->deleteElement($element);
-        
+
         return response()->json(null, 204);
     }
 
@@ -98,15 +97,15 @@ class FormElementController extends Controller
     public function reorder(Request $request, Form $form)
     {
         $this->authorize('update', $form);
-        
+
         $request->validate([
             'elements' => 'required|array',
             'elements.*.id' => 'required|exists:form_elements,id',
             'elements.*.order' => 'required|integer|min:0',
         ]);
-        
+
         $this->formElementService->reorderElements($request->elements);
-        
+
         return response()->json(['message' => 'Elements reordered successfully']);
     }
 }

@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\API;
@@ -44,7 +43,7 @@ class FormController extends Controller
     public function store(StoreFormRequest $request)
     {
         $form = $this->formService->createForm($request->validated());
-        
+
         return response()->json($form, 201);
     }
 
@@ -54,7 +53,7 @@ class FormController extends Controller
     public function show(Form $form)
     {
         $this->authorize('view', $form);
-        
+
         return response()->json(
             $this->formService->getFormWithElements($form)
         );
@@ -66,9 +65,9 @@ class FormController extends Controller
     public function update(UpdateFormRequest $request, Form $form)
     {
         $this->authorize('update', $form);
-        
+
         $form = $this->formService->updateForm($form, $request->validated());
-        
+
         return response()->json($form);
     }
 
@@ -78,9 +77,9 @@ class FormController extends Controller
     public function destroy(Form $form)
     {
         $this->authorize('delete', $form);
-        
+
         $this->formService->deleteForm($form);
-        
+
         return response()->json(null, 204);
     }
 
@@ -92,7 +91,7 @@ class FormController extends Controller
         $form = Form::where('slug', $slug)
             ->where('is_published', true)
             ->firstOrFail();
-            
+
         return response()->json(
             $this->formService->getFormWithElementsPublic($form)
         );
@@ -104,10 +103,10 @@ class FormController extends Controller
     public function togglePublish(Form $form)
     {
         $this->authorize('update', $form);
-        
+
         $form->is_published = !$form->is_published;
         $form->save();
-        
+
         return response()->json(['is_published' => $form->is_published]);
     }
 
@@ -117,9 +116,9 @@ class FormController extends Controller
     public function analytics(Form $form)
     {
         $this->authorize('view', $form);
-        
+
         $analytics = $this->formService->getFormAnalytics($form);
-        
+
         return response()->json($analytics);
     }
 }

@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Database\Seeders;
@@ -21,7 +20,7 @@ class FormSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create();
-        
+
         // Create test users if they don't exist
         if (User::count() == 0) {
             User::create([
@@ -31,7 +30,7 @@ class FormSeeder extends Seeder
                 'email_verified_at' => now(),
                 'remember_token' => Str::random(10),
             ]);
-            
+
             User::create([
                 'name' => 'Admin User',
                 'email' => 'admin@example.com',
@@ -40,9 +39,9 @@ class FormSeeder extends Seeder
                 'remember_token' => Str::random(10),
             ]);
         }
-        
+
         $users = User::all();
-        
+
         // Form types to create with specific elements
         $formTypes = [
             [
@@ -100,12 +99,12 @@ class FormSeeder extends Seeder
                 ]
             ],
         ];
-        
+
         // Create forms
         foreach ($formTypes as $index => $formType) {
             // Get a random user
             $user = $users->random();
-            
+
             // Create the form
             $form = Form::create([
                 'title' => $formType['title'],
@@ -121,7 +120,7 @@ class FormSeeder extends Seeder
                 'created_at' => $faker->dateTimeBetween('-3 months', '-2 days'),
                 'updated_at' => $faker->dateTimeBetween('-2 days', 'now'),
             ]);
-            
+
             // Create form elements
             $elementOrder = 0;
             foreach ($formType['elements'] as $elementData) {
@@ -133,7 +132,7 @@ class FormSeeder extends Seeder
                     'required' => $elementData['required'],
                     'order' => $elementOrder++,
                 ]);
-                
+
                 // Create options for elements that need them
                 if (isset($elementData['options'])) {
                     $optionOrder = 0;
@@ -147,13 +146,13 @@ class FormSeeder extends Seeder
                     }
                 }
             }
-            
+
             // Create random number of responses for each form (0-50)
             $responseCount = rand(0, 50);
             for ($i = 0; $i < $responseCount; $i++) {
                 $startTime = $faker->dateTimeBetween('-3 months', 'now');
                 $completionTime = rand(60, 900); // Between 1 and 15 minutes
-                
+
                 // Create the response
                 $response = $form->responses()->create([
                     'user_id' => $faker->boolean(30) ? $users->random()->id : null,
@@ -164,14 +163,14 @@ class FormSeeder extends Seeder
                     'created_at' => $startTime,
                     'updated_at' => $startTime,
                 ]);
-                
+
                 // Create answers for each element in the form
                 foreach ($form->elements as $element) {
                     // Skip section and break elements
                     if (in_array($element->type, ['section', 'break'])) {
                         continue;
                     }
-                    
+
                     // Generate different answer values based on element type
                     $value = '';
                     switch ($element->type) {
@@ -208,7 +207,7 @@ class FormSeeder extends Seeder
                             }
                             break;
                     }
-                    
+
                     // Create the answer
                     $response->answers()->create([
                         'form_element_id' => $element->id,

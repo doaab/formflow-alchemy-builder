@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Services;
@@ -41,7 +40,7 @@ class FormResponseService
             foreach ($data['answers'] as $answer) {
                 // Get the form element by element_id
                 $element = $form->elements()->where('element_id', $answer['element_id'])->first();
-                
+
                 if ($element) {
                     $response->answers()->create([
                         'form_element_id' => $element->id,
@@ -81,15 +80,15 @@ class FormResponseService
         $elements = $form->elements()
             ->orderBy('order')
             ->get();
-            
+
         // Get all responses with their answers
         $responses = $form->responses()
             ->with('answers')
             ->orderBy('created_at', 'desc')
             ->get();
-            
+
         $filename = 'form_responses_' . $form->id . '_' . date('Y-m-d') . '.csv';
-        
+
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
@@ -97,22 +96,22 @@ class FormResponseService
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0',
         ];
-        
+
         $callback = function() use ($responses, $elements) {
             $file = fopen('php://output', 'w');
-            
+
             // Create headers row
             $headers = ['Response ID', 'Submitted At', 'Email', 'IP Address'];
-            
+
             foreach ($elements as $element) {
                 // Skip section and break elements
                 if (!in_array($element->type, ['section', 'break'])) {
                     $headers[] = $element->label;
                 }
             }
-            
+
             fputcsv($file, $headers);
-            
+
             // Add data rows
             foreach ($responses as $response) {
                 $row = [
@@ -121,35 +120,35 @@ class FormResponseService
                     $response->respondent_email,
                     $response->ip_address,
                 ];
-                
+
                 $answersByElementId = [];
                 foreach ($response->answers as $answer) {
                     $answersByElementId[$answer->form_element_id] = $answer->value;
                 }
-                
+
                 foreach ($elements as $element) {
                     // Skip section and break elements
                     if (!in_array($element->type, ['section', 'break'])) {
                         $row[] = $answersByElementId[$element->id] ?? '';
                     }
                 }
-                
+
                 fputcsv($file, $row);
             }
-            
+
             fclose($file);
         };
-        
+
         return new StreamedResponse($callback, 200, $headers);
     }
-    
+
     /**
      * Get response statistics.
      */
     public function getResponseStatistics(Form $form)
     {
         $totalResponses = $form->responses()->count();
-        
+
         $responsesByDay = $form->responses()
             ->select(
                 DB::raw('DATE(created_at) as date'),
@@ -158,18 +157,18 @@ class FormResponseService
             ->groupBy('date')
             ->orderBy('date')
             ->get();
-            
+
         $avgCompletionTime = $form->responses()
             ->whereNotNull('completion_time')
             ->avg('completion_time');
-            
+
         return [
             'total_responses' => $totalResponses,
             'responses_by_day' => $responsesByDay,
             'avg_completion_time' => round($avgCompletionTime),
         ];
     }
-    
+
     /**
      * Update response analytics.
      */
@@ -182,9 +181,9 @@ class FormResponseService
             if (empty($answer['value'])) {
                 continue;
             }
-            
+
             $element = $form->elements()->where('element_id', $answer['element_id'])->first();
-            
+
             if ($element) {
                 DB::table('form_response_analytics')
                     ->updateOrInsert(

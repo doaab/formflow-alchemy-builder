@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Services;
@@ -96,29 +95,29 @@ class FormService
     public function getFormAnalytics(Form $form)
     {
         $responseCount = $form->responses()->count();
-        
+
         $completionTimeAvg = $form->responses()
             ->whereNotNull('completion_time')
             ->avg('completion_time');
-            
+
         $completionTimeAvg = round($completionTimeAvg);
-            
+
         $responsesByDate = DB::table('form_responses')
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
             ->where('form_id', $form->id)
             ->groupBy('date')
             ->orderBy('date')
             ->get();
-            
+
         // Get most common answers for each question
         $elementAnswers = [];
-        
+
         foreach ($form->elements as $element) {
             // Skip layout elements
             if (in_array($element->type, ['section', 'break'])) {
                 continue;
             }
-            
+
             $topAnswers = DB::table('form_answers')
                 ->join('form_responses', 'form_answers.form_response_id', '=', 'form_responses.id')
                 ->where('form_responses.form_id', $form->id)
@@ -128,14 +127,14 @@ class FormService
                 ->orderByDesc('count')
                 ->limit(5)
                 ->get();
-                
+
             $elementAnswers[$element->element_id] = [
                 'question' => $element->label,
                 'type' => $element->type,
                 'top_answers' => $topAnswers
             ];
         }
-        
+
         return [
             'total_responses' => $responseCount,
             'avg_completion_time' => $completionTimeAvg,
