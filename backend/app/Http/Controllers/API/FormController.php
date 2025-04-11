@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\API;
@@ -50,8 +51,10 @@ class FormController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Form $form)
+    public function show(Request $request, $id)
     {
+        // Use findOrFail to automatically throw ModelNotFoundException if not found
+        $form = Form::findOrFail($id);
         $this->authorize('view', $form);
 
         return response()->json(
@@ -62,8 +65,10 @@ class FormController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateFormRequest $request, Form $form)
+    public function update(UpdateFormRequest $request, $id)
     {
+        // Use findOrFail to automatically throw ModelNotFoundException if not found
+        $form = Form::findOrFail($id);
         $this->authorize('update', $form);
 
         $form = $this->formService->updateForm($form, $request->validated());
@@ -74,8 +79,10 @@ class FormController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Form $form)
+    public function destroy($id)
     {
+        // Use findOrFail to automatically throw ModelNotFoundException if not found
+        $form = Form::findOrFail($id);
         $this->authorize('delete', $form);
 
         $this->formService->deleteForm($form);
@@ -100,8 +107,10 @@ class FormController extends Controller
     /**
      * Publish or unpublish a form.
      */
-    public function togglePublish(Form $form)
+    public function togglePublish($id)
     {
+        // Use findOrFail to automatically throw ModelNotFoundException if not found
+        $form = Form::findOrFail($id);
         $this->authorize('update', $form);
 
         $form->is_published = !$form->is_published;
@@ -113,8 +122,10 @@ class FormController extends Controller
     /**
      * Get form analytics.
      */
-    public function analytics(Form $form)
+    public function analytics($id)
     {
+        // Use findOrFail to automatically throw ModelNotFoundException if not found
+        $form = Form::findOrFail($id);
         $this->authorize('view', $form);
 
         $analytics = $this->formService->getFormAnalytics($form);
