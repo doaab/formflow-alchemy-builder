@@ -69,11 +69,14 @@ export const useCurrentUser = () => {
         const { user } = await getCurrentUser();
         return user;
       } catch (error) {
-        // For unauthorized errors, just return null instead of throwing
-        if (error instanceof Error && error.message.includes('401')) {
+        // For unauthorized errors (401), just return null instead of throwing
+        if (error instanceof Error && (error.message.includes('401') || error.message.includes('Unauthorized'))) {
+          console.info('User not logged in yet');
           return null;
         }
-        throw error;
+        // Only log other types of errors that aren't authentication related
+        console.error('Error fetching current user:', error);
+        return null;
       }
     },
     retry: false,

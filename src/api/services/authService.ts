@@ -125,6 +125,10 @@ export const getCurrentUser = async (): Promise<{user: User}> => {
       credentials: 'include', // Include cookies for Laravel Sanctum
     });
     
+    if (response.status === 401) {
+      throw new Error('User not authenticated');
+    }
+    
     if (!response.ok) {
       throw new Error(`Failed to get user with status: ${response.status}`);
     }
