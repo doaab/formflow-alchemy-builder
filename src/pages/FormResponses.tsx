@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -19,17 +18,14 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { fetchFormResponses, useExportResponses } from "@/api/formApi";
+import { useFormResponses, useExportResponses } from "@/api/hooks/useFormQueries";
 
 interface ResponseTableProps {
   formId: number;
 }
 
 const ResponseTable = ({ formId }: ResponseTableProps) => {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["form-responses", formId],
-    queryFn: () => fetchFormResponses(formId),
-  });
+  const { data, isLoading, error } = useFormResponses(formId);
   
   const { toast } = useToast();
   const { mutate: exportResponses, isPending: isExporting } = useExportResponses();
