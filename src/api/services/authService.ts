@@ -3,10 +3,27 @@ import { User } from '../types/authTypes';
 import { API_URL } from './config';
 
 /**
+ * Get CSRF cookie from Laravel Sanctum
+ */
+export const getCsrfCookie = async (): Promise<void> => {
+  try {
+    await fetch(`${API_URL.replace('/api', '')}/sanctum/csrf-cookie`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+  } catch (error) {
+    console.error('Error fetching CSRF cookie:', error);
+  }
+};
+
+/**
  * Register a new user
  */
 export const register = async (name: string, email: string, password: string, passwordConfirmation: string): Promise<{user: User, message: string}> => {
   try {
+    // Get CSRF cookie first
+    await getCsrfCookie();
+    
     const response = await fetch(`${API_URL}/register`, {
       method: 'POST',
       headers: {
@@ -39,6 +56,9 @@ export const register = async (name: string, email: string, password: string, pa
  */
 export const login = async (email: string, password: string): Promise<{user: User, message: string}> => {
   try {
+    // Get CSRF cookie first
+    await getCsrfCookie();
+    
     const response = await fetch(`${API_URL}/login`, {
       method: 'POST',
       headers: {
@@ -94,6 +114,9 @@ export const logout = async (): Promise<{message: string}> => {
  */
 export const getCurrentUser = async (): Promise<{user: User}> => {
   try {
+    // Get CSRF cookie first if needed
+    await getCsrfCookie();
+    
     const response = await fetch(`${API_URL}/user`, {
       headers: {
         'Content-Type': 'application/json',

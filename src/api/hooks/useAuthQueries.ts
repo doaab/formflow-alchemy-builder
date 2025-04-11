@@ -69,7 +69,11 @@ export const useCurrentUser = () => {
         const { user } = await getCurrentUser();
         return user;
       } catch (error) {
-        return null;
+        // For unauthorized errors, just return null instead of throwing
+        if (error instanceof Error && error.message.includes('401')) {
+          return null;
+        }
+        throw error;
       }
     },
     retry: false,
