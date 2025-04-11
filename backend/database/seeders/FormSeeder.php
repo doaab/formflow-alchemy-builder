@@ -140,6 +140,7 @@ class FormSeeder extends Seeder
                     foreach ($elementData['options'] as $optionText) {
                         $element->options()->create([
                             'option_id' => 'option_' . Str::random(12),
+                            'label' => $optionText,  // Adding the label field
                             'value' => $optionText,
                             'order' => $optionOrder++,
                         ]);
