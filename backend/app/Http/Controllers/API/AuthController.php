@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\API;
@@ -37,9 +36,9 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
-        
+
         $request->session()->regenerate();
-        
+
         return response()->json([
             'user' => $user,
             'message' => 'User registered successfully',
@@ -71,7 +70,7 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
-        
+
         return response()->json([
             'user' => Auth::user(),
             'message' => 'User logged in successfully',
