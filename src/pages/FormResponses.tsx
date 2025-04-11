@@ -178,11 +178,11 @@ const FormResponses = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            {isLoading ? <Skeleton className="h-9 w-64" /> : formData?.title || "Form Responses"}
+            {isLoading ? <Skeleton className="h-9 w-64 inline-block" /> : formData?.title || "Form Responses"}
           </h1>
-          <p className="text-muted-foreground mt-1 text-lg">
-            {isLoading ? <Skeleton className="h-6 w-96" /> : formData?.description || "View and analyze form submission data"}
-          </p>
+          <div className="text-muted-foreground mt-1 text-lg">
+            {isLoading ? <Skeleton className="h-6 w-96 inline-block" /> : formData?.description || "View and analyze form submission data"}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -217,7 +217,7 @@ const FormResponses = () => {
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold">
-                {isLoading ? <Skeleton className="h-10 w-20" /> : formData?.responses_count || 0}
+                {isLoading ? <Skeleton className="h-10 w-20 inline-block" /> : formData?.responses_count || 0}
               </div>
             </CardContent>
           </Card>
@@ -229,7 +229,7 @@ const FormResponses = () => {
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold">
-                {isLoading ? <Skeleton className="h-10 w-20" /> : "2:34"}
+                {isLoading ? <Skeleton className="h-10 w-20 inline-block" /> : "2:34"}
               </div>
             </CardContent>
           </Card>
@@ -241,7 +241,7 @@ const FormResponses = () => {
             </CardHeader>
             <CardContent>
               <div className="text-4xl font-bold">
-                {isLoading ? <Skeleton className="h-10 w-20" /> : "87%"}
+                {isLoading ? <Skeleton className="h-10 w-20 inline-block" /> : "87%"}
               </div>
             </CardContent>
           </Card>

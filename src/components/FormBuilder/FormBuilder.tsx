@@ -10,7 +10,7 @@ import { Button } from "../ui/button";
 import { Save, Loader2, BookOpen, List } from "lucide-react";
 import { useEffect, useState } from "react";
 import { saveFormToLocalStorage, prepareFormDataForBackend } from "@/utils/formUtils";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 
 const FormBuilder = () => {
@@ -22,7 +22,7 @@ const FormBuilder = () => {
       setIsSaving(true);
       
       // Get the form data from the context
-      const formData = document.getElementById('form-builder-provider')?.dataset.formData;
+      const formData = document.getElementById('form-builder-provider')?.dataset.formdata;
       if (!formData) throw new Error("Form data not found");
       
       const parsedForm = JSON.parse(formData);
@@ -71,7 +71,7 @@ const FormBuilder = () => {
         <div 
           id="form-builder-provider" 
           className="flex flex-col h-screen"
-          data-formData=""
+          data-formdata=""
         >
           <div className="flex items-center justify-between p-3 bg-white border-b">
             <h1 className="text-xl font-bold text-primary">FormFlow Alchemy</h1>
@@ -125,7 +125,7 @@ const FormDataTracker = () => {
   useEffect(() => {
     const element = document.getElementById('form-builder-provider');
     if (element) {
-      element.dataset.formData = JSON.stringify(formData);
+      element.dataset.formdata = JSON.stringify(formData);
     }
   }, [formData]);
   
