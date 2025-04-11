@@ -1,11 +1,9 @@
+
 <?php
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\FormController;
-use App\Http\Controllers\API\FormElementController;
-use App\Http\Controllers\API\FormResponseController;
-use App\Http\Controllers\API\QuestionTypeController;
+use App\Http\Controllers\API\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,29 +16,35 @@ use App\Http\Controllers\API\QuestionTypeController;
 |
 */
 
-// Public routes
-Route::get('forms/{slug}', [FormController::class, 'getBySlug']);
-Route::post('forms/{slug}/responses', [FormResponseController::class, 'store']);
-Route::get('question-types', [QuestionTypeController::class, 'index']);
-Route::get('question-types/by-category', [QuestionTypeController::class, 'getByCategory']);
+// Auth Routes
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
 
-// Protected routes
-Route::middleware(['auth:sanctum'])->group(function() {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-
+// Protected Routes
+Route::middleware('auth:sanctum')->group(function () {
     // Forms
-    Route::apiResource('forms', FormController::class);
-    Route::post('forms/{form}/toggle-publish', [FormController::class, 'togglePublish']);
-    Route::get('forms/{form}/analytics', [FormController::class, 'analytics']);
+    Route::get('/forms', [App\Http\Controllers\API\FormController::class, 'index']);
+    Route::post('/forms', [App\Http\Controllers\API\FormController::class, 'store']);
+    Route::get('/forms/{form}', [App\Http\Controllers\API\FormController::class, 'show']);
+    Route::put('/forms/{form}', [App\Http\Controllers\API\FormController::class, 'update']);
+    Route::delete('/forms/{form}', [App\Http\Controllers\API\FormController::class, 'destroy']);
+    Route::post('/forms/{form}/toggle-publish', [App\Http\Controllers\API\FormController::class, 'togglePublish']);
 
     // Form Elements
-    Route::apiResource('forms.elements', FormElementController::class);
-    Route::post('forms/{form}/elements/reorder', [FormElementController::class, 'reorder']);
+    Route::get('/forms/{form}/elements', [App\Http\Controllers\API\FormElementController::class, 'index']);
+    Route::post('/forms/{form}/elements', [App\Http\Controllers\API\FormElementController::class, 'store']);
+    Route::get('/forms/{form}/elements/{element}', [App\Http\Controllers\API\FormElementController::class, 'show']);
+    Route::put('/forms/{form}/elements/{element}', [App\Http\Controllers\API\FormElementController::class, 'update']);
+    Route::delete('/forms/{form}/elements/{element}', [App\Http\Controllers\API\FormElementController::class, 'destroy']);
 
     // Form Responses
-    Route::apiResource('forms.responses', FormResponseController::class)->only(['index', 'show']);
-    Route::get('forms/{form}/responses/export', [FormResponseController::class, 'export']);
-    Route::get('forms/{form}/responses/statistics', [FormResponseController::class, 'statistics']);
+    Route::get('/forms/{form}/responses', [App\Http\Controllers\API\FormResponseController::class, 'index']);
+    Route::get('/forms/{form}/responses/{response}', [App\Http\Controllers\API\FormResponseController::class, 'show']);
+    Route::delete('/forms/{form}/responses/{response}', [App\Http\Controllers\API\FormResponseController::class, 'destroy']);
+    Route::get('/forms/{form}/responses/export', [App\Http\Controllers\API\FormResponseController::class, 'export']);
 });
+
+// Public Routes for form submission
+Route::post('/forms/{form}/responses', [App\Http\Controllers\API\FormResponseController::class, 'store']);

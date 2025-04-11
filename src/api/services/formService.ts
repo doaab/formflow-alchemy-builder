@@ -1,9 +1,7 @@
 
 import { FormsResponse, FormResponsesResponse, FormResponseWithAnswers } from '../types/formTypes';
 import { getMockForms, getMockResponses, getMockResponseDetails } from '../mocks/formMockData';
-
-// Base API URL - adjust based on your environment
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+import { API_URL } from './config';
 
 // API functions
 export const fetchForms = async (): Promise<FormsResponse> => {
@@ -18,13 +16,14 @@ export const fetchForms = async (): Promise<FormsResponse> => {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        // Add authorization header here when implemented
-        // 'Authorization': `Bearer ${token}`
       },
       credentials: 'include', // Include cookies for Laravel Sanctum
     });
     
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Unauthorized. Please login.');
+      }
       throw new Error(`API error: ${response.status}`);
     }
     
@@ -47,13 +46,14 @@ export const fetchFormResponses = async (formId: number): Promise<FormResponsesR
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        // Add authorization header here when implemented
-        // 'Authorization': `Bearer ${token}`
       },
       credentials: 'include', // Include cookies for Laravel Sanctum
     });
     
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Unauthorized. Please login.');
+      }
       throw new Error(`API error: ${response.status}`);
     }
     
@@ -76,13 +76,14 @@ export const fetchFormResponseDetails = async (formId: number, responseId: numbe
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        // Add authorization header here when implemented
-        // 'Authorization': `Bearer ${token}`
       },
       credentials: 'include', // Include cookies for Laravel Sanctum
     });
     
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Unauthorized. Please login.');
+      }
       throw new Error(`API error: ${response.status}`);
     }
     
