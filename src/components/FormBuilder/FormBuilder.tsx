@@ -11,11 +11,15 @@ import { Save, Loader2, BookOpen, List } from "lucide-react";
 import { useEffect, useState } from "react";
 import { saveFormToLocalStorage, prepareFormDataForBackend } from "@/utils/formUtils";
 import { useToast } from "@/components/ui/use-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { API_URL } from "@/api/services/config";
+import { useSaveForm } from "@/api/hooks/useFormQueries";
 
 const FormBuilder = () => {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const saveFormMutation = useSaveForm();
   
   const handleSaveForm = async () => {
     try {
@@ -33,33 +37,26 @@ const FormBuilder = () => {
       // Prepare data for backend and send to API
       const backendData = prepareFormDataForBackend(parsedForm);
       
-      // TODO: Replace with actual API call when integrated
       console.log("Data ready for backend submission:", backendData);
       
-      // For now, let's simulate a successful save
-      // const response = await fetch('/api/forms', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${token}`
-      //   },
-      //   body: JSON.stringify(backendData)
-      // });
-      // 
-      // if (!response.ok) throw new Error('Failed to save form');
-      // const data = await response.json();
+      // Using the mutation to save the form
+      const result = await saveFormMutation.mutateAsync(backendData);
       
       toast({
         title: "Form saved",
         description: "Your form has been saved successfully",
       });
+      
+      // Redirect to the forms list
+      navigate('/forms');
+      
     } catch (error) {
+      console.error("Error saving form:", error);
       toast({
         title: "Error",
         description: "There was an error saving your form",
         variant: "destructive",
       });
-      console.error("Error saving form:", error);
     } finally {
       setIsSaving(false);
     }
@@ -91,10 +88,10 @@ const FormBuilder = () => {
               <FormPreviewDialog />
               <Button 
                 onClick={handleSaveForm} 
-                disabled={isSaving}
+                disabled={isSaving || saveFormMutation.isPending}
                 className="flex items-center"
               >
-                {isSaving ? (
+                {isSaving || saveFormMutation.isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="mr-2 h-4 w-4" />

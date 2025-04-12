@@ -29,6 +29,38 @@ export const useFormResponseDetails = (formId: number, responseId: number) => {
   });
 };
 
+export const useSaveForm = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (formData: any) => {
+      const method = formData.id ? 'PUT' : 'POST';
+      const url = formData.id ? `${API_URL}/forms/${formData.id}` : `${API_URL}/forms`;
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(formData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save form');
+      }
+      
+      return await response.json();
+    },
+    onSuccess: () => {
+      // Invalidate and refetch forms list
+      queryClient.invalidateQueries({ queryKey: ['forms'] });
+    },
+  });
+};
+
 export const useToggleFormPublish = () => {
   const queryClient = useQueryClient();
   
@@ -39,7 +71,6 @@ export const useToggleFormPublish = () => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          // Add authorization header here when implemented
         },
         credentials: 'include', // Include cookies for Laravel Sanctum
       });
@@ -64,7 +95,6 @@ export const useDeleteForm = () => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          // Add authorization header here when implemented
         },
         credentials: 'include', // Include cookies for Laravel Sanctum
       });

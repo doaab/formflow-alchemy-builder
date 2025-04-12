@@ -43,10 +43,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/forms/{formId}/responses', [App\Http\Controllers\API\FormResponseController::class, 'index']);
     Route::get('/forms/{formId}/responses/{responseId}', [App\Http\Controllers\API\FormResponseController::class, 'show']);
     Route::delete('/forms/{formId}/responses/{responseId}', [App\Http\Controllers\API\FormResponseController::class, 'destroy']);
-    Route::get('/forms/{formId}/responses/export', [App\Http\Controllers\API\FormResponseController::class, 'export']);
     Route::get('/forms/{formId}/statistics', [App\Http\Controllers\API\FormResponseController::class, 'statistics']);
+    Route::get('/forms/{formId}/responses/export', [App\Http\Controllers\API\FormResponseController::class, 'export']);
 });
 
 // Public Routes for form submission
 Route::post('/forms/{slug}/responses', [App\Http\Controllers\API\FormResponseController::class, 'store']);
-
