@@ -109,4 +109,24 @@ class FormResponseController extends Controller
 
         return response()->json($stats);
     }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Request $request, $formId, $responseId)
+    {
+        $form = Form::findOrFail($formId);
+        $this->authorize('view', $form);
+        
+        $response = FormResponse::findOrFail($responseId);
+        
+        if ($response->form_id !== $form->id) {
+            return response()->json(['message' => 'Response does not belong to this form'], 404);
+        }
+
+        $response->answers()->delete();
+        $response->delete();
+
+        return response()->json(['message' => 'Response deleted successfully']);
+    }
 }

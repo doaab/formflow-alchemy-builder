@@ -49,3 +49,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Public Routes for form submission
 Route::post('/forms/{slug}/responses', [App\Http\Controllers\API\FormResponseController::class, 'store']);
+

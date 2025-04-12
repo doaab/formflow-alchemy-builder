@@ -82,17 +82,20 @@ export const useDeleteForm = () => {
 export const useExportResponses = () => {
   return useMutation({
     mutationFn: async (formId: number) => {
+      // Using the correct URL format for the export endpoint
       const response = await fetch(`${API_URL}/forms/${formId}/responses/export`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          // Add authorization header here when implemented
+          'Accept': 'text/csv, application/json',
         },
         credentials: 'include', // Include cookies for Laravel Sanctum
       });
       
-      if (!response.ok) throw new Error('Failed to export responses');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Export response error:', errorText);
+        throw new Error(`Failed to export responses: ${response.status}`);
+      }
       
       // Create a download link for the CSV file
       const blob = await response.blob();
