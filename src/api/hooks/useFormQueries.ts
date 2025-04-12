@@ -27,6 +27,27 @@ export const useFormResponseDetails = (formId: number, responseId: number) => {
   });
 };
 
+// Helper function to get CSRF token
+const getCsrfToken = async () => {
+  try {
+    const csrfUrl = `${API_URL.replace('/api', '')}/sanctum/csrf-cookie`;
+    console.log('Fetching CSRF token from:', csrfUrl);
+    
+    await fetch(csrfUrl, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+    
+    return true;
+  } catch (error) {
+    console.log('CSRF token fetch failed:', error);
+    return false;
+  }
+};
+
 export const useSaveForm = () => {
   const queryClient = useQueryClient();
   
@@ -42,16 +63,8 @@ export const useSaveForm = () => {
         const method = formData.id ? 'PUT' : 'POST';
         const url = formData.id ? `${API_URL}/forms/${formData.id}` : `${API_URL}/forms`;
         
-        // First try to get the CSRF cookie
-        try {
-          await fetch(`${API_URL.replace('/api', '')}/sanctum/csrf-cookie`, {
-            method: 'GET',
-            credentials: 'include',
-          });
-        } catch (csrfError) {
-          console.warn('Could not fetch CSRF cookie:', csrfError);
-          // Continue anyway as the server might not require it
-        }
+        // Try to get CSRF token first
+        await getCsrfToken();
         
         console.log(`Sending ${method} request to ${url}`);
         
@@ -64,14 +77,19 @@ export const useSaveForm = () => {
           },
           credentials: 'include',
           body: JSON.stringify(formData),
+          // Add timeout to avoid waiting too long
+          signal: AbortSignal.timeout(10000),
         });
         
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-          throw new Error(errorData.message || `Failed to save form: ${response.status}`);
+          const errorText = await response.text();
+          console.error('Form save error response:', response.status, errorText);
+          throw new Error(errorText || `Failed to save form: ${response.status}`);
         }
         
-        return await response.json();
+        const result = await response.json();
+        console.log('Form saved successfully:', result);
+        return result;
       } catch (error) {
         console.error('Form save error details:', error);
         throw error;

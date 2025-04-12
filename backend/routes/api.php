@@ -4,6 +4,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\FormController;
+use App\Http\Controllers\API\FormElementController;
+use App\Http\Controllers\API\FormResponseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +19,11 @@ use App\Http\Controllers\API\AuthController;
 |
 */
 
+// Test route to verify API is working
+Route::get('/ping', function() {
+    return response()->json(['message' => 'API is working!', 'timestamp' => now()]);
+});
+
 // Auth Routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -25,27 +33,27 @@ Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum')
 // Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
     // Forms
-    Route::get('/forms', [App\Http\Controllers\API\FormController::class, 'index']);
-    Route::post('/forms', [App\Http\Controllers\API\FormController::class, 'store']);
-    Route::get('/forms/{id}', [App\Http\Controllers\API\FormController::class, 'show']);
-    Route::put('/forms/{id}', [App\Http\Controllers\API\FormController::class, 'update']);
-    Route::delete('/forms/{id}', [App\Http\Controllers\API\FormController::class, 'destroy']);
-    Route::post('/forms/{id}/toggle-publish', [App\Http\Controllers\API\FormController::class, 'togglePublish']);
+    Route::get('/forms', [FormController::class, 'index']);
+    Route::post('/forms', [FormController::class, 'store']);
+    Route::get('/forms/{id}', [FormController::class, 'show']);
+    Route::put('/forms/{id}', [FormController::class, 'update']);
+    Route::delete('/forms/{id}', [FormController::class, 'destroy']);
+    Route::post('/forms/{id}/toggle-publish', [FormController::class, 'togglePublish']);
 
     // Form Elements
-    Route::get('/forms/{form}/elements', [App\Http\Controllers\API\FormElementController::class, 'index']);
-    Route::post('/forms/{form}/elements', [App\Http\Controllers\API\FormElementController::class, 'store']);
-    Route::get('/forms/{form}/elements/{element}', [App\Http\Controllers\API\FormElementController::class, 'show']);
-    Route::put('/forms/{form}/elements/{element}', [App\Http\Controllers\API\FormElementController::class, 'update']);
-    Route::delete('/forms/{form}/elements/{element}', [App\Http\Controllers\API\FormElementController::class, 'destroy']);
+    Route::get('/forms/{form}/elements', [FormElementController::class, 'index']);
+    Route::post('/forms/{form}/elements', [FormElementController::class, 'store']);
+    Route::get('/forms/{form}/elements/{element}', [FormElementController::class, 'show']);
+    Route::put('/forms/{form}/elements/{element}', [FormElementController::class, 'update']);
+    Route::delete('/forms/{form}/elements/{element}', [FormElementController::class, 'destroy']);
 
     // Form Responses
-    Route::get('/forms/{formId}/responses', [App\Http\Controllers\API\FormResponseController::class, 'index']);
-    Route::get('/forms/{formId}/responses/{responseId}', [App\Http\Controllers\API\FormResponseController::class, 'show']);
-    Route::delete('/forms/{formId}/responses/{responseId}', [App\Http\Controllers\API\FormResponseController::class, 'destroy']);
-    Route::get('/forms/{formId}/statistics', [App\Http\Controllers\API\FormResponseController::class, 'statistics']);
-    Route::get('/forms/{formId}/responses/export', [App\Http\Controllers\API\FormResponseController::class, 'export']);
+    Route::get('/forms/{formId}/responses', [FormResponseController::class, 'index']);
+    Route::get('/forms/{formId}/responses/{responseId}', [FormResponseController::class, 'show']);
+    Route::delete('/forms/{formId}/responses/{responseId}', [FormResponseController::class, 'destroy']);
+    Route::get('/forms/{formId}/statistics', [FormResponseController::class, 'statistics']);
+    Route::get('/forms/{formId}/responses/export', [FormResponseController::class, 'export']);
 });
 
 // Public Routes for form submission
-Route::post('/forms/{slug}/responses', [App\Http\Controllers\API\FormResponseController::class, 'store']);
+Route::post('/forms/{slug}/responses', [FormResponseController::class, 'store']);
