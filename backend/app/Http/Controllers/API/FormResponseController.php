@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\API;
@@ -22,9 +23,9 @@ class FormResponseController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Form $form)
+    public function index(Request $request, $formId)
     {
-//        dd($form);
+        $form = Form::findOrFail($formId);
         $this->authorize('view', $form);
 
         $responses = $this->formResponseService->getResponsesByForm($form);
@@ -69,10 +70,13 @@ class FormResponseController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Form $form, FormResponse $response)
+    public function show(Request $request, $formId, $responseId)
     {
+        $form = Form::findOrFail($formId);
         $this->authorize('view', $form);
-//        dd($form);
+        
+        $response = FormResponse::findOrFail($responseId);
+        
         if ($response->form_id !== $form->id) {
             return response()->json(['message' => 'Response does not belong to this form'], 404);
         }
@@ -85,8 +89,9 @@ class FormResponseController extends Controller
     /**
      * Export responses as CSV.
      */
-    public function export(Form $form)
+    public function export(Request $request, $formId)
     {
+        $form = Form::findOrFail($formId);
         $this->authorize('view', $form);
 
         return $this->formResponseService->exportResponses($form);
@@ -95,8 +100,9 @@ class FormResponseController extends Controller
     /**
      * Get statistics about form responses.
      */
-    public function statistics(Form $form)
+    public function statistics(Request $request, $formId)
     {
+        $form = Form::findOrFail($formId);
         $this->authorize('view', $form);
 
         $stats = $this->formResponseService->getResponseStatistics($form);
