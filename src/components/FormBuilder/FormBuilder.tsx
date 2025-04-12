@@ -40,7 +40,7 @@ const FormBuilder = () => {
       console.log("Data ready for backend submission:", backendData);
       
       // Using the mutation to save the form
-      const result = await saveFormMutation.mutateAsync(backendData);
+      await saveFormMutation.mutateAsync(backendData);
       
       toast({
         title: "Form saved",
@@ -54,7 +54,7 @@ const FormBuilder = () => {
       console.error("Error saving form:", error);
       toast({
         title: "Error",
-        description: "There was an error saving your form",
+        description: "There was an error saving your form. Please try again.",
         variant: "destructive",
       });
     } finally {
