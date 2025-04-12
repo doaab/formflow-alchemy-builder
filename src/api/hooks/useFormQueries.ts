@@ -1,9 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchForms, fetchFormResponses, fetchFormResponseDetails } from '../services/formService';
-
-// Base API URL - adjust based on your environment
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+import { API_URL } from '../services/config';
 
 // React Query hooks
 export const useForms = () => {
@@ -34,25 +32,50 @@ export const useSaveForm = () => {
   
   return useMutation({
     mutationFn: async (formData: any) => {
-      const method = formData.id ? 'PUT' : 'POST';
-      const url = formData.id ? `${API_URL}/forms/${formData.id}` : `${API_URL}/forms`;
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save form');
+      try {
+        // Ensure we have a valid API URL
+        if (!API_URL) {
+          throw new Error('API URL is not configured');
+        }
+        
+        // Check if form has an ID to determine if it's an update or new form
+        const method = formData.id ? 'PUT' : 'POST';
+        const url = formData.id ? `${API_URL}/forms/${formData.id}` : `${API_URL}/forms`;
+        
+        // First try to get the CSRF cookie
+        try {
+          await fetch(`${API_URL.replace('/api', '')}/sanctum/csrf-cookie`, {
+            method: 'GET',
+            credentials: 'include',
+          });
+        } catch (csrfError) {
+          console.warn('Could not fetch CSRF cookie:', csrfError);
+          // Continue anyway as the server might not require it
+        }
+        
+        console.log(`Sending ${method} request to ${url}`);
+        
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          credentials: 'include',
+          body: JSON.stringify(formData),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+          throw new Error(errorData.message || `Failed to save form: ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('Form save error details:', error);
+        throw error;
       }
-      
-      return await response.json();
     },
     onSuccess: () => {
       // Invalidate and refetch forms list

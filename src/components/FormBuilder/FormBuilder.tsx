@@ -7,19 +7,38 @@ import FormTitle from "./FormTitle";
 import DragDrop from "./DragDrop";
 import FormPreviewDialog from "./FormPreviewDialog";
 import { Button } from "../ui/button";
-import { Save, Loader2, BookOpen, List } from "lucide-react";
+import { Save, Loader2, BookOpen, List, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { saveFormToLocalStorage, prepareFormDataForBackend } from "@/utils/formUtils";
 import { useToast } from "@/components/ui/use-toast";
 import { Link, useNavigate } from "react-router-dom";
-import { API_URL } from "@/api/services/config";
+import { API_URL, checkBackendConnection } from "@/api/services/config";
 import { useSaveForm } from "@/api/hooks/useFormQueries";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const FormBuilder = () => {
   const [isSaving, setIsSaving] = useState(false);
+  const [backendConnected, setBackendConnected] = useState<boolean | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const saveFormMutation = useSaveForm();
+  
+  useEffect(() => {
+    // Check backend connection on component mount
+    const checkConnection = async () => {
+      const isConnected = await checkBackendConnection();
+      setBackendConnected(isConnected);
+      if (!isConnected) {
+        toast({
+          title: "Backend Connection Issue",
+          description: `Cannot connect to backend at ${API_URL}. Forms cannot be saved to the server.`,
+          variant: "destructive",
+        });
+      }
+    };
+    
+    checkConnection();
+  }, [toast]);
   
   const handleSaveForm = async () => {
     try {
@@ -33,6 +52,16 @@ const FormBuilder = () => {
       
       // Save to localStorage for persistence during development
       saveFormToLocalStorage(parsedForm);
+      
+      // Check if backend is available before trying to save
+      if (!backendConnected) {
+        toast({
+          title: "Saved Locally Only",
+          description: "Form saved to browser storage only. Backend connection not available.",
+        });
+        setIsSaving(false);
+        return;
+      }
       
       // Prepare data for backend and send to API
       const backendData = prepareFormDataForBackend(parsedForm);
@@ -100,6 +129,17 @@ const FormBuilder = () => {
               </Button>
             </div>
           </div>
+          
+          {backendConnected === false && (
+            <Alert variant="destructive" className="m-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Backend Connection Issue</AlertTitle>
+              <AlertDescription>
+                Cannot connect to backend server at {API_URL}. Forms will be saved locally only.
+                Please ensure the backend server is running at the correct URL.
+              </AlertDescription>
+            </Alert>
+          )}
           
           <FormTitle />
           
