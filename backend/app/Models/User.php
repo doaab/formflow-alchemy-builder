@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Models;
@@ -42,4 +43,17 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * Check if the user is an admin.
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        // This is a simple implementation. In a real application, you might want to 
+        // check against a role or permission system. For now, we'll assume
+        // no users are admins until you implement proper roles.
+        return false;
+    }
 }
