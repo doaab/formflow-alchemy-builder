@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\API;
@@ -56,6 +55,7 @@ class FormController extends Controller
         // Use findOrFail to automatically throw ModelNotFoundException if not found
         $form = Form::findOrFail($id);
         $this->authorize('view', $form);
+
 
         return response()->json(
             $this->formService->getFormWithElements($form)

@@ -24,6 +24,7 @@ class FormResponseController extends Controller
      */
     public function index(Form $form)
     {
+//        dd($form);
         $this->authorize('view', $form);
 
         $responses = $this->formResponseService->getResponsesByForm($form);
@@ -71,7 +72,7 @@ class FormResponseController extends Controller
     public function show(Form $form, FormResponse $response)
     {
         $this->authorize('view', $form);
-
+//        dd($form);
         if ($response->form_id !== $form->id) {
             return response()->json(['message' => 'Response does not belong to this form'], 404);
         }

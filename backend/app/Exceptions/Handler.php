@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Exceptions;
@@ -40,7 +39,7 @@ class Handler extends ExceptionHandler
             }
         });
 
-        // Handle NotFoundHttpException 
+        // Handle NotFoundHttpException
         $this->renderable(function (NotFoundHttpException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json([
