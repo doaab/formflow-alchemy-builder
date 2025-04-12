@@ -7,12 +7,24 @@ import { API_URL } from './config';
  */
 export const getCsrfCookie = async (): Promise<void> => {
   try {
-    await fetch(`${API_URL.replace('/api', '')}/sanctum/csrf-cookie`, {
+    const response = await fetch(`${API_URL.replace('/api', '')}/sanctum/csrf-cookie`, {
       method: 'GET',
       credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
     });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch CSRF cookie: ${response.status}`);
+    }
+
+    // Give the browser a moment to save the cookie
+    await new Promise(resolve => setTimeout(resolve, 100));
   } catch (error) {
     console.error('Error fetching CSRF cookie:', error);
+    throw error;
   }
 };
 
@@ -29,8 +41,9 @@ export const register = async (name: string, email: string, password: string, pa
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
       },
-      credentials: 'include', // Include cookies for Laravel Sanctum
+      credentials: 'include', 
       body: JSON.stringify({
         name,
         email,
@@ -64,8 +77,9 @@ export const login = async (email: string, password: string): Promise<{user: Use
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
       },
-      credentials: 'include', // Include cookies for Laravel Sanctum
+      credentials: 'include', 
       body: JSON.stringify({
         email,
         password
@@ -75,6 +89,24 @@ export const login = async (email: string, password: string): Promise<{user: Use
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || `Login failed with status: ${response.status}`);
+    }
+    
+    // After successful login, check the authentication status
+    const authCheckResponse = await fetch(`${API_URL}/auth/check`, {
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    });
+    
+    if (!authCheckResponse.ok) {
+      throw new Error('Authentication verification failed after login');
+    }
+    
+    const authStatus = await authCheckResponse.json();
+    if (!authStatus.authenticated) {
+      throw new Error('Login succeeded but session was not established');
     }
     
     return await response.json();
@@ -94,8 +126,9 @@ export const logout = async (): Promise<{message: string}> => {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
       },
-      credentials: 'include', // Include cookies for Laravel Sanctum
+      credentials: 'include',
     });
     
     if (!response.ok) {
@@ -121,8 +154,9 @@ export const getCurrentUser = async (): Promise<{user: User}> => {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
       },
-      credentials: 'include', // Include cookies for Laravel Sanctum
+      credentials: 'include',
     });
     
     if (response.status === 401) {
@@ -137,5 +171,28 @@ export const getCurrentUser = async (): Promise<{user: User}> => {
   } catch (error) {
     console.error('Error getting current user:', error);
     throw error;
+  }
+};
+
+/**
+ * Check auth status without throwing (for internal use)
+ */
+export const checkAuthStatus = async (): Promise<boolean> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/check`, {
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    });
+    
+    if (!response.ok) return false;
+    
+    const status = await response.json();
+    return status.authenticated === true;
+  } catch (error) {
+    console.error('Error checking auth status:', error);
+    return false;
   }
 };

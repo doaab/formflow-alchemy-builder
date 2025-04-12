@@ -26,7 +26,7 @@ return [
         'http://127.0.0.1:8080',
         'http://localhost:5173', // Vite dev server default
         'http://127.0.0.1:5173',
-        '*', // Allow all origins temporarily for debugging
+        'https://e005b4a0-4ab9-477a-8ffb-cd1345d72df5.lovableproject.com',
     ],
 
     'allowed_origins_patterns' => [],

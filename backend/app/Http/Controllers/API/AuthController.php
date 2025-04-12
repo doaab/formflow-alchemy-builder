@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\API;
@@ -71,10 +72,25 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        // Explicitly set a cookie with the session info
+        $minutes = config('session.lifetime');
+        $path = config('session.path');
+        $domain = config('session.domain');
+        $secure = config('session.secure');
+        $httpOnly = config('session.http_only');
+
         return response()->json([
             'user' => Auth::user(),
             'message' => 'User logged in successfully',
-        ]);
+        ])->cookie(
+            config('session.cookie'), 
+            session()->getId(), 
+            $minutes, 
+            $path, 
+            $domain, 
+            $secure, 
+            $httpOnly
+        );
     }
 
     /**
@@ -101,6 +117,10 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Not authenticated'], 401);
+        }
+        
         return response()->json(['user' => $request->user()]);
     }
 }

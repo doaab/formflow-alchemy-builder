@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../api/hooks/useAuthQueries";
 import { useToast } from "@/components/ui/use-toast";
+import { getCsrfCookie } from "../api/services/authService";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,17 @@ export default function Login() {
   const redirectFrom = location.state?.from;
   
   useEffect(() => {
+    // Pre-fetch CSRF token when component loads
+    const preloadCsrf = async () => {
+      try {
+        await getCsrfCookie();
+      } catch (error) {
+        console.error("Failed to preload CSRF token:", error);
+      }
+    };
+    
+    preloadCsrf();
+    
     if (redirectMessage) {
       toast({
         title: "Authentication Required",
@@ -68,6 +80,8 @@ export default function Login() {
         // If there was a redirect path, go back to it after login
         if (redirectFrom) {
           navigate(redirectFrom);
+        } else {
+          navigate('/forms');
         }
       }
     });

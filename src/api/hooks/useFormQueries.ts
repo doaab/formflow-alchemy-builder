@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchForms, fetchFormResponses, fetchFormResponseDetails } from '../services/formService';
 import { API_URL } from '../services/config';
@@ -27,7 +26,7 @@ export const useFormResponseDetails = (formId: number, responseId: number) => {
   });
 };
 
-// Helper function to get CSRF token
+// Helper function to get CSRF token - improved with better error handling
 const getCsrfToken = async () => {
   try {
     const csrfUrl = `${API_URL.replace('/api', '')}/sanctum/csrf-cookie`;
@@ -38,6 +37,7 @@ const getCsrfToken = async () => {
       credentials: 'include',
       headers: {
         'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
       },
     });
     
@@ -46,6 +46,9 @@ const getCsrfToken = async () => {
     if (!response.ok) {
       throw new Error(`Failed to fetch CSRF token: ${response.status}`);
     }
+    
+    // Wait a moment to ensure cookie is set
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     return true;
   } catch (error) {
@@ -89,15 +92,15 @@ export const useSaveForm = () => {
         });
         
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Form save error response:', response.status, errorText);
+          const errorData = await response.json().catch(() => null);
+          console.error('Form save error response:', response.status, errorData || response.statusText);
           
           // If it's an authentication error, throw a specific error message
           if (response.status === 401) {
-            throw new Error("Unauthenticated.");
+            throw new Error(errorData?.message || "Unauthenticated.");
           }
           
-          throw new Error(errorText || `Failed to save form: ${response.status}`);
+          throw new Error(errorData?.message || `Failed to save form: ${response.status}`);
         }
         
         const result = await response.json();
