@@ -33,7 +33,7 @@ const getCsrfToken = async () => {
     const csrfUrl = `${API_URL.replace('/api', '')}/sanctum/csrf-cookie`;
     console.log('Fetching CSRF token from:', csrfUrl);
     
-    await fetch(csrfUrl, {
+    const response = await fetch(csrfUrl, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -41,10 +41,16 @@ const getCsrfToken = async () => {
       },
     });
     
+    console.log('CSRF cookie response:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch CSRF token: ${response.status}`);
+    }
+    
     return true;
   } catch (error) {
     console.log('CSRF token fetch failed:', error);
-    return false;
+    throw error;
   }
 };
 
@@ -64,6 +70,7 @@ export const useSaveForm = () => {
         const url = formData.id ? `${API_URL}/forms/${formData.id}` : `${API_URL}/forms`;
         
         // Try to get CSRF token first
+        console.log("Fetching CSRF token from:", API_URL);
         await getCsrfToken();
         
         console.log(`Sending ${method} request to ${url}`);
@@ -84,6 +91,12 @@ export const useSaveForm = () => {
         if (!response.ok) {
           const errorText = await response.text();
           console.error('Form save error response:', response.status, errorText);
+          
+          // If it's an authentication error, throw a specific error message
+          if (response.status === 401) {
+            throw new Error("Unauthenticated.");
+          }
+          
           throw new Error(errorText || `Failed to save form: ${response.status}`);
         }
         

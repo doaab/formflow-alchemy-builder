@@ -24,13 +24,21 @@ Route::get('/ping', function() {
     return response()->json(['message' => 'API is working!', 'timestamp' => now()]);
 });
 
-// Auth Routes
+// Auth status route to check if a user is authenticated without redirecting
+Route::get('/auth/check', function() {
+    return response()->json([
+        'authenticated' => auth()->check(),
+        'user' => auth()->check() ? auth()->user() : null,
+    ]);
+});
+
+// Public Auth Routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
 
-// Protected Routes
+// Protected Routes - These all require authentication
 Route::middleware('auth:sanctum')->group(function () {
     // Forms
     Route::get('/forms', [FormController::class, 'index']);
@@ -55,5 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/forms/{formId}/responses/export', [FormResponseController::class, 'export']);
 });
 
-// Public Routes for form submission
+// Public Routes for form submission - These do not require authentication
+Route::get('/forms/{slug}', [FormController::class, 'getBySlug']);
 Route::post('/forms/{slug}/responses', [FormResponseController::class, 'store']);
+

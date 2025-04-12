@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Middleware;
@@ -12,6 +13,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        'api/*', // Exclude all API routes from CSRF protection as we use Sanctum instead
+        'sanctum/csrf-cookie', // Allow fetching CSRF cookie without verification
     ];
 }

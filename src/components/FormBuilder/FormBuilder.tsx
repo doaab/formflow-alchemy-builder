@@ -7,7 +7,7 @@ import FormTitle from "./FormTitle";
 import DragDrop from "./DragDrop";
 import FormPreviewDialog from "./FormPreviewDialog";
 import { Button } from "../ui/button";
-import { Save, Loader2, BookOpen, List, AlertCircle } from "lucide-react";
+import { Save, Loader2, BookOpen, List, AlertCircle, LogIn } from "lucide-react";
 import { useEffect, useState } from "react";
 import { saveFormToLocalStorage, prepareFormDataForBackend } from "@/utils/formUtils";
 import { useToast } from "@/components/ui/use-toast";
@@ -15,6 +15,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { API_URL, checkBackendConnection } from "@/api/services/config";
 import { useSaveForm } from "@/api/hooks/useFormQueries";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from "@/context/AuthContext";
 
 const FormBuilder = () => {
   const [isSaving, setIsSaving] = useState(false);
@@ -22,6 +23,7 @@ const FormBuilder = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const saveFormMutation = useSaveForm();
+  const { user, isAuthenticated } = useAuth();
   
   useEffect(() => {
     // Check backend connection on component mount
@@ -42,6 +44,24 @@ const FormBuilder = () => {
   
   const handleSaveForm = async () => {
     try {
+      // First check if user is authenticated
+      if (!isAuthenticated) {
+        toast({
+          title: "Authentication Required",
+          description: "You need to log in before saving forms to the server.",
+          variant: "destructive",
+        });
+        
+        // Redirect to login page
+        navigate('/login', { 
+          state: { 
+            from: '/form-builder',
+            message: 'Please log in to save your form' 
+          } 
+        });
+        return;
+      }
+
       setIsSaving(true);
       
       // Get the form data from the context
@@ -81,11 +101,28 @@ const FormBuilder = () => {
       
     } catch (error) {
       console.error("Error saving form:", error);
-      toast({
-        title: "Error",
-        description: "There was an error saving your form. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Check if it's an auth error
+      if (error instanceof Error && error.message.includes("Unauthenticated")) {
+        toast({
+          title: "Authentication Error",
+          description: "Your session has expired. Please log in again.",
+          variant: "destructive",
+        });
+        
+        navigate('/login', { 
+          state: { 
+            from: '/form-builder',
+            message: 'Your session has expired. Please log in again to save your form.' 
+          } 
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "There was an error saving your form. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSaving(false);
     }
@@ -114,6 +151,14 @@ const FormBuilder = () => {
                   Documentation
                 </Button>
               </Link>
+              {!isAuthenticated && (
+                <Link to="/login">
+                  <Button variant="outline" className="flex items-center">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Login
+                  </Button>
+                </Link>
+              )}
               <FormPreviewDialog />
               <Button 
                 onClick={handleSaveForm} 
@@ -129,6 +174,16 @@ const FormBuilder = () => {
               </Button>
             </div>
           </div>
+          
+          {!isAuthenticated && (
+            <Alert className="m-4 bg-amber-50 border-amber-200">
+              <AlertCircle className="h-4 w-4 text-amber-500" />
+              <AlertTitle className="text-amber-700">Not Logged In</AlertTitle>
+              <AlertDescription className="text-amber-600">
+                You are currently not logged in. You can continue building your form, but you'll need to log in to save it to the server.
+              </AlertDescription>
+            </Alert>
+          )}
           
           {backendConnected === false && (
             <Alert variant="destructive" className="m-4">

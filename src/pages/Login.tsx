@@ -1,10 +1,11 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../api/hooks/useAuthQueries";
+import { useToast } from "@/components/ui/use-toast";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 
 // Form schema
@@ -30,6 +32,22 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const { mutate: login, isPending } = useLoginMutation();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // Check if we were redirected from another page with a message
+  const redirectMessage = location.state?.message;
+  const redirectFrom = location.state?.from;
+  
+  useEffect(() => {
+    if (redirectMessage) {
+      toast({
+        title: "Authentication Required",
+        description: redirectMessage,
+      });
+    }
+  }, [redirectMessage, toast]);
   
   // Form definition
   const form = useForm<LoginFormValues>({
@@ -45,6 +63,13 @@ export default function Login() {
     login({
       email: values.email,
       password: values.password
+    }, {
+      onSuccess: () => {
+        // If there was a redirect path, go back to it after login
+        if (redirectFrom) {
+          navigate(redirectFrom);
+        }
+      }
     });
   }
   
@@ -58,6 +83,12 @@ export default function Login() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {redirectMessage && (
+            <Alert className="mb-6">
+              <AlertDescription>{redirectMessage}</AlertDescription>
+            </Alert>
+          )}
+          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
