@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Models;
@@ -54,5 +55,13 @@ class User extends Authenticatable
         // check against a role or permission system. For now, we'll assume
         // no users are admins until you implement proper roles.
         return false;
+    }
+
+    /**
+     * Get the forms for the user.
+     */
+    public function forms()
+    {
+        return $this->hasMany(Form::class);
     }
 }

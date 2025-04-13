@@ -1,3 +1,4 @@
+
 import { FormsResponse, FormResponsesResponse, FormResponseWithAnswers } from '../types/formTypes';
 import { getMockForms, getMockResponses, getMockResponseDetails } from '../mocks/formMockData';
 import { API_URL } from './config';
@@ -41,10 +42,13 @@ export const fetchForms = async (): Promise<FormsResponse> => {
     // Return empty data structure instead of throwing
     return { 
       data: [],
-      current_page: 1,
+      // Make sure we're returning properties that match the FormsResponse type
       total: 0,
       per_page: 10,
-      last_page: 1
+      last_page: 1,
+      current_page: 1,
+      from: null,
+      to: null
     };
   }
 };
