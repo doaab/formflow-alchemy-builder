@@ -46,7 +46,11 @@ export const useSaveForm = () => {
         
         // Try to get CSRF token first - this is important even for unauthenticated requests
         console.log("Fetching CSRF token from:", API_URL);
-        await getCsrfCookie();
+        try {
+          await getCsrfCookie();
+        } catch (error) {
+          console.warn("Could not fetch CSRF token, continuing anyway:", error);
+        }
         
         // Ensure user_id is set
         if (!formData.user_id) {
@@ -66,14 +70,21 @@ export const useSaveForm = () => {
           credentials: 'include',
           body: JSON.stringify(formData),
           // Add timeout to avoid waiting too long
-          signal: AbortSignal.timeout(10000),
+          signal: AbortSignal.timeout(30000),
         });
         
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error('Form save error response:', response.status, errorData || response.statusText);
+          let errorMessage = `Failed to save form: ${response.status}`;
           
-          throw new Error(errorData?.message || `Failed to save form: ${response.status}`);
+          try {
+            const errorData = await response.json();
+            console.error('Form save error response:', response.status, errorData);
+            errorMessage = errorData?.message || errorMessage;
+          } catch (e) {
+            console.error('Could not parse error response:', e);
+          }
+          
+          throw new Error(errorMessage);
         }
         
         const result = await response.json();
@@ -85,10 +96,13 @@ export const useSaveForm = () => {
         throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Invalidate and refetch forms list
       queryClient.invalidateQueries({ queryKey: ['forms'] });
       toast.success("Form saved successfully");
+      
+      // Add the form to the cache
+      queryClient.setQueryData(['form', data.id], data);
     },
     onError: (error: Error) => {
       toast.error(`Error saving form: ${error.message}`);

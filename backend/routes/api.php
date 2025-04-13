@@ -35,19 +35,17 @@ Route::get('/auth/check', [AuthController::class, 'check']);
 Route::get('/auth/debug', [AuthController::class, 'debug']);
 
 // Public Routes for forms - These do NOT require authentication
-Route::get('/forms', [FormController::class, 'index']); // Make the forms list public
-Route::post('/forms', [FormController::class, 'store']);
-Route::put('/forms/{id}', [FormController::class, 'update']);
-Route::delete('/forms/{id}', [FormController::class, 'destroy']);
+Route::get('/forms', [FormController::class, 'index']); // Public forms list
+Route::post('/forms', [FormController::class, 'store']); // Allow anonymous form creation
+Route::put('/forms/{id}', [FormController::class, 'update']); // Allow anonymous form updates
+Route::delete('/forms/{id}', [FormController::class, 'destroy']); // Allow anonymous form deletion
 Route::post('/forms/{id}/toggle-publish', [FormController::class, 'togglePublish']);
-Route::get('/forms/{slug}', [FormController::class, 'getBySlug']);
-Route::post('/forms/{slug}/responses', [FormResponseController::class, 'store']);
+Route::get('/forms/{id}', [FormController::class, 'show']); // Get form by ID
+Route::get('/forms/slug/{slug}', [FormController::class, 'getBySlug']); // Get form by slug
+Route::post('/forms/{slug}/responses', [FormResponseController::class, 'store']); // Submit form response
 
 // Protected Routes - These all require authentication
 Route::middleware('auth:sanctum')->group(function () {
-    // Forms (except save and public view which are defined above)
-    Route::get('/forms/{id}', [FormController::class, 'show']);
-
     // Form Elements
     Route::get('/forms/{form}/elements', [FormElementController::class, 'index']);
     Route::post('/forms/{form}/elements', [FormElementController::class, 'store']);

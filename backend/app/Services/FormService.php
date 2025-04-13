@@ -22,7 +22,7 @@ class FormService
     public function createForm(array $data)
     {
         if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['title']) . '-' . Str::random(8);
+            $data['slug'] = Str::slug($data['title'] ?? 'untitled') . '-' . Str::random(8);
         }
 
         // Always ensure there's a user_id
@@ -36,7 +36,17 @@ class FormService
             }
         }
 
-        return Form::create($data);
+        $form = Form::create($data);
+        
+        // Create elements if provided
+        if (isset($data['elements']) && is_array($data['elements'])) {
+            foreach ($data['elements'] as $index => $elementData) {
+                $elementData['order'] = $index;
+                $this->formElementService->createElement($form, $elementData);
+            }
+        }
+
+        return $form->fresh();
     }
 
     /**
@@ -44,13 +54,44 @@ class FormService
      */
     public function updateForm(Form $form, array $data)
     {
-        // Ensure user_id is preserved
-        if (!isset($data['user_id'])) {
-            $data['user_id'] = $form->user_id;
+        DB::beginTransaction();
+
+        try {
+            // Ensure user_id is preserved
+            if (!isset($data['user_id'])) {
+                $data['user_id'] = $form->user_id;
+            }
+            
+            // Update basic form data
+            $form->update([
+                'title' => $data['title'] ?? $form->title,
+                'description' => $data['description'] ?? $form->description,
+                'user_id' => $data['user_id'],
+                'theme' => $data['theme'] ?? $form->theme,
+                'collect_email' => $data['collect_email'] ?? $form->collect_email,
+                'one_response_per_user' => $data['one_response_per_user'] ?? $form->one_response_per_user,
+                'show_progress_bar' => $data['show_progress_bar'] ?? $form->show_progress_bar,
+                'shuffle_questions' => $data['shuffle_questions'] ?? $form->shuffle_questions,
+            ]);
+            
+            // Handle elements update if provided
+            if (isset($data['elements']) && is_array($data['elements'])) {
+                // Delete all existing elements if we're doing a complete replacement
+                $form->elements()->delete();
+                
+                // Create new elements
+                foreach ($data['elements'] as $index => $elementData) {
+                    $elementData['order'] = $index;
+                    $this->formElementService->createElement($form, $elementData);
+                }
+            }
+
+            DB::commit();
+            return $this->getFormWithElements($form);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
-        
-        $form->update($data);
-        return $form;
     }
 
     /**

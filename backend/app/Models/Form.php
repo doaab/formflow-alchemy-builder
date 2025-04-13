@@ -49,6 +49,12 @@ class Form extends Model
      */
     protected $attributes = [
         'user_id' => 1, // Set default user ID to 1 for anonymous forms
+        'is_published' => false,
+        'theme' => 'default',
+        'collect_email' => false,
+        'one_response_per_user' => false,
+        'show_progress_bar' => true,
+        'shuffle_questions' => false,
     ];
 
     /**
@@ -110,7 +116,7 @@ class Form extends Model
         // Generate slug before creating
         static::creating(function ($form) {
             if (empty($form->slug)) {
-                $form->slug = \Str::slug($form->title) . '-' . \Str::random(8);
+                $form->slug = \Str::slug($form->title ?? 'untitled') . '-' . \Str::random(8);
             }
             
             // Set default user_id if not provided
