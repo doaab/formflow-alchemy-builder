@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchForms, fetchFormResponses, fetchFormResponseDetails } from '../services/formService';
 import { API_URL } from '../services/config';
@@ -43,7 +44,7 @@ export const useSaveForm = () => {
         const method = formData.id ? 'PUT' : 'POST';
         const url = formData.id ? `${API_URL}/forms/${formData.id}` : `${API_URL}/forms`;
         
-        // Try to get CSRF token first
+        // Try to get CSRF token first - this is important even for unauthenticated requests
         console.log("Fetching CSRF token from:", API_URL);
         await getCsrfCookie();
         
@@ -63,8 +64,14 @@ export const useSaveForm = () => {
         });
         
         if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
+          const errorData = await response.json().catch(() => ({}));
           console.error('Form save error response:', response.status, errorData || response.statusText);
+          
+          // Handle specific error cases
+          if (response.status === 401) {
+            // We now have special handling for anonymous forms, so this shouldn't normally happen
+            throw new Error('Failed to save form: Authentication required');
+          }
           
           throw new Error(errorData?.message || `Failed to save form: ${response.status}`);
         }

@@ -1,4 +1,3 @@
-
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { FormBuilderProvider, useFormBuilder } from "@/context/FormBuilderContext";
@@ -44,9 +43,6 @@ const FormBuilder = () => {
   
   const handleSaveForm = async () => {
     try {
-      // No longer checking if user is authenticated
-      // Form saving now works regardless of authentication status
-      
       setIsSaving(true);
       
       // Get the form data from the context
@@ -71,31 +67,28 @@ const FormBuilder = () => {
       // Prepare data for backend and send to API
       const backendData = prepareFormDataForBackend(parsedForm);
       
-      // Add anonymous user if not authenticated
+      // Always provide a user_id for anonymous forms
+      // The backend will handle permissions appropriately
       if (!isAuthenticated) {
-        backendData.user_id = 1; // Use default user ID for anonymous forms
+        backendData.user_id = 1; // Default anonymous user ID
         console.log("Saving form as anonymous user");
       }
       
       console.log("Data ready for backend submission:", backendData);
       
       // Using the mutation to save the form
-      await saveFormMutation.mutateAsync(backendData);
+      const result = await saveFormMutation.mutateAsync(backendData);
       
       toast({
         title: "Form saved",
-        description: "Your form has been saved successfully",
+        description: isAuthenticated 
+          ? "Your form has been saved successfully" 
+          : "Your form has been saved anonymously. Create an account to access it later.",
       });
       
       // Redirect to the forms list if user is authenticated
       if (isAuthenticated) {
         navigate('/forms');
-      } else {
-        // Just show success message for non-authenticated users
-        toast({
-          title: "Form saved anonymously",
-          description: "Your form has been saved, but you'll need to log in to access it later.",
-        });
       }
       
     } catch (error) {

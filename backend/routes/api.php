@@ -34,13 +34,16 @@ Route::get('/user', [AuthController::class, 'user']);
 Route::get('/auth/check', [AuthController::class, 'check']);
 Route::get('/auth/debug', [AuthController::class, 'debug']);
 
-// Form saving route that doesn't require authentication
+// Public Routes for forms - These do NOT require authentication
+// Form saving routes that don't require authentication
 Route::post('/forms', [FormController::class, 'store']);
 Route::put('/forms/{id}', [FormController::class, 'update']);
+Route::get('/forms/{slug}', [FormController::class, 'getBySlug']);
+Route::post('/forms/{slug}/responses', [FormResponseController::class, 'store']);
 
 // Protected Routes - These all require authentication
 Route::middleware('auth:sanctum')->group(function () {
-    // Forms (except save which is defined above)
+    // Forms (except save and public view which are defined above)
     Route::get('/forms', [FormController::class, 'index']);
     Route::get('/forms/{id}', [FormController::class, 'show']);
     Route::delete('/forms/{id}', [FormController::class, 'destroy']);
@@ -60,7 +63,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/forms/{formId}/statistics', [FormResponseController::class, 'statistics']);
     Route::get('/forms/{formId}/responses/export', [FormResponseController::class, 'export']);
 });
-
-// Public Routes for form submission - These do not require authentication
-Route::get('/forms/{slug}', [FormController::class, 'getBySlug']);
-Route::post('/forms/{slug}/responses', [FormResponseController::class, 'store']);

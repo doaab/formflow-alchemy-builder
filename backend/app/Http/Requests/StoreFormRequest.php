@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Requests;
@@ -12,6 +11,7 @@ class StoreFormRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        // Allow all requests to store forms - we'll handle user association in the controller
         return true;
     }
 
@@ -31,6 +31,7 @@ class StoreFormRequest extends FormRequest
             'one_response_per_user' => 'boolean',
             'show_progress_bar' => 'boolean',
             'shuffle_questions' => 'boolean',
+            'user_id' => 'nullable|integer',
         ];
     }
 
@@ -39,8 +40,12 @@ class StoreFormRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        $this->merge([
-            'user_id' => auth()->id(),
-        ]);
+        // If user is authenticated, use their ID
+        if (auth()->check()) {
+            $this->merge([
+                'user_id' => auth()->id(),
+            ]);
+        }
+        // Otherwise, we'll use the user_id from the request (which is validated above)
     }
 }
