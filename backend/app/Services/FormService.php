@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Services;
@@ -22,6 +23,17 @@ class FormService
     {
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['title']) . '-' . Str::random(8);
+        }
+
+        // Ensure there's a user_id
+        if (empty($data['user_id'])) {
+            // Use the authenticated user's ID if available
+            if (auth()->check()) {
+                $data['user_id'] = auth()->id();
+            } else {
+                // Default to system user (ID 1) for anonymous forms
+                $data['user_id'] = 1;
+            }
         }
 
         return Form::create($data);

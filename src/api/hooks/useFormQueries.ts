@@ -48,6 +48,12 @@ export const useSaveForm = () => {
         console.log("Fetching CSRF token from:", API_URL);
         await getCsrfCookie();
         
+        // Make sure user_id is set
+        if (!formData.user_id) {
+          console.warn("No user_id provided in form data, setting default user_id=1");
+          formData.user_id = 1;
+        }
+        
         console.log(`Sending ${method} request to ${url}`, formData);
         
         const response = await fetch(url, {
@@ -66,12 +72,6 @@ export const useSaveForm = () => {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           console.error('Form save error response:', response.status, errorData || response.statusText);
-          
-          // Handle specific error cases
-          if (response.status === 401) {
-            console.warn('Authentication issue saving form, attempting to save as anonymous');
-            // We'll just let this fail through to be caught by the general error handler
-          }
           
           throw new Error(errorData?.message || `Failed to save form: ${response.status}`);
         }

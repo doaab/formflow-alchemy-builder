@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Models;
@@ -86,6 +87,12 @@ class Form extends Model
         static::creating(function ($form) {
             if (empty($form->slug)) {
                 $form->slug = \Str::slug($form->title) . '-' . \Str::random(8);
+            }
+            
+            // Set default user_id if not provided
+            if (empty($form->user_id)) {
+                // Use a default system user ID (typically 1) for anonymous forms
+                $form->user_id = 1;
             }
         });
     }

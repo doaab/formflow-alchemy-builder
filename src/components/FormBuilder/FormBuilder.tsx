@@ -1,4 +1,3 @@
-
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { FormBuilderProvider, useFormBuilder } from "@/context/FormBuilderContext";
@@ -26,7 +25,6 @@ const FormBuilder = () => {
   const { user, isAuthenticated } = useAuth();
   
   useEffect(() => {
-    // Check backend connection on component mount
     const checkConnection = async () => {
       const isConnected = await checkBackendConnection();
       setBackendConnected(isConnected);
@@ -46,16 +44,13 @@ const FormBuilder = () => {
     try {
       setIsSaving(true);
       
-      // Get the form data from the context
       const formData = document.getElementById('form-builder-provider')?.dataset.formdata;
       if (!formData) throw new Error("Form data not found");
       
       const parsedForm = JSON.parse(formData);
       
-      // Save to localStorage for persistence during development
       saveFormToLocalStorage(parsedForm);
       
-      // Check if backend is available before trying to save
       if (!backendConnected) {
         toast({
           title: "Saved Locally Only",
@@ -65,19 +60,17 @@ const FormBuilder = () => {
         return;
       }
       
-      // Prepare data for backend and send to API
       const backendData = prepareFormDataForBackend(parsedForm);
       
-      // ALWAYS provide a user_id for anonymous forms (ID 1 is typically the admin/system user)
-      // The backend will handle permissions appropriately
-      if (!isAuthenticated) {
-        backendData.user_id = 1; // Default anonymous user ID
-        console.log("Saving form as anonymous user");
+      if (isAuthenticated && user?.id) {
+        backendData.user_id = user.id;
+      } else {
+        backendData.user_id = 1;
+        console.log("Saving form as anonymous user with ID: 1");
       }
       
       console.log("Data ready for backend submission:", backendData);
       
-      // Using the mutation to save the form
       const result = await saveFormMutation.mutateAsync(backendData);
       
       toast({
@@ -87,7 +80,6 @@ const FormBuilder = () => {
           : "Your form has been saved anonymously. Create an account to access it later.",
       });
       
-      // Redirect to the forms list if user is authenticated
       if (isAuthenticated) {
         navigate('/forms');
       }
@@ -186,7 +178,6 @@ const FormBuilder = () => {
   );
 };
 
-// This component just tracks form data changes for saving
 const FormDataTracker = () => {
   const { formData } = useFormBuilder();
   
