@@ -6,7 +6,6 @@ import { z } from "zod";
 import { Link, useNavigate } from "react-router-dom";
 import { useRegisterMutation } from "../api/hooks/useAuthQueries";
 import { getCsrfCookie, checkAuthStatus } from "../api/services/authService";
-import { useToast } from "@/components/ui/use-toast";
 import { toast } from "sonner";
 
 // UI Components
@@ -40,7 +39,6 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export default function Register() {
   const { mutate: register, isPending, error } = useRegisterMutation();
   const navigate = useNavigate();
-  const { toast: uiToast } = useToast();
   const [statusMessage, setStatusMessage] = useState<string>("");
   
   useEffect(() => {
@@ -71,7 +69,7 @@ export default function Register() {
     
     checkLoginStatus();
     preloadCsrf();
-  }, [uiToast, navigate]);
+  }, [navigate]);
   
   // Form definition
   const form = useForm<RegisterFormValues>({

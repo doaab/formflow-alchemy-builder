@@ -66,7 +66,6 @@ export const register = async (name: string, email: string, password: string, pa
     
     const data = await response.json();
     
-    // The registration automatically logs the user in
     return data;
   } catch (error) {
     console.error('Error during registration:', error);
@@ -102,6 +101,13 @@ export const login = async (email: string, password: string): Promise<{user: Use
     }
     
     const data = await response.json();
+    
+    // Verify authentication was successful after login
+    const isAuthenticated = await checkAuthStatus();
+    if (!isAuthenticated) {
+      throw new Error('Authentication verification failed after login');
+    }
+    
     return data;
   } catch (error) {
     console.error('Error during login:', error);
@@ -172,6 +178,7 @@ export const getCurrentUser = async (): Promise<{user: User}> => {
  */
 export const checkAuthStatus = async (): Promise<boolean> => {
   try {
+    // IMPORTANT: Make sure the route exists in Laravel
     const response = await fetch(`${API_URL}/auth/check`, {
       credentials: 'include',
       headers: {

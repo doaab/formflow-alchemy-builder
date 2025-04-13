@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../api/hooks/useAuthQueries";
-import { useToast } from "@/components/ui/use-toast";
 import { getCsrfCookie, checkAuthStatus } from "../api/services/authService";
 import { toast } from "sonner";
 
@@ -36,7 +35,6 @@ export default function Login() {
   const { mutate: login, isPending, error } = useLoginMutation();
   const location = useLocation();
   const navigate = useNavigate();
-  const { toast: uiToast } = useToast();
   const [statusMessage, setStatusMessage] = useState<string>("");
   
   // Check if we were redirected from another page with a message
@@ -73,12 +71,11 @@ export default function Login() {
     preloadCsrf();
     
     if (redirectMessage) {
-      uiToast({
-        title: "Authentication Required",
+      toast.info("Authentication Required", {
         description: redirectMessage,
       });
     }
-  }, [redirectMessage, uiToast, navigate]);
+  }, [redirectMessage, navigate]);
   
   // Form definition
   const form = useForm<LoginFormValues>({
