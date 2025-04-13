@@ -38,6 +38,7 @@ export const useLoginMutation = () => {
       navigate('/forms');
     },
     onError: (error: Error) => {
+      console.error("Login error:", error);
       toast.error(error.message || 'Login failed');
     }
   });
@@ -70,7 +71,7 @@ export const useCurrentUser = () => {
         return user;
       } catch (error) {
         // For unauthorized errors (401), just return null instead of throwing
-        if (error instanceof Error && (error.message.includes('401') || error.message.includes('Unauthorized'))) {
+        if (error instanceof Error && (error.message.includes('401') || error.message.includes('Unauthorized') || error.message.includes('not authenticated'))) {
           console.info('User not logged in yet');
           return null;
         }

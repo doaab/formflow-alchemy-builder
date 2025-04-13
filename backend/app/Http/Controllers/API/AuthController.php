@@ -38,8 +38,6 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        $request->session()->regenerate();
-
         return response()->json([
             'user' => $user,
             'message' => 'User registered successfully',
@@ -70,27 +68,12 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $request->session()->regenerate();
-
-        // Explicitly set a cookie with the session info
-        $minutes = config('session.lifetime');
-        $path = config('session.path');
-        $domain = config('session.domain');
-        $secure = config('session.secure');
-        $httpOnly = config('session.http_only');
+        $user = Auth::user();
 
         return response()->json([
-            'user' => Auth::user(),
+            'user' => $user,
             'message' => 'User logged in successfully',
-        ])->cookie(
-            config('session.cookie'), 
-            session()->getId(), 
-            $minutes, 
-            $path, 
-            $domain, 
-            $secure, 
-            $httpOnly
-        );
+        ]);
     }
 
     /**

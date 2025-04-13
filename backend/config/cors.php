@@ -29,7 +29,7 @@ return [
         'https://e005b4a0-4ab9-477a-8ffb-cd1345d72df5.lovableproject.com',
     ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => ['#^https?://.+\.lovableproject\.com$#'],
 
     'allowed_headers' => ['*'],
 

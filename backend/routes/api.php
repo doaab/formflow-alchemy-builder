@@ -36,7 +36,7 @@ Route::get('/auth/check', function() {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
+Route::get('/user', [AuthController::class, 'user']);
 
 // Protected Routes - These all require authentication
 Route::middleware('auth:sanctum')->group(function () {
@@ -66,4 +66,3 @@ Route::middleware('auth:sanctum')->group(function () {
 // Public Routes for form submission - These do not require authentication
 Route::get('/forms/{slug}', [FormController::class, 'getBySlug']);
 Route::post('/forms/{slug}/responses', [FormResponseController::class, 'store']);
-

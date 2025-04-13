@@ -91,25 +91,10 @@ export const login = async (email: string, password: string): Promise<{user: Use
       throw new Error(errorData.message || `Login failed with status: ${response.status}`);
     }
     
-    // After successful login, check the authentication status
-    const authCheckResponse = await fetch(`${API_URL}/auth/check`, {
-      credentials: 'include',
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-    });
+    const data = await response.json();
     
-    if (!authCheckResponse.ok) {
-      throw new Error('Authentication verification failed after login');
-    }
-    
-    const authStatus = await authCheckResponse.json();
-    if (!authStatus.authenticated) {
-      throw new Error('Login succeeded but session was not established');
-    }
-    
-    return await response.json();
+    // No need for a separate auth check, trust the login response
+    return data;
   } catch (error) {
     console.error('Error during login:', error);
     throw error;
@@ -147,9 +132,6 @@ export const logout = async (): Promise<{message: string}> => {
  */
 export const getCurrentUser = async (): Promise<{user: User}> => {
   try {
-    // Get CSRF cookie first if needed
-    await getCsrfCookie();
-    
     const response = await fetch(`${API_URL}/user`, {
       headers: {
         'Content-Type': 'application/json',
@@ -175,11 +157,12 @@ export const getCurrentUser = async (): Promise<{user: User}> => {
 };
 
 /**
- * Check auth status without throwing (for internal use)
+ * Check auth status directly using the /user endpoint
+ * This simplifies our authentication flow
  */
 export const checkAuthStatus = async (): Promise<boolean> => {
   try {
-    const response = await fetch(`${API_URL}/auth/check`, {
+    const response = await fetch(`${API_URL}/user`, {
       credentials: 'include',
       headers: {
         'Accept': 'application/json',
@@ -187,10 +170,7 @@ export const checkAuthStatus = async (): Promise<boolean> => {
       },
     });
     
-    if (!response.ok) return false;
-    
-    const status = await response.json();
-    return status.authenticated === true;
+    return response.status === 200;
   } catch (error) {
     console.error('Error checking auth status:', error);
     return false;

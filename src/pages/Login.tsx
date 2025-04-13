@@ -32,7 +32,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
-  const { mutate: login, isPending } = useLoginMutation();
+  const { mutate: login, isPending, error } = useLoginMutation();
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -100,6 +100,12 @@ export default function Login() {
           {redirectMessage && (
             <Alert className="mb-6">
               <AlertDescription>{redirectMessage}</AlertDescription>
+            </Alert>
+          )}
+          
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>{error.message}</AlertDescription>
             </Alert>
           )}
           

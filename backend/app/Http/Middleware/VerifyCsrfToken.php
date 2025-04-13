@@ -13,22 +13,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        'api/*', // Exclude all API routes from CSRF protection as we use Sanctum instead
+        'api/*', // Exclude all API routes from CSRF protection
         'sanctum/csrf-cookie', // Allow fetching CSRF cookie without verification
     ];
-    
-    /**
-     * Add additional handling to check if the request has valid authorization
-     */
-    protected function tokensMatch($request)
-    {
-        // Check if this is an API request first
-        if (strpos($request->path(), 'api/') === 0) {
-            // For API requests, we'll assume they're protected by Sanctum authentication
-            return true;
-        }
-        
-        // For non-API requests, use the parent CSRF token validation
-        return parent::tokensMatch($request);
-    }
 }
