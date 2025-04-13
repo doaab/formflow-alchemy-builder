@@ -48,7 +48,7 @@ export const useSaveForm = () => {
         console.log("Fetching CSRF token from:", API_URL);
         await getCsrfCookie();
         
-        console.log(`Sending ${method} request to ${url}`);
+        console.log(`Sending ${method} request to ${url}`, formData);
         
         const response = await fetch(url, {
           method,
@@ -69,8 +69,8 @@ export const useSaveForm = () => {
           
           // Handle specific error cases
           if (response.status === 401) {
-            // We now have special handling for anonymous forms, so this shouldn't normally happen
-            throw new Error('Failed to save form: Authentication required');
+            console.warn('Authentication issue saving form, attempting to save as anonymous');
+            // We'll just let this fail through to be caught by the general error handler
           }
           
           throw new Error(errorData?.message || `Failed to save form: ${response.status}`);

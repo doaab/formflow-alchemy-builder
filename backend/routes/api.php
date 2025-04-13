@@ -35,19 +35,20 @@ Route::get('/auth/check', [AuthController::class, 'check']);
 Route::get('/auth/debug', [AuthController::class, 'debug']);
 
 // Public Routes for forms - These do NOT require authentication
-// Form saving routes that don't require authentication
+// Form routes that don't require authentication
 Route::post('/forms', [FormController::class, 'store']);
 Route::put('/forms/{id}', [FormController::class, 'update']);
 Route::get('/forms/{slug}', [FormController::class, 'getBySlug']);
 Route::post('/forms/{slug}/responses', [FormResponseController::class, 'store']);
+// Add these routes outside of auth middleware
+Route::delete('/forms/{id}', [FormController::class, 'destroy']);
+Route::post('/forms/{id}/toggle-publish', [FormController::class, 'togglePublish']);
 
 // Protected Routes - These all require authentication
 Route::middleware('auth:sanctum')->group(function () {
     // Forms (except save and public view which are defined above)
     Route::get('/forms', [FormController::class, 'index']);
     Route::get('/forms/{id}', [FormController::class, 'show']);
-    Route::delete('/forms/{id}', [FormController::class, 'destroy']);
-    Route::post('/forms/{id}/toggle-publish', [FormController::class, 'togglePublish']);
 
     // Form Elements
     Route::get('/forms/{form}/elements', [FormElementController::class, 'index']);

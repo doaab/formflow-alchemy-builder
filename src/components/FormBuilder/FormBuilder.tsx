@@ -1,3 +1,4 @@
+
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { FormBuilderProvider, useFormBuilder } from "@/context/FormBuilderContext";
@@ -67,7 +68,7 @@ const FormBuilder = () => {
       // Prepare data for backend and send to API
       const backendData = prepareFormDataForBackend(parsedForm);
       
-      // Always provide a user_id for anonymous forms
+      // ALWAYS provide a user_id for anonymous forms (ID 1 is typically the admin/system user)
       // The backend will handle permissions appropriately
       if (!isAuthenticated) {
         backendData.user_id = 1; // Default anonymous user ID
