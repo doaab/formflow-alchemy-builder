@@ -34,13 +34,15 @@ Route::get('/user', [AuthController::class, 'user']);
 Route::get('/auth/check', [AuthController::class, 'check']);
 Route::get('/auth/debug', [AuthController::class, 'debug']);
 
+// Form saving route that doesn't require authentication
+Route::post('/forms', [FormController::class, 'store']);
+Route::put('/forms/{id}', [FormController::class, 'update']);
+
 // Protected Routes - These all require authentication
 Route::middleware('auth:sanctum')->group(function () {
-    // Forms
+    // Forms (except save which is defined above)
     Route::get('/forms', [FormController::class, 'index']);
-    Route::post('/forms', [FormController::class, 'store']);
     Route::get('/forms/{id}', [FormController::class, 'show']);
-    Route::put('/forms/{id}', [FormController::class, 'update']);
     Route::delete('/forms/{id}', [FormController::class, 'destroy']);
     Route::post('/forms/{id}/toggle-publish', [FormController::class, 'togglePublish']);
 

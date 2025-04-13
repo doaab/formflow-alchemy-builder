@@ -44,24 +44,9 @@ const FormBuilder = () => {
   
   const handleSaveForm = async () => {
     try {
-      // First check if user is authenticated
-      if (!isAuthenticated) {
-        toast({
-          title: "Authentication Required",
-          description: "You need to log in before saving forms to the server.",
-          variant: "destructive",
-        });
-        
-        // Redirect to login page
-        navigate('/login', { 
-          state: { 
-            from: '/form-builder',
-            message: 'Please log in to save your form' 
-          } 
-        });
-        return;
-      }
-
+      // No longer checking if user is authenticated
+      // Form saving now works regardless of authentication status
+      
       setIsSaving(true);
       
       // Get the form data from the context
@@ -86,6 +71,12 @@ const FormBuilder = () => {
       // Prepare data for backend and send to API
       const backendData = prepareFormDataForBackend(parsedForm);
       
+      // Add anonymous user if not authenticated
+      if (!isAuthenticated) {
+        backendData.user_id = 1; // Use default user ID for anonymous forms
+        console.log("Saving form as anonymous user");
+      }
+      
       console.log("Data ready for backend submission:", backendData);
       
       // Using the mutation to save the form
@@ -96,33 +87,24 @@ const FormBuilder = () => {
         description: "Your form has been saved successfully",
       });
       
-      // Redirect to the forms list
-      navigate('/forms');
+      // Redirect to the forms list if user is authenticated
+      if (isAuthenticated) {
+        navigate('/forms');
+      } else {
+        // Just show success message for non-authenticated users
+        toast({
+          title: "Form saved anonymously",
+          description: "Your form has been saved, but you'll need to log in to access it later.",
+        });
+      }
       
     } catch (error) {
       console.error("Error saving form:", error);
-      
-      // Check if it's an auth error
-      if (error instanceof Error && error.message.includes("Unauthenticated")) {
-        toast({
-          title: "Authentication Error",
-          description: "Your session has expired. Please log in again.",
-          variant: "destructive",
-        });
-        
-        navigate('/login', { 
-          state: { 
-            from: '/form-builder',
-            message: 'Your session has expired. Please log in again to save your form.' 
-          } 
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "There was an error saving your form. Please try again.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Error",
+        description: "There was an error saving your form. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -180,7 +162,7 @@ const FormBuilder = () => {
               <AlertCircle className="h-4 w-4 text-amber-500" />
               <AlertTitle className="text-amber-700">Not Logged In</AlertTitle>
               <AlertDescription className="text-amber-600">
-                You are currently not logged in. You can continue building your form, but you'll need to log in to save it to the server.
+                You are currently not logged in. You can still save your form, but logging in will give you better access to manage your forms later.
               </AlertDescription>
             </Alert>
           )}

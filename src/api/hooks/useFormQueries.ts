@@ -66,19 +66,11 @@ export const useSaveForm = () => {
           const errorData = await response.json().catch(() => null);
           console.error('Form save error response:', response.status, errorData || response.statusText);
           
-          // If it's an authentication error, throw a specific error message
-          if (response.status === 401) {
-            throw new Error(errorData?.message || "Unauthenticated.");
-          }
-          
           throw new Error(errorData?.message || `Failed to save form: ${response.status}`);
         }
         
         const result = await response.json();
         console.log('Form saved successfully:', result);
-        
-        // Refresh forms and auth status
-        queryClient.invalidateQueries({ queryKey: ['user'] });
         
         return result;
       } catch (error) {
