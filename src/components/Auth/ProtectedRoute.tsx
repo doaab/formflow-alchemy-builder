@@ -5,9 +5,10 @@ import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   authenticationRequired?: boolean;
+  redirectTo?: string;
 }
 
-export default function ProtectedRoute({ authenticationRequired = true }: ProtectedRouteProps) {
+export default function ProtectedRoute({ authenticationRequired = true, redirectTo = "/" }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
@@ -22,7 +23,7 @@ export default function ProtectedRoute({ authenticationRequired = true }: Protec
 
   // If authentication is required but user is not authenticated, redirect to login
   if (authenticationRequired && !isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to={redirectTo || "/login"} state={{ from: location }} replace />;
   }
 
   // If authentication is not required and user is authenticated (e.g. login page), redirect to forms

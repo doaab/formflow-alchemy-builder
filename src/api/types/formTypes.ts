@@ -91,6 +91,23 @@ export interface FormResponseWithAnswers extends FormResponse {
 }
 
 // API response types
+export interface PaginationLinks {
+  first: string;
+  last: string;
+  prev: string | null;
+  next: string | null;
+}
+
+export interface PaginationMeta {
+  current_page: number;
+  from: number | null;
+  last_page: number;
+  path: string;
+  per_page: number;
+  to: number | null;
+  total: number;
+}
+
 export interface FormsResponse {
   data: Form[];
   total: number;
@@ -99,7 +116,8 @@ export interface FormsResponse {
   last_page: number;
   from: number | null;
   to: number | null;
-  links?: any; // Laravel pagination links
+  links?: PaginationLinks;
+  meta?: PaginationMeta;
 }
 
 export interface FormResponsesResponse {
@@ -110,4 +128,6 @@ export interface FormResponsesResponse {
   last_page: number;
   from: number | null;
   to: number | null;
+  links?: PaginationLinks;
+  meta?: PaginationMeta;
 }
