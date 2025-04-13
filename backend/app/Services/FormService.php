@@ -25,7 +25,7 @@ class FormService
             $data['slug'] = Str::slug($data['title']) . '-' . Str::random(8);
         }
 
-        // Ensure there's a user_id
+        // Always ensure there's a user_id
         if (empty($data['user_id'])) {
             // Use the authenticated user's ID if available
             if (auth()->check()) {
@@ -44,6 +44,11 @@ class FormService
      */
     public function updateForm(Form $form, array $data)
     {
+        // Ensure user_id is preserved
+        if (!isset($data['user_id'])) {
+            $data['user_id'] = $form->user_id;
+        }
+        
         $form->update($data);
         return $form;
     }

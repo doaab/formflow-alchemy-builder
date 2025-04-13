@@ -48,10 +48,10 @@ export const useSaveForm = () => {
         console.log("Fetching CSRF token from:", API_URL);
         await getCsrfCookie();
         
-        // Make sure user_id is set
+        // Ensure user_id is set
         if (!formData.user_id) {
-          console.warn("No user_id provided in form data, setting default user_id=1");
-          formData.user_id = 1;
+          formData.user_id = 1; // Set default user_id for anonymous forms
+          console.log("Setting default user_id=1 for form");
         }
         
         console.log(`Sending ${method} request to ${url}`, formData);

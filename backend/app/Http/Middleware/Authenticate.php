@@ -37,7 +37,7 @@ class Authenticate extends Middleware
         // Allow form creation/updating without authentication
         if ($request->is('api/forms') || 
             preg_match('#^api/forms/\d+$#', $request->path()) && ($request->isMethod('PUT') || $request->isMethod('POST'))) {
-            return $request->next($request);
+            return;  // Just return without throwing an exception, which allows the request to continue
         }
         
         parent::unauthenticated($request, $guards);

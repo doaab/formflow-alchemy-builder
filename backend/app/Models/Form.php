@@ -43,6 +43,15 @@ class Form extends Model
     ];
 
     /**
+     * Default attribute values.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'user_id' => 1, // Set default user ID to 1 for anonymous forms
+    ];
+
+    /**
      * Get the route key for the model.
      *
      * @return string
