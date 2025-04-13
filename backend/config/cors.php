@@ -1,4 +1,3 @@
-
 <?php
 
 return [
@@ -27,6 +26,8 @@ return [
         'http://localhost:5173', // Vite dev server default
         'http://127.0.0.1:5173',
         'https://e005b4a0-4ab9-477a-8ffb-cd1345d72df5.lovableproject.com',
+        'https://lovable.dev/projects/e005b4a0-4ab9-477a-8ffb-cd1345d72df5',
+        'https://preview--formflow-alchemy-builder.lovable.app',
         '*', // Allow all origins temporarily for debugging
     ],
 

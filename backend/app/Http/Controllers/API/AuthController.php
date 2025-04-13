@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\API;
@@ -38,7 +37,7 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
-        
+
         // Start session if not started
         if (!$request->session()->isStarted()) {
             $request->session()->start();
@@ -130,7 +129,7 @@ class AuthController extends Controller
         if (!Auth::check()) {
             return response()->json(['message' => 'Not authenticated'], 401);
         }
-        
+
         return response()->json(['user' => $request->user()]);
     }
 
@@ -150,7 +149,7 @@ class AuthController extends Controller
 
     /**
      * Debug endpoint to check token information
-     * 
+     *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
@@ -158,12 +157,12 @@ class AuthController extends Controller
     {
         $sessionId = $request->session()->getId();
         $tokens = [];
-        
+
         if (Auth::check()) {
             $user = Auth::user();
             $tokens = PersonalAccessToken::where('tokenable_id', $user->id)->get();
         }
-        
+
         return response()->json([
             'session_id' => $sessionId,
             'tokens' => $tokens,

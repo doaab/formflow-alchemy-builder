@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Middleware;
@@ -18,7 +17,7 @@ class Authenticate extends Middleware
         if ($request->is('api/*')) {
             return null;
         }
-        
+
         // For web requests, redirect to the login page
         return $request->expectsJson() ? null : '/login';
     }
