@@ -44,14 +44,17 @@ Route::get('/forms/{id}', [FormController::class, 'show']); // Get form by ID
 Route::get('/forms/slug/{slug}', [FormController::class, 'getBySlug']); // Get form by slug
 Route::post('/forms/{slug}/responses', [FormResponseController::class, 'store']); // Submit form response
 
+// Form Elements Public Routes
+Route::get('/forms/{form}/elements', [FormElementController::class, 'index']);
+
 // Protected Routes - These all require authentication
 Route::middleware('auth:sanctum')->group(function () {
-    // Form Elements
-    Route::get('/forms/{form}/elements', [FormElementController::class, 'index']);
+    // Form Elements Management
     Route::post('/forms/{form}/elements', [FormElementController::class, 'store']);
     Route::get('/forms/{form}/elements/{element}', [FormElementController::class, 'show']);
     Route::put('/forms/{form}/elements/{element}', [FormElementController::class, 'update']);
     Route::delete('/forms/{form}/elements/{element}', [FormElementController::class, 'destroy']);
+    Route::post('/forms/{form}/elements/reorder', [FormElementController::class, 'reorder']);
 
     // Form Responses
     Route::get('/forms/{formId}/responses', [FormResponseController::class, 'index']);

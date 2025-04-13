@@ -66,6 +66,92 @@ export const getSavedForm = (): FormData | null => {
 };
 
 /**
+ * Converts a backend form model to the frontend form data structure
+ */
+export const convertBackendFormToFrontend = (form: any, elements: any[]): FormData => {
+  try {
+    if (!form || !elements) {
+      throw new Error("Invalid form or elements data");
+    }
+    
+    // Convert backend form model to frontend form data structure
+    const convertedElements = elements.map(element => {
+      const baseElement: any = {
+        id: element.element_id,
+        type: element.type as any,
+        label: element.label,
+        required: element.required,
+        placeholder: element.placeholder || undefined,
+        defaultValue: element.default_value || undefined,
+      };
+      
+      // Handle specific element types
+      switch (element.type) {
+        case 'email':
+          baseElement.confirmEmail = element.confirm_email || false;
+          break;
+        case 'star':
+          baseElement.maxStars = element.max_stars || 5;
+          break;
+        case 'section':
+          baseElement.description = element.description || '';
+          break;
+        case 'address':
+          baseElement.expanded = element.address_expanded || false;
+          baseElement.fields = {
+            street1: element.address_street1 || true,
+            street2: element.address_street2 || true,
+            city: element.address_city || true,
+            state: element.address_state || true,
+            zipCode: element.address_zipcode || true,
+            country: element.address_country || true,
+          };
+          baseElement.allowedCountries = element.allowed_countries || undefined;
+          break;
+        case 'phone':
+          baseElement.defaultCountry = element.default_country || 'US';
+          baseElement.allowedCountries = element.allowed_countries || undefined;
+          break;
+      }
+      
+      // Handle options for select, radio, checkbox
+      if (element.options && element.options.length > 0) {
+        baseElement.options = element.options.map((opt: any) => ({
+          id: opt.option_id,
+          label: opt.label,
+          value: opt.value
+        }));
+      }
+      
+      // Handle conditional logic
+      if (element.conditional_logic_enabled) {
+        baseElement.conditionalLogic = {
+          enabled: true,
+          action: element.conditional_action as 'show' | 'hide',
+          logicGate: element.conditional_logic_gate as 'all' | 'any',
+          conditions: element.conditionalRules?.map((rule: any) => ({
+            questionId: rule.question_id,
+            operator: rule.operator as any,
+            value: rule.value
+          })) || []
+        };
+      }
+      
+      return baseElement;
+    });
+    
+    return {
+      title: form.title,
+      description: form.description,
+      elements: convertedElements,
+    };
+  } catch (error) {
+    console.error("Error converting backend form to frontend:", error);
+    throw error;
+  }
+};
+
+/**
  * Transforms form data from the frontend format to the backend format
  */
 export const prepareFormDataForBackend = (formData: FormData): any => {

@@ -87,7 +87,7 @@ class FormService
             }
 
             DB::commit();
-            return $this->getFormWithElements($form);
+            return $this->getFormWithElements($form->fresh());
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -107,7 +107,7 @@ class FormService
      */
     public function getFormWithElements(Form $form)
     {
-        $form->load([
+        return $form->load([
             'elements' => function ($query) {
                 $query->orderBy('order');
             },
@@ -116,8 +116,6 @@ class FormService
             },
             'elements.conditionalRules',
         ]);
-
-        return $form;
     }
 
     /**
@@ -126,7 +124,7 @@ class FormService
     public function getFormWithElementsPublic(Form $form)
     {
         // Only include published forms
-        if (!$form->is_published) {
+        if (!$form->is_published && !auth()->check()) {
             return null;
         }
 
@@ -141,8 +139,9 @@ class FormService
         ]);
 
         // Remove any sensitive data
-        unset($form->user_id);
-        // Add other fields to unset if needed
+        if (!auth()->check()) {
+            unset($form->user_id);
+        }
 
         return $form;
     }

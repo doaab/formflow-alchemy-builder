@@ -4,6 +4,7 @@ import { fetchForms, fetchFormResponses, fetchFormResponseDetails } from '../ser
 import { API_URL } from '../services/config';
 import { toast } from 'sonner';
 import { getCsrfCookie } from '../services/authService';
+import { FormElement } from '../types/formTypes';
 
 // React Query hooks
 export const useForms = () => {
@@ -26,6 +27,60 @@ export const useFormResponseDetails = (formId: number, responseId: number) => {
     queryKey: ['form-response-details', formId, responseId],
     queryFn: () => fetchFormResponseDetails(formId, responseId),
     enabled: !!formId && !!responseId,
+  });
+};
+
+export const useFormElements = (formId: number) => {
+  return useQuery({
+    queryKey: ['form-elements', formId],
+    queryFn: async () => {
+      try {
+        const response = await fetch(`${API_URL}/forms/${formId}/elements`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          credentials: 'include',
+        });
+        
+        if (!response.ok) throw new Error(`Failed to fetch elements: ${response.status}`);
+        
+        return await response.json() as FormElement[];
+      } catch (error) {
+        console.error('Error fetching form elements:', error);
+        return [] as FormElement[];
+      }
+    },
+    enabled: !!formId,
+  });
+};
+
+export const useFormById = (formId: number | string | undefined) => {
+  return useQuery({
+    queryKey: ['form', formId],
+    queryFn: async () => {
+      try {
+        if (!formId) throw new Error('No form ID provided');
+        
+        const response = await fetch(`${API_URL}/forms/${formId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          credentials: 'include',
+        });
+        
+        if (!response.ok) throw new Error(`Failed to fetch form: ${response.status}`);
+        
+        return await response.json();
+      } catch (error) {
+        console.error('Error fetching form:', error);
+        throw error;
+      }
+    },
+    enabled: !!formId,
   });
 };
 

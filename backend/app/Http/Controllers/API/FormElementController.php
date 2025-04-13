@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\API;
@@ -24,8 +25,7 @@ class FormElementController extends Controller
      */
     public function index(Form $form)
     {
-        $this->authorize('view', $form);
-
+        // Public route - no need to check authorization
         $elements = $this->formElementService->getElementsByForm($form);
 
         return response()->json($elements);

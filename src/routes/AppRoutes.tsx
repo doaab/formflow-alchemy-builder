@@ -14,6 +14,9 @@ import ProtectedRoute from '@/components/Auth/ProtectedRoute';
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* Public routes - accessible to all */}
+      <Route path="/" element={<FormBuilder />} />
+      
       {/* Auth routes - accessible only when not logged in */}
       <Route element={<ProtectedRoute authenticationRequired={false} />}>
         <Route path="/login" element={<Login />} />
@@ -21,10 +24,10 @@ const AppRoutes = () => {
       </Route>
       
       {/* Protected routes - require authentication */}
-      <Route element={<ProtectedRoute authenticationRequired={true} />}>
-        <Route path="/" element={<FormBuilder />} />
+      <Route element={<ProtectedRoute authenticationRequired={true} redirectTo="/login" />}>
         <Route path="/forms" element={<FormList />} />
         <Route path="/forms/:formId" element={<FormDetail />} />
+        <Route path="/forms/:formId/edit" element={<FormBuilder />} />
         <Route path="/forms/:formId/responses" element={<FormResponses />} />
         <Route path="/forms/:formId/responses/:responseId" element={<FormResponseDetail />} />
         <Route path="/docs" element={<Documentation />} />

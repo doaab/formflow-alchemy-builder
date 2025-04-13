@@ -1,3 +1,4 @@
+
 export interface Form {
   id?: number;
   title: string;
@@ -13,6 +14,7 @@ export interface Form {
   updated_at?: string;
   deleted_at?: string;
   responses_count?: number;
+  user_id?: number;
 }
 
 export interface FormElement {
@@ -71,7 +73,8 @@ export interface FormResponse {
   completion_time: number | null;
   created_at: string;
   updated_at: string;
-  answers?: FormAnswer[];
+  user_agent?: string | null;
+  respondent_email?: string | null;
 }
 
 export interface FormAnswer {
@@ -79,6 +82,8 @@ export interface FormAnswer {
   form_response_id: number;
   form_element_id: number;
   value: string | null;
+  created_at?: string;
+  formElement?: FormElement;
 }
 
 export interface FormResponseWithAnswers extends FormResponse {
@@ -94,6 +99,7 @@ export interface FormsResponse {
   last_page: number;
   from: number | null;
   to: number | null;
+  links?: any; // Laravel pagination links
 }
 
 export interface FormResponsesResponse {

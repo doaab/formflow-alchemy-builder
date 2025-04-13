@@ -1,3 +1,4 @@
+
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { FormBuilderProvider, useFormBuilder } from "@/context/FormBuilderContext";
@@ -10,9 +11,9 @@ import { Save, Loader2, BookOpen, List, AlertCircle, LogIn } from "lucide-react"
 import { useEffect, useState } from "react";
 import { saveFormToLocalStorage, prepareFormDataForBackend } from "@/utils/formUtils";
 import { useToast } from "@/components/ui/use-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { API_URL, checkBackendConnection } from "@/api/services/config";
-import { useSaveForm } from "@/api/hooks/useFormQueries";
+import { useSaveForm, useFormById, useFormElements } from "@/api/hooks/useFormQueries";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext";
 
@@ -23,6 +24,10 @@ const FormBuilder = () => {
   const navigate = useNavigate();
   const saveFormMutation = useSaveForm();
   const { user, isAuthenticated } = useAuth();
+  const { formId } = useParams<{ formId?: string }>();
+  
+  const { data: formData, isLoading: isLoadingForm } = useFormById(formId);
+  const { data: formElements, isLoading: isLoadingElements } = useFormElements(formId ? parseInt(formId) : 0);
   
   useEffect(() => {
     const checkConnection = async () => {
@@ -62,6 +67,11 @@ const FormBuilder = () => {
       
       const backendData = prepareFormDataForBackend(parsedForm);
       
+      // If editing existing form, include the ID
+      if (formId) {
+        backendData.id = parseInt(formId);
+      }
+      
       if (isAuthenticated && user?.id) {
         backendData.user_id = user.id;
       } else {
@@ -98,7 +108,7 @@ const FormBuilder = () => {
   
   return (
     <DndProvider backend={HTML5Backend}>
-      <FormBuilderProvider>
+      <FormBuilderProvider initialFormId={formId ? parseInt(formId) : undefined} initialFormData={formData} initialFormElements={formElements}>
         <div 
           id="form-builder-provider" 
           className="flex flex-col h-screen"
@@ -162,6 +172,13 @@ const FormBuilder = () => {
                 Please ensure the backend server is running at the correct URL.
               </AlertDescription>
             </Alert>
+          )}
+          
+          {(isLoadingForm || isLoadingElements) && (
+            <div className="flex justify-center items-center p-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2">Loading form...</span>
+            </div>
           )}
           
           <FormTitle />
