@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchForms, fetchFormResponses, fetchFormResponseDetails } from '../services/formService';
 import { API_URL } from '../services/config';
+import { toast } from 'sonner';
+import { getCsrfCookie } from '../services/authService';
 
 // React Query hooks
 export const useForms = () => {
@@ -26,37 +28,6 @@ export const useFormResponseDetails = (formId: number, responseId: number) => {
   });
 };
 
-// Helper function to get CSRF token - improved with better error handling
-const getCsrfToken = async () => {
-  try {
-    const csrfUrl = `${API_URL.replace('/api', '')}/sanctum/csrf-cookie`;
-    console.log('Fetching CSRF token from:', csrfUrl);
-    
-    const response = await fetch(csrfUrl, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-    });
-    
-    console.log('CSRF cookie response:', response.status);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch CSRF token: ${response.status}`);
-    }
-    
-    // Wait a moment to ensure cookie is set
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    return true;
-  } catch (error) {
-    console.log('CSRF token fetch failed:', error);
-    throw error;
-  }
-};
-
 export const useSaveForm = () => {
   const queryClient = useQueryClient();
   
@@ -74,7 +45,7 @@ export const useSaveForm = () => {
         
         // Try to get CSRF token first
         console.log("Fetching CSRF token from:", API_URL);
-        await getCsrfToken();
+        await getCsrfCookie();
         
         console.log(`Sending ${method} request to ${url}`);
         
@@ -105,6 +76,10 @@ export const useSaveForm = () => {
         
         const result = await response.json();
         console.log('Form saved successfully:', result);
+        
+        // Refresh forms and auth status
+        queryClient.invalidateQueries({ queryKey: ['user'] });
+        
         return result;
       } catch (error) {
         console.error('Form save error details:', error);
@@ -114,7 +89,11 @@ export const useSaveForm = () => {
     onSuccess: () => {
       // Invalidate and refetch forms list
       queryClient.invalidateQueries({ queryKey: ['forms'] });
+      toast.success("Form saved successfully");
     },
+    onError: (error: Error) => {
+      toast.error(`Error saving form: ${error.message}`);
+    }
   });
 };
 

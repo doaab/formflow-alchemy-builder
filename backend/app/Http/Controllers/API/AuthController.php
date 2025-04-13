@@ -37,6 +37,14 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
+        
+        // Start session if not started
+        if (!$request->session()->isStarted()) {
+            $request->session()->start();
+        }
+
+        // Regenerate session ID for security
+        $request->session()->regenerate();
 
         return response()->json([
             'user' => $user,
@@ -67,6 +75,14 @@ class AuthController extends Controller
                 'message' => 'The provided credentials are incorrect.'
             ], 401);
         }
+
+        // Start session if not started
+        if (!$request->session()->isStarted()) {
+            $request->session()->start();
+        }
+
+        // Regenerate session ID for security
+        $request->session()->regenerate();
 
         $user = Auth::user();
 
@@ -105,5 +121,19 @@ class AuthController extends Controller
         }
         
         return response()->json(['user' => $request->user()]);
+    }
+
+    /**
+     * Check if user is authenticated
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function check(Request $request)
+    {
+        return response()->json([
+            'authenticated' => Auth::check(),
+            'user' => Auth::check() ? Auth::user() : null,
+        ]);
     }
 }

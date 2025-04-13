@@ -1,6 +1,6 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { register, login, logout, getCurrentUser } from '../services/authService';
+import { register, login, logout, getCurrentUser, checkAuthStatus } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -34,8 +34,10 @@ export const useLoginMutation = () => {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(['user'], data.user);
+      // Force refetch user data to ensure session is active
+      queryClient.invalidateQueries({ queryKey: ['user'] });
       toast.success(data.message || 'Login successful');
-      navigate('/forms');
+      // Don't navigate here, we'll do it in the component with proper redirects
     },
     onError: (error: Error) => {
       console.error("Login error:", error);
@@ -67,6 +69,15 @@ export const useCurrentUser = () => {
     queryKey: ['user'],
     queryFn: async () => {
       try {
+        // First try the direct authentication check - faster and less likely to fail
+        const isAuth = await checkAuthStatus();
+        
+        if (!isAuth) {
+          console.log('User not authenticated according to auth check');
+          return null;
+        }
+        
+        // If authenticated, get full user details
         const { user } = await getCurrentUser();
         return user;
       } catch (error) {

@@ -1,12 +1,12 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../api/hooks/useAuthQueries";
 import { useToast } from "@/components/ui/use-toast";
-import { getCsrfCookie } from "../api/services/authService";
+import { getCsrfCookie, checkAuthStatus } from "../api/services/authService";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -36,21 +36,42 @@ export default function Login() {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [statusMessage, setStatusMessage] = useState<string>("");
   
   // Check if we were redirected from another page with a message
   const redirectMessage = location.state?.message;
   const redirectFrom = location.state?.from;
   
   useEffect(() => {
-    // Pre-fetch CSRF token when component loads
-    const preloadCsrf = async () => {
+    // Check if user is already logged in
+    const checkLoginStatus = async () => {
       try {
-        await getCsrfCookie();
+        const isAuthenticated = await checkAuthStatus();
+        if (isAuthenticated) {
+          toast({
+            title: "Already Logged In",
+            description: "You are already logged in.",
+          });
+          navigate('/forms');
+        }
       } catch (error) {
-        console.error("Failed to preload CSRF token:", error);
+        console.error("Error checking login status:", error);
       }
     };
     
+    // Pre-fetch CSRF token when component loads
+    const preloadCsrf = async () => {
+      try {
+        setStatusMessage("Establishing secure connection...");
+        await getCsrfCookie();
+        setStatusMessage("");
+      } catch (error) {
+        console.error("Failed to preload CSRF token:", error);
+        setStatusMessage("Warning: Could not establish secure connection. Login may fail.");
+      }
+    };
+    
+    checkLoginStatus();
     preloadCsrf();
     
     if (redirectMessage) {
@@ -59,7 +80,7 @@ export default function Login() {
         description: redirectMessage,
       });
     }
-  }, [redirectMessage, toast]);
+  }, [redirectMessage, toast, navigate]);
   
   // Form definition
   const form = useForm<LoginFormValues>({
@@ -77,12 +98,16 @@ export default function Login() {
       password: values.password
     }, {
       onSuccess: () => {
+        toast.success("Login successful");
         // If there was a redirect path, go back to it after login
         if (redirectFrom) {
           navigate(redirectFrom);
         } else {
           navigate('/forms');
         }
+      },
+      onError: (error) => {
+        toast.error(`Login failed: ${error.message}`);
       }
     });
   }
@@ -97,6 +122,12 @@ export default function Login() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {statusMessage && (
+            <Alert className="mb-4 bg-blue-50">
+              <AlertDescription>{statusMessage}</AlertDescription>
+            </Alert>
+          )}
+          
           {redirectMessage && (
             <Alert className="mb-6">
               <AlertDescription>{redirectMessage}</AlertDescription>

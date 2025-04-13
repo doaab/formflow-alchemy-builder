@@ -25,12 +25,7 @@ Route::get('/ping', function() {
 });
 
 // Auth status route to check if a user is authenticated without redirecting
-Route::get('/auth/check', function() {
-    return response()->json([
-        'authenticated' => auth()->check(),
-        'user' => auth()->check() ? auth()->user() : null,
-    ]);
-});
+Route::get('/auth/check', [AuthController::class, 'check']);
 
 // Public Auth Routes
 Route::post('/register', [AuthController::class, 'register']);

@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout', 'register'],
 
     'allowed_methods' => ['*'],
 
@@ -27,6 +27,7 @@ return [
         'http://localhost:5173', // Vite dev server default
         'http://127.0.0.1:5173',
         'https://e005b4a0-4ab9-477a-8ffb-cd1345d72df5.lovableproject.com',
+        '*', // Allow all origins temporarily for debugging
     ],
 
     'allowed_origins_patterns' => ['#^https?://.+\.lovableproject\.com$#'],

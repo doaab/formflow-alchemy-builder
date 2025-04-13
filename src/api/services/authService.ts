@@ -7,21 +7,28 @@ import { API_URL } from './config';
  */
 export const getCsrfCookie = async (): Promise<void> => {
   try {
-    const response = await fetch(`${API_URL.replace('/api', '')}/sanctum/csrf-cookie`, {
+    const csrfUrl = `${API_URL.replace('/api', '')}/sanctum/csrf-cookie`;
+    console.log('Fetching CSRF token from:', csrfUrl);
+    
+    const response = await fetch(csrfUrl, {
       method: 'GET',
       credentials: 'include',
       headers: {
         'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
+        'X-Requested-With': 'XMLHttpRequest'
       },
     });
-
+    
+    console.log('CSRF cookie response:', response.status);
+    
     if (!response.ok) {
-      throw new Error(`Failed to fetch CSRF cookie: ${response.status}`);
+      throw new Error(`Failed to fetch CSRF token: ${response.status}`);
     }
-
-    // Give the browser a moment to save the cookie
-    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Wait a moment to ensure cookie is set
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    return;
   } catch (error) {
     console.error('Error fetching CSRF cookie:', error);
     throw error;
@@ -57,7 +64,15 @@ export const register = async (name: string, email: string, password: string, pa
       throw new Error(errorData.message || `Registration failed with status: ${response.status}`);
     }
     
-    return await response.json();
+    const data = await response.json();
+    
+    // Verify we're logged in after registration
+    const authCheck = await checkAuthStatus();
+    if (!authCheck) {
+      throw new Error('Authentication verification failed after registration');
+    }
+    
+    return data;
   } catch (error) {
     console.error('Error during registration:', error);
     throw error;
@@ -93,7 +108,12 @@ export const login = async (email: string, password: string): Promise<{user: Use
     
     const data = await response.json();
     
-    // No need for a separate auth check, trust the login response
+    // Verify we're logged in after login
+    const authCheck = await checkAuthStatus();
+    if (!authCheck) {
+      throw new Error('Authentication verification failed after login');
+    }
+    
     return data;
   } catch (error) {
     console.error('Error during login:', error);
@@ -106,6 +126,9 @@ export const login = async (email: string, password: string): Promise<{user: Use
  */
 export const logout = async (): Promise<{message: string}> => {
   try {
+    // Get CSRF cookie first
+    await getCsrfCookie();
+    
     const response = await fetch(`${API_URL}/logout`, {
       method: 'POST',
       headers: {
@@ -157,12 +180,11 @@ export const getCurrentUser = async (): Promise<{user: User}> => {
 };
 
 /**
- * Check auth status directly using the /user endpoint
- * This simplifies our authentication flow
+ * Check auth status using the /auth/check endpoint
  */
 export const checkAuthStatus = async (): Promise<boolean> => {
   try {
-    const response = await fetch(`${API_URL}/user`, {
+    const response = await fetch(`${API_URL}/auth/check`, {
       credentials: 'include',
       headers: {
         'Accept': 'application/json',
@@ -170,7 +192,13 @@ export const checkAuthStatus = async (): Promise<boolean> => {
       },
     });
     
-    return response.status === 200;
+    if (!response.ok) {
+      console.error('Auth check failed with status:', response.status);
+      return false;
+    }
+    
+    const data = await response.json();
+    return data.authenticated === true;
   } catch (error) {
     console.error('Error checking auth status:', error);
     return false;

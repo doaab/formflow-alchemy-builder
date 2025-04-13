@@ -15,5 +15,8 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         'api/*', // Exclude all API routes from CSRF protection
         'sanctum/csrf-cookie', // Allow fetching CSRF cookie without verification
+        'login',
+        'logout',
+        'register'
     ];
 }

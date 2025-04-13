@@ -1,10 +1,12 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useRegisterMutation } from "../api/hooks/useAuthQueries";
+import { getCsrfCookie, checkAuthStatus } from "../api/services/authService";
+import { useToast } from "@/components/ui/use-toast";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -18,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 
 // Form schema
@@ -34,7 +37,43 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function Register() {
-  const { mutate: register, isPending } = useRegisterMutation();
+  const { mutate: register, isPending, error } = useRegisterMutation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [statusMessage, setStatusMessage] = useState<string>("");
+  
+  useEffect(() => {
+    // Check if user is already logged in
+    const checkLoginStatus = async () => {
+      try {
+        const isAuthenticated = await checkAuthStatus();
+        if (isAuthenticated) {
+          toast({
+            title: "Already Logged In",
+            description: "You are already logged in.",
+          });
+          navigate('/forms');
+        }
+      } catch (error) {
+        console.error("Error checking login status:", error);
+      }
+    };
+    
+    // Pre-fetch CSRF token when component loads
+    const preloadCsrf = async () => {
+      try {
+        setStatusMessage("Establishing secure connection...");
+        await getCsrfCookie();
+        setStatusMessage("");
+      } catch (error) {
+        console.error("Failed to preload CSRF token:", error);
+        setStatusMessage("Warning: Could not establish secure connection. Registration may fail.");
+      }
+    };
+    
+    checkLoginStatus();
+    preloadCsrf();
+  }, [toast, navigate]);
   
   // Form definition
   const form = useForm<RegisterFormValues>({
@@ -54,6 +93,14 @@ export default function Register() {
       email: values.email,
       password: values.password,
       passwordConfirmation: values.passwordConfirmation
+    }, {
+      onSuccess: () => {
+        toast.success("Registration successful");
+        navigate('/forms');
+      },
+      onError: (error) => {
+        toast.error(`Registration failed: ${error.message}`);
+      }
     });
   }
   
@@ -67,6 +114,18 @@ export default function Register() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {statusMessage && (
+            <Alert className="mb-4 bg-blue-50">
+              <AlertDescription>{statusMessage}</AlertDescription>
+            </Alert>
+          )}
+          
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>{error instanceof Error ? error.message : 'An error occurred'}</AlertDescription>
+            </Alert>
+          )}
+          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
