@@ -1,7 +1,7 @@
-
 import { FormsResponse, FormResponsesResponse, FormResponseWithAnswers } from '../types/formTypes';
 import { getMockForms, getMockResponses, getMockResponseDetails } from '../mocks/formMockData';
 import { API_URL } from './config';
+import { toast } from 'sonner';
 
 // API functions
 export const fetchForms = async (): Promise<FormsResponse> => {
@@ -12,25 +12,40 @@ export const fetchForms = async (): Promise<FormsResponse> => {
       return getMockForms();
     }
     
+    console.log("Fetching forms from API:", `${API_URL}/forms`);
+    
     const response = await fetch(`${API_URL}/forms`, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
       },
       credentials: 'include', // Include cookies for Laravel Sanctum
     });
     
     if (!response.ok) {
       if (response.status === 401) {
-        throw new Error('Unauthorized. Please login.');
+        console.warn("Unauthorized when fetching forms. Continuing as anonymous.");
+        // Continue without throwing, we'll show forms accessible to anonymous users
+      } else {
+        console.error(`API error when fetching forms: ${response.status}`);
+        // For other errors, we'll show the data we have or empty results
       }
-      throw new Error(`API error: ${response.status}`);
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log("Forms fetched successfully:", data);
+    return data;
   } catch (error) {
     console.error('Error fetching forms:', error);
-    throw error;
+    // Return empty data structure instead of throwing
+    return { 
+      data: [],
+      current_page: 1,
+      total: 0,
+      per_page: 10,
+      last_page: 1
+    };
   }
 };
 

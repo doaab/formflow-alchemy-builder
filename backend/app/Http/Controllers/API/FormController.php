@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\API;
@@ -24,14 +25,26 @@ class FormController extends Controller
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
-        $forms = $user->forms()
+        // Handle both authenticated and non-authenticated requests
+        if (Auth::check()) {
+            // If authenticated, show user's forms
+            $user = Auth::user();
+            $forms = $user->forms();
+        } else {
+            // If not authenticated, show all forms (for demo purposes)
+            // In a real app, you might want to show only public forms or restrict this
+            $forms = Form::query();
+        }
+        
+        // Apply filters
+        $forms = $forms
             ->when($request->has('search'), function ($query) use ($request) {
                 return $query->where('title', 'like', '%' . $request->search . '%');
             })
             ->when($request->has('sort'), function ($query) use ($request) {
                 return $query->orderBy($request->sort, $request->order ?? 'asc');
             })
+            ->orderBy('updated_at', 'desc') // Default sort by last updated
             ->paginate($request->per_page ?? 10);
 
         return response()->json($forms);

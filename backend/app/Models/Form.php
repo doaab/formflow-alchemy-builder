@@ -52,6 +52,13 @@ class Form extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['responses_count'];
+
+    /**
      * Get the route key for the model.
      *
      * @return string
@@ -83,6 +90,14 @@ class Form extends Model
     public function responses()
     {
         return $this->hasMany(FormResponse::class);
+    }
+
+    /**
+     * Get the response count as an accessor.
+     */
+    public function getResponsesCountAttribute()
+    {
+        return $this->responses()->count();
     }
 
     /**
