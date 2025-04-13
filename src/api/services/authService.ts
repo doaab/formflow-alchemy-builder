@@ -66,12 +66,7 @@ export const register = async (name: string, email: string, password: string, pa
     
     const data = await response.json();
     
-    // Verify we're logged in after registration
-    const authCheck = await checkAuthStatus();
-    if (!authCheck) {
-      throw new Error('Authentication verification failed after registration');
-    }
-    
+    // The registration automatically logs the user in
     return data;
   } catch (error) {
     console.error('Error during registration:', error);
@@ -107,13 +102,6 @@ export const login = async (email: string, password: string): Promise<{user: Use
     }
     
     const data = await response.json();
-    
-    // Verify we're logged in after login
-    const authCheck = await checkAuthStatus();
-    if (!authCheck) {
-      throw new Error('Authentication verification failed after login');
-    }
-    
     return data;
   } catch (error) {
     console.error('Error during login:', error);
@@ -193,7 +181,7 @@ export const checkAuthStatus = async (): Promise<boolean> => {
     });
     
     if (!response.ok) {
-      console.error('Auth check failed with status:', response.status);
+      console.log('Auth check failed with status:', response.status);
       return false;
     }
     

@@ -24,14 +24,14 @@ Route::get('/ping', function() {
     return response()->json(['message' => 'API is working!', 'timestamp' => now()]);
 });
 
-// Auth status route to check if a user is authenticated without redirecting
-Route::get('/auth/check', [AuthController::class, 'check']);
-
-// Public Auth Routes
+// Auth Routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/user', [AuthController::class, 'user']);
+
+// Auth check route - this is important for checking auth status
+Route::get('/auth/check', [AuthController::class, 'check']);
 
 // Protected Routes - These all require authentication
 Route::middleware('auth:sanctum')->group(function () {

@@ -1,18 +1,18 @@
 
-import { BrowserRouter } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TooltipProvider } from "@radix-ui/react-tooltip";
-import { Toaster } from "@/components/ui/sonner";
-import Index from "@/pages/Index";
-import { AuthProvider } from "@/context/AuthContext";
-import "@/App.css";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import AppRoutes from './routes/AppRoutes';
+import { AuthProvider } from './context/AuthContext';
+import './App.css';
 
-// Create a client for React Query
+// Create a query client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
       refetchOnWindowFocus: false,
+      staleTime: 30000,
     },
   },
 });
@@ -20,14 +20,12 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <Index />
-            <Toaster position="top-right" />
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppRoutes />
+          <Toaster position="top-right" />
+        </AuthProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }

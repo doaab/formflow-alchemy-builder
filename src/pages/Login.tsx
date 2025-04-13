@@ -7,6 +7,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../api/hooks/useAuthQueries";
 import { useToast } from "@/components/ui/use-toast";
 import { getCsrfCookie, checkAuthStatus } from "../api/services/authService";
+import { toast } from "sonner";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,7 @@ export default function Login() {
   const { mutate: login, isPending, error } = useLoginMutation();
   const location = useLocation();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const [statusMessage, setStatusMessage] = useState<string>("");
   
   // Check if we were redirected from another page with a message
@@ -48,10 +49,7 @@ export default function Login() {
       try {
         const isAuthenticated = await checkAuthStatus();
         if (isAuthenticated) {
-          toast({
-            title: "Already Logged In",
-            description: "You are already logged in.",
-          });
+          toast.success("Already Logged In");
           navigate('/forms');
         }
       } catch (error) {
@@ -75,12 +73,12 @@ export default function Login() {
     preloadCsrf();
     
     if (redirectMessage) {
-      toast({
+      uiToast({
         title: "Authentication Required",
         description: redirectMessage,
       });
     }
-  }, [redirectMessage, toast, navigate]);
+  }, [redirectMessage, uiToast, navigate]);
   
   // Form definition
   const form = useForm<LoginFormValues>({

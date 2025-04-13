@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useRegisterMutation } from "../api/hooks/useAuthQueries";
 import { getCsrfCookie, checkAuthStatus } from "../api/services/authService";
 import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export default function Register() {
   const { mutate: register, isPending, error } = useRegisterMutation();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const [statusMessage, setStatusMessage] = useState<string>("");
   
   useEffect(() => {
@@ -48,10 +49,7 @@ export default function Register() {
       try {
         const isAuthenticated = await checkAuthStatus();
         if (isAuthenticated) {
-          toast({
-            title: "Already Logged In",
-            description: "You are already logged in.",
-          });
+          toast.success("Already logged in");
           navigate('/forms');
         }
       } catch (error) {
@@ -73,7 +71,7 @@ export default function Register() {
     
     checkLoginStatus();
     preloadCsrf();
-  }, [toast, navigate]);
+  }, [uiToast, navigate]);
   
   // Form definition
   const form = useForm<RegisterFormValues>({
