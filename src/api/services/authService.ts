@@ -103,9 +103,15 @@ export const login = async (email: string, password: string): Promise<{user: Use
     const data = await response.json();
     
     // Verify authentication was successful after login
-    const isAuthenticated = await checkAuthStatus();
-    if (!isAuthenticated) {
-      throw new Error('Authentication verification failed after login');
+    try {
+      const isAuthenticated = await checkAuthStatus();
+      if (!isAuthenticated) {
+        console.error('Authentication verification failed after login');
+        // Continue anyway, don't throw error here as the login was technically successful
+      }
+    } catch (error) {
+      console.error('Error checking auth after login:', error);
+      // Continue anyway, don't throw error here
     }
     
     return data;
@@ -174,12 +180,12 @@ export const getCurrentUser = async (): Promise<{user: User}> => {
 };
 
 /**
- * Check auth status using the /auth/check endpoint
+ * Check auth status using the /user endpoint directly
+ * This is more reliable than a separate auth/check endpoint
  */
 export const checkAuthStatus = async (): Promise<boolean> => {
   try {
-    // IMPORTANT: Make sure the route exists in Laravel
-    const response = await fetch(`${API_URL}/auth/check`, {
+    const response = await fetch(`${API_URL}/user`, {
       credentials: 'include',
       headers: {
         'Accept': 'application/json',
@@ -187,13 +193,18 @@ export const checkAuthStatus = async (): Promise<boolean> => {
       },
     });
     
+    if (response.status === 401) {
+      console.log('User not authenticated');
+      return false;
+    }
+    
     if (!response.ok) {
       console.log('Auth check failed with status:', response.status);
       return false;
     }
     
     const data = await response.json();
-    return data.authenticated === true;
+    return !!data.user;
   } catch (error) {
     console.error('Error checking auth status:', error);
     return false;

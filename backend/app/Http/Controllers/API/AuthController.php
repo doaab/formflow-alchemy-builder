@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -33,7 +34,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password),
+            'password' => Hash::make($request->password),
         ]);
 
         Auth::login($user);
@@ -86,9 +87,13 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
+        // Create a token for API access if needed
+        // $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
             'user' => $user,
             'message' => 'User logged in successfully',
+            // 'token' => $token,
         ]);
     }
 
@@ -101,6 +106,12 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::guard('web')->logout();
+
+        // Revoke all tokens if using token authentication
+        // if (Auth::check()) {
+        //     $user = Auth::user();
+        //     $user->tokens()->delete();
+        // }
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -134,6 +145,31 @@ class AuthController extends Controller
         return response()->json([
             'authenticated' => Auth::check(),
             'user' => Auth::check() ? Auth::user() : null,
+        ]);
+    }
+
+    /**
+     * Debug endpoint to check token information
+     * 
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function debug(Request $request)
+    {
+        $sessionId = $request->session()->getId();
+        $tokens = [];
+        
+        if (Auth::check()) {
+            $user = Auth::user();
+            $tokens = PersonalAccessToken::where('tokenable_id', $user->id)->get();
+        }
+        
+        return response()->json([
+            'session_id' => $sessionId,
+            'tokens' => $tokens,
+            'authenticated' => Auth::check(),
+            'user' => Auth::check() ? Auth::user() : null,
+            'session_data' => $request->session()->all(),
         ]);
     }
 }

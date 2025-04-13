@@ -92,7 +92,7 @@ export default function Login() {
       email: values.email,
       password: values.password
     }, {
-      onSuccess: () => {
+      onSuccess: (data) => {
         toast.success("Login successful");
         // If there was a redirect path, go back to it after login
         if (redirectFrom) {

@@ -30,8 +30,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/user', [AuthController::class, 'user']);
 
-// Auth check route - this is important for checking auth status
+// Auth check routes
 Route::get('/auth/check', [AuthController::class, 'check']);
+Route::get('/auth/debug', [AuthController::class, 'debug']);
 
 // Protected Routes - These all require authentication
 Route::middleware('auth:sanctum')->group(function () {

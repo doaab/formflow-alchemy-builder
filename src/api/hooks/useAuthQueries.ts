@@ -69,16 +69,8 @@ export const useCurrentUser = () => {
     queryKey: ['user'],
     queryFn: async () => {
       try {
-        // First try the direct authentication check - faster and less likely to fail
-        const isAuth = await checkAuthStatus();
-        
-        if (!isAuth) {
-          console.log('User not authenticated according to auth check');
-          return null;
-        }
-        
-        // If authenticated, get full user details
-        const { user } = await getCurrentUser();
+        // Go directly to the user endpoint instead of the auth check
+        const { user } = await getCurrentUser().catch(() => ({ user: null }));
         return user;
       } catch (error) {
         // For unauthorized errors (401), just return null instead of throwing
