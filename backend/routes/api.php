@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Http\Request;
@@ -6,6 +7,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\FormController;
 use App\Http\Controllers\API\FormElementController;
 use App\Http\Controllers\API\FormResponseController;
+use App\Http\Controllers\API\QuestionTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,50 +20,53 @@ use App\Http\Controllers\API\FormResponseController;
 |
 */
 
-// Test route to verify API is working
-Route::get('/ping', function() {
-    return response()->json(['message' => 'API is working!', 'timestamp' => now()]);
-});
-
-// Auth Routes
+// Authentication routes
 Route::post('/register', [AuthController::class, 'register']);
-Route::any('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-Route::get('/user', [AuthController::class, 'user']);
-Route::get('/csrf-cookie', function() {
-    return response()->json(['message' => 'CSRF cookie set']);
+
+// User route - protected by auth
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
 });
 
-// Auth check routes
-Route::get('/auth/check', [AuthController::class, 'check']);
-Route::get('/auth/debug', [AuthController::class, 'debug']);
+// Question types - public access
+Route::get('/question-types', [QuestionTypeController::class, 'index']);
 
-// Public Routes for forms - These do NOT require authentication
-Route::get('/forms', [FormController::class, 'index']); // Public forms list
-Route::post('/forms', [FormController::class, 'store']); // Allow anonymous form creation
-Route::put('/forms/{id}', [FormController::class, 'update']); // Allow anonymous form updates
-Route::delete('/forms/{id}', [FormController::class, 'destroy']); // Allow anonymous form deletion
-Route::post('/forms/{id}/toggle-publish', [FormController::class, 'togglePublish']);
-Route::get('/forms/{id}', [FormController::class, 'show']); // Get form by ID
-Route::get('/forms/slug/{slug}', [FormController::class, 'getBySlug']); // Get form by slug
-Route::post('/forms/{slug}/responses', [FormResponseController::class, 'store']); // Submit form response
+// Public form access by slug - no authentication required
+Route::get('/forms/by-slug/{slug}', [FormController::class, 'getBySlug']);
 
-// Form Elements Public Routes
-Route::get('/forms/{form}/elements', [FormElementController::class, 'index']);
-
-// Protected Routes - These all require authentication
-Route::middleware('auth:sanctum')->group(function () {
-    // Form Elements Management
-    Route::post('/forms/{form}/elements', [FormElementController::class, 'store']);
-    Route::get('/forms/{form}/elements/{element}', [FormElementController::class, 'show']);
-    Route::put('/forms/{form}/elements/{element}', [FormElementController::class, 'update']);
-    Route::delete('/forms/{form}/elements/{element}', [FormElementController::class, 'destroy']);
-    Route::post('/forms/{form}/elements/reorder', [FormElementController::class, 'reorder']);
-
-    // Form Responses
-    Route::get('/forms/{formId}/responses', [FormResponseController::class, 'index']);
-    Route::get('/forms/{formId}/responses/{responseId}', [FormResponseController::class, 'show']);
-    Route::delete('/forms/{formId}/responses/{responseId}', [FormResponseController::class, 'destroy']);
-    Route::get('/forms/{formId}/statistics', [FormResponseController::class, 'statistics']);
-    Route::get('/forms/{formId}/responses/export', [FormResponseController::class, 'export']);
+// Form routes - some are protected by auth
+Route::prefix('forms')->group(function () {
+    // Public routes
+    Route::get('/', [FormController::class, 'index']);
+    Route::get('/{form}', [FormController::class, 'show']);
+    
+    // Form elements - public read access
+    Route::get('/{form}/elements', [FormElementController::class, 'index']);
+    
+    // Submit form responses - public access
+    Route::post('/{slug}/responses', [FormResponseController::class, 'store']);
+    
+    // Routes that need auth
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/', [FormController::class, 'store']);
+        Route::put('/{form}', [FormController::class, 'update']);
+        Route::delete('/{form}', [FormController::class, 'destroy']);
+        Route::post('/{form}/toggle-publish', [FormController::class, 'togglePublish']);
+        Route::get('/{form}/analytics', [FormController::class, 'analytics']);
+        
+        // Form elements management
+        Route::post('/{form}/elements', [FormElementController::class, 'store']);
+        Route::put('/{form}/elements/{element}', [FormElementController::class, 'update']);
+        Route::delete('/{form}/elements/{element}', [FormElementController::class, 'destroy']);
+        Route::post('/{form}/elements/reorder', [FormElementController::class, 'reorder']);
+        
+        // Form responses
+        Route::get('/{form}/responses', [FormResponseController::class, 'index']);
+        Route::get('/{form}/responses/{response}', [FormResponseController::class, 'show']);
+        Route::delete('/{form}/responses/{response}', [FormResponseController::class, 'destroy']);
+        Route::get('/{form}/responses/export', [FormResponseController::class, 'export']);
+        Route::get('/{form}/responses/statistics', [FormResponseController::class, 'statistics']);
+    });
 });

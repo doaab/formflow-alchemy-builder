@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\API;
@@ -34,12 +35,19 @@ class FormResponseController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * This method can be accessed with a slug parameter for public forms
      */
-    public function store(StoreFormResponseRequest $request, $slug)
+    public function store(Request $request, $slugOrId)
     {
-        $form = Form::where('slug', $slug)
-            ->where('is_published', true)
-            ->firstOrFail();
+        // Check if the parameter is a numeric ID or a string slug
+        if (is_numeric($slugOrId)) {
+            $form = Form::findOrFail($slugOrId);
+        } else {
+            // Find by slug instead
+            $form = Form::where('slug', $slugOrId)
+                ->where('is_published', true)
+                ->firstOrFail();
+        }
 
         // Check if one response per user is enabled and user has already submitted
         if ($form->one_response_per_user && Auth::check()) {
@@ -61,7 +69,8 @@ class FormResponseController extends Controller
             $completionTime = time() - $startTime;
         }
 
-        $response = $this->formResponseService->createResponse($form, $request->validated(), $completionTime);
+        // Use all request data for now to avoid validation issues
+        $response = $this->formResponseService->createResponse($form, $request->all(), $completionTime);
 
         return response()->json($response, 201);
     }

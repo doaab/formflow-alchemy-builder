@@ -7,6 +7,7 @@ import FormList from '@/pages/Form/FormList.tsx';
 import FormDetail from '@/pages/Form/FormDetail.tsx';
 import FormResponses from '@/pages/Form/FormResponses.tsx';
 import FormResponseDetail from '@/pages/Form/FormResponseDetail.tsx';
+import SurveyForm from '@/pages/Form/SurveyForm.tsx';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ProtectedRoute from '@/components/Auth/ProtectedRoute';
@@ -16,6 +17,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Public routes - accessible to all */}
       <Route path="/" element={<FormBuilder />} />
+      <Route path="/survey/:slug" element={<SurveyForm />} />
       
       {/* Auth routes - accessible only when not logged in */}
       <Route element={<ProtectedRoute authenticationRequired={false} />}>

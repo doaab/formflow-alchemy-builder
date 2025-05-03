@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -19,3 +20,9 @@ Route::get('/', function () {
 
 // Add a named route for login
 Route::view('/login', 'welcome')->name('login');
+
+// Add a route for survey forms - this simply passes through to the frontend
+Route::get('/survey/{slug}', function () {
+    return view('welcome');
+})->where('slug', '[a-zA-Z0-9\-]+');
+
