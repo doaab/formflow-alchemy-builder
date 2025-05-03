@@ -3,13 +3,13 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Eye, EyeOff, File, List, Calendar, CheckCircle, XCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { Badge } from "@/components/ui/badge.tsx";
 import { format } from "date-fns";
-import { fetchForms } from "@/api/formApi";
+import { fetchForms } from "@/api/formApi.ts";
 import { toast } from "sonner";
-import { API_URL } from "@/api/services/config";
+import { API_URL } from "@/api/services/config.ts";
 
 const FormList = () => {
   const { data, isLoading, error, refetch } = useQuery({

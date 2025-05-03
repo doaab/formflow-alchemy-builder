@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Http\Request;
@@ -26,9 +25,12 @@ Route::get('/ping', function() {
 
 // Auth Routes
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::any('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/user', [AuthController::class, 'user']);
+Route::get('/csrf-cookie', function() {
+    return response()->json(['message' => 'CSRF cookie set']);
+});
 
 // Auth check routes
 Route::get('/auth/check', [AuthController::class, 'check']);

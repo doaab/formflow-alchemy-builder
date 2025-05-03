@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Services;
@@ -37,7 +36,7 @@ class FormService
         }
 
         $form = Form::create($data);
-        
+
         // Create elements if provided
         if (isset($data['elements']) && is_array($data['elements'])) {
             foreach ($data['elements'] as $index => $elementData) {
@@ -61,7 +60,7 @@ class FormService
             if (!isset($data['user_id'])) {
                 $data['user_id'] = $form->user_id;
             }
-            
+
             // Update basic form data
             $form->update([
                 'title' => $data['title'] ?? $form->title,
@@ -73,12 +72,12 @@ class FormService
                 'show_progress_bar' => $data['show_progress_bar'] ?? $form->show_progress_bar,
                 'shuffle_questions' => $data['shuffle_questions'] ?? $form->shuffle_questions,
             ]);
-            
+
             // Handle elements update if provided
             if (isset($data['elements']) && is_array($data['elements'])) {
                 // Delete all existing elements if we're doing a complete replacement
                 $form->elements()->delete();
-                
+
                 // Create new elements
                 foreach ($data['elements'] as $index => $elementData) {
                     $elementData['order'] = $index;

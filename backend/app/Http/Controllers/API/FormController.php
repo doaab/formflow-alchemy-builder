@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\API;
@@ -35,7 +34,7 @@ class FormController extends Controller
             // In a real app, you might want to show only public forms or restrict this
             $forms = Form::query();
         }
-        
+
         // Apply filters
         $forms = $forms
             ->when($request->has('search'), function ($query) use ($request) {
@@ -67,7 +66,7 @@ class FormController extends Controller
     public function show(Request $request, $id)
     {
         $form = Form::findOrFail($id);
-        
+
         // Skip authorization for now
         // $this->authorize('view', $form);
 
@@ -82,7 +81,7 @@ class FormController extends Controller
     public function update(Request $request, $id)
     {
         $form = Form::findOrFail($id);
-        
+
         // Skip authorization for now
         // $this->authorize('update', $form);
 
@@ -97,7 +96,7 @@ class FormController extends Controller
     public function destroy($id)
     {
         $form = Form::findOrFail($id);
-        
+
         // Skip authorization for now
         // $this->authorize('delete', $form);
 
@@ -126,7 +125,7 @@ class FormController extends Controller
     public function togglePublish($id)
     {
         $form = Form::findOrFail($id);
-        
+
         // Skip authorization for now
         // $this->authorize('update', $form);
 
@@ -142,7 +141,7 @@ class FormController extends Controller
     public function analytics($id)
     {
         $form = Form::findOrFail($id);
-        
+
         // Skip authorization for now
         // $this->authorize('view', $form);
 

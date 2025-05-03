@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Middleware;
@@ -22,7 +21,7 @@ class Authenticate extends Middleware
         // For web requests, redirect to the login page
         return $request->expectsJson() ? null : '/login';
     }
-    
+
     /**
      * Handle an unauthenticated request.
      *
@@ -35,11 +34,11 @@ class Authenticate extends Middleware
     protected function unauthenticated($request, array $guards)
     {
         // Allow form creation/updating without authentication
-        if ($request->is('api/forms') || 
+        if ($request->is('api/forms') ||
             preg_match('#^api/forms/\d+$#', $request->path()) && ($request->isMethod('PUT') || $request->isMethod('POST'))) {
             return;  // Just return without throwing an exception, which allows the request to continue
         }
-        
+
         parent::unauthenticated($request, $guards);
     }
 }
