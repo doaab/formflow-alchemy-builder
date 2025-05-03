@@ -1,4 +1,3 @@
-
 export interface Form {
   id?: number;
   title: string;
@@ -15,6 +14,7 @@ export interface Form {
   deleted_at?: string;
   responses_count?: number;
   user_id?: number;
+  elements?: FormElement[]; // Add elements property
 }
 
 export interface FormElement {

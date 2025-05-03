@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Services;
@@ -42,9 +43,10 @@ class FormResponseService
                 $element = $form->elements()->where('element_id', $answer['element_id'])->first();
 
                 if ($element) {
+                    // Store the answer, handling arrays properly with JSON encoding
                     $response->answers()->create([
                         'form_element_id' => $element->id,
-                        'value' => $answer['value'],
+                        'value' => $answer['value'], // The model will automatically handle JSON encoding/decoding
                     ]);
                 }
             }
@@ -185,19 +187,36 @@ class FormResponseService
             $element = $form->elements()->where('element_id', $answer['element_id'])->first();
 
             if ($element) {
-                DB::table('form_response_analytics')
-                    ->updateOrInsert(
-                        [
-                            'form_id' => $form->id,
-                            'element_id' => $answer['element_id'],
-                            'answer_value' => (string) $answer['value']
-                        ],
-                        [
-                            'count' => DB::raw('count + 1'),
-                            'updated_at' => now()
-                        ]
-                    );
+                // Handle both array and scalar values for analytics
+                if (is_array($answer['value'])) {
+                    // For array values (like checkboxes), create an entry for each selected option
+                    foreach ($answer['value'] as $selectedValue) {
+                        $this->incrementAnswerCount($form->id, $answer['element_id'], $selectedValue);
+                    }
+                } else {
+                    // For scalar values
+                    $this->incrementAnswerCount($form->id, $answer['element_id'], $answer['value']);
+                }
             }
         }
+    }
+
+    /**
+     * Increment answer count in analytics
+     */
+    private function incrementAnswerCount($formId, $elementId, $value)
+    {
+        DB::table('form_response_analytics')
+            ->updateOrInsert(
+                [
+                    'form_id' => $formId,
+                    'element_id' => $elementId,
+                    'answer_value' => (string) $value
+                ],
+                [
+                    'count' => DB::raw('count + 1'),
+                    'updated_at' => now()
+                ]
+            );
     }
 }

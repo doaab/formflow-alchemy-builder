@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Models;
@@ -18,6 +19,15 @@ class FormAnswer extends Model
         'form_response_id',
         'form_element_id',
         'value',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'value' => 'json', // Cast value to JSON to handle arrays properly
     ];
 
     /**

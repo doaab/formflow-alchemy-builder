@@ -8,8 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from 'sonner';
 import { API_URL } from '@/api/services/config';
 import { Form } from '@/api/types/formTypes';
-import { FormElement } from 'lucide-react';
 
+// Define the interface for URL parameters
 interface SurveyParams {
   slug: string;
 }
@@ -21,9 +21,11 @@ const SurveyForm = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState<boolean>(false);
-  const [startTime] = useState<number>(Date.now() / 1000); // Record start time in seconds
+  const [startTime] = useState<number>(Math.floor(Date.now() / 1000)); // Record start time in seconds
+  const [formCompleted, setFormCompleted] = useState<boolean>(false);
   
-  const { slug } = useParams<SurveyParams>();
+  const params = useParams<{ slug: string }>();
+  const slug = params.slug;
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -35,6 +37,7 @@ const SurveyForm = () => {
           return;
         }
         
+        console.log('Fetching form with slug:', slug);
         const response = await fetch(`${API_URL}/forms/by-slug/${slug}`, {
           method: 'GET',
           headers: {
@@ -54,6 +57,7 @@ const SurveyForm = () => {
         }
         
         const data = await response.json();
+        console.log('Form data loaded:', data);
         setForm(data);
         
         // Initialize form data with default values if available
@@ -62,6 +66,9 @@ const SurveyForm = () => {
           data.elements.forEach((element: any) => {
             if (element.default_value) {
               initialFormData[element.element_id] = element.default_value;
+            } else if (element.type === 'checkbox') {
+              // Initialize checkbox values as empty arrays
+              initialFormData[element.element_id] = [];
             }
           });
           setFormData(initialFormData);
@@ -134,6 +141,7 @@ const SurveyForm = () => {
     setSubmitting(true);
     
     try {
+      console.log('Preparing form data to submit');
       // Format the answers data
       const answers = Object.keys(formData).map(elementId => ({
         element_id: elementId,
@@ -147,6 +155,8 @@ const SurveyForm = () => {
         ip_address: '', // This will be filled by the server
         respondent_email: form.collect_email ? formData['email'] : null
       };
+      
+      console.log('Submitting form data:', responseData);
       
       const response = await fetch(`${API_URL}/forms/${slug}/responses`, {
         method: 'POST',
@@ -170,11 +180,8 @@ const SurveyForm = () => {
       setFormData({});
       
       // Show a completion message or screen
-      setForm(prevForm => ({
-        ...prevForm!,
-        completed: true
-      }));
-    } catch (error) {
+      setFormCompleted(true);
+    } catch (error: any) {
       console.error('Error submitting form:', error);
       toast.error(`Failed to submit form: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
@@ -204,6 +211,7 @@ const SurveyForm = () => {
         );
       
       case 'textarea':
+      case 'paragraph':
         return (
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">
@@ -293,7 +301,7 @@ const SurveyForm = () => {
                       if (e.target.checked) {
                         handleInputChange(element_id, [...currentValues, option.value]);
                       } else {
-                        handleInputChange(element_id, currentValues.filter(v => v !== option.value));
+                        handleInputChange(element_id, currentValues.filter((v: string) => v !== option.value));
                       }
                     }}
                     className="mr-2"
@@ -306,6 +314,7 @@ const SurveyForm = () => {
         );
         
       case 'select':
+      case 'dropdown':
         return (
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">
@@ -395,7 +404,7 @@ const SurveyForm = () => {
   }
   
   // Form completion state
-  if (form.completed) {
+  if (formCompleted) {
     return (
       <div className="container mx-auto p-4 max-w-3xl">
         <Card className="w-full">
