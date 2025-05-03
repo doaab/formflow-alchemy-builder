@@ -8,6 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from 'sonner';
 import { API_URL } from '@/api/services/config';
 import { Form } from '@/api/types/formTypes';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 // Define the interface for URL parameters
 interface SurveyParams {
@@ -23,6 +25,8 @@ const SurveyForm = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [startTime] = useState<number>(Math.floor(Date.now() / 1000)); // Record start time in seconds
   const [formCompleted, setFormCompleted] = useState<boolean>(false);
+  const [wizardMode, setWizardMode] = useState<boolean>(false);
+  const [pageBreaks, setPageBreaks] = useState<number[]>([]);
   
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
@@ -72,6 +76,23 @@ const SurveyForm = () => {
             }
           });
           setFormData(initialFormData);
+          
+          // Check if form has break elements (for wizard mode)
+          const breakIndices: number[] = [];
+          data.elements.forEach((element: any, index: number) => {
+            if (element.type === 'break') {
+              breakIndices.push(index);
+            }
+          });
+          
+          if (breakIndices.length > 0) {
+            setWizardMode(true);
+            setPageBreaks(breakIndices);
+            console.log("Wizard mode enabled with page breaks at:", breakIndices);
+          } else {
+            setWizardMode(false);
+            console.log("Standard form mode enabled");
+          }
         }
       } catch (err) {
         console.error('Error fetching form:', err);
@@ -84,23 +105,46 @@ const SurveyForm = () => {
     fetchForm();
   }, [slug]);
   
-  // Filter elements to exclude layout elements like section and break
-  const getFormElements = () => {
+  // Get all form elements except layout elements
+  const getAllFormElements = () => {
     if (!form?.elements) return [];
     
-    // First filter out section and break elements
+    // Sort elements by order
     return form.elements
-      .filter(element => !['section', 'break'].includes(element.type))
+      .filter(element => !['break'].includes(element.type))
       .sort((a, b) => a.order - b.order);
   };
   
-  // Get layout elements like section and break
-  const getLayoutElements = () => {
-    if (!form?.elements) return [];
+  // Get visible elements for current wizard step
+  const getVisibleElements = () => {
+    if (!wizardMode) {
+      // In standard mode, return all elements except breaks
+      return getAllFormElements();
+    }
     
-    return form.elements
-      .filter(element => ['section', 'break'].includes(element.type))
-      .sort((a, b) => a.order - b.order);
+    // In wizard mode, return only elements for the current step
+    const allElements = form?.elements || [];
+    const sortedElements = [...allElements].sort((a, b) => a.order - b.order);
+    
+    let startIndex = 0;
+    let endIndex = sortedElements.length;
+    
+    // Find the correct start index
+    if (currentStep > 0 && pageBreaks.length > 0) {
+      if (currentStep - 1 < pageBreaks.length) {
+        startIndex = pageBreaks[currentStep - 1] + 1; // Start after the previous page break
+      }
+    }
+    
+    // Find the correct end index
+    if (currentStep < pageBreaks.length) {
+      endIndex = pageBreaks[currentStep];
+    }
+    
+    // Return elements for current step
+    return sortedElements
+      .slice(startIndex, endIndex)
+      .filter(element => !['break'].includes(element.type));
   };
   
   const handleInputChange = (elementId: string, value: any) => {
@@ -111,19 +155,30 @@ const SurveyForm = () => {
   };
   
   const handleNextStep = () => {
-    const elements = getFormElements();
+    const visibleElements = getVisibleElements();
     
     // Check if current step's required fields are filled
-    const currentElement = elements[currentStep];
-    if (currentElement?.required && !formData[currentElement.element_id]) {
-      toast.error(`${currentElement.label} is required`);
+    const isValid = visibleElements.every(element => {
+      if (element.required && !formData[element.element_id]) {
+        toast.error(`${element.label} is required`);
+        return false;
+      }
+      return true;
+    });
+    
+    if (!isValid) {
       return;
     }
     
-    if (currentStep < elements.length - 1) {
-      setCurrentStep(currentStep + 1);
-      window.scrollTo(0, 0);
+    if (wizardMode) {
+      if (currentStep < pageBreaks.length) {
+        setCurrentStep(currentStep + 1);
+        window.scrollTo(0, 0);
+      } else {
+        handleSubmit();
+      }
     } else {
+      // In standard mode, just submit the form
       handleSubmit();
     }
   };
@@ -137,6 +192,12 @@ const SurveyForm = () => {
   
   const handleSubmit = async () => {
     if (!form) return;
+    
+    // Check if form is paused
+    if (form.status === 'paused' || form.is_paused) {
+      toast.error("This form is currently paused and not accepting responses");
+      return;
+    }
     
     setSubmitting(true);
     
@@ -210,7 +271,6 @@ const SurveyForm = () => {
           </div>
         );
       
-      case 'textarea':
       case 'paragraph':
         return (
           <div className="mb-4">
@@ -335,6 +395,17 @@ const SurveyForm = () => {
           </div>
         );
         
+      case 'section':
+        return (
+          <div className="mb-6">
+            <h3 className="text-lg font-medium">{label}</h3>
+            {element.description && (
+              <p className="text-sm text-gray-600 mt-1">{element.description}</p>
+            )}
+            <hr className="my-2" />
+          </div>
+        );
+        
       default:
         return (
           <div className="mb-4">
@@ -425,10 +496,36 @@ const SurveyForm = () => {
     );
   }
   
+  // Form is paused
+  if (form.status === 'paused' || form.is_paused) {
+    return (
+      <div className="container mx-auto p-4 max-w-3xl">
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-xl">{form.title}</CardTitle>
+            {form.description && <CardDescription>{form.description}</CardDescription>}
+          </CardHeader>
+          <CardContent>
+            <Alert variant="destructive" className="my-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Form Paused</AlertTitle>
+              <AlertDescription>
+                This form is currently not accepting responses. Please check back later.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={() => navigate('/')}>Back to Home</Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+  
   // Active form
-  const elements = getFormElements();
-  const currentElement = elements[currentStep];
-  const progress = elements.length > 0 ? (currentStep / elements.length) * 100 : 0;
+  const visibleElements = getVisibleElements();
+  const totalSteps = wizardMode ? pageBreaks.length + 1 : 1; // In wizard mode, total steps = number of page breaks + 1
+  const progress = wizardMode ? ((currentStep / totalSteps) * 100) : 0;
   
   return (
     <div className="container mx-auto p-4 max-w-3xl">
@@ -437,38 +534,46 @@ const SurveyForm = () => {
           <CardTitle className="text-xl">{form.title}</CardTitle>
           {form.description && <CardDescription>{form.description}</CardDescription>}
           
-          {form.show_progress_bar && elements.length > 1 && (
+          {form.show_progress_bar && wizardMode && totalSteps > 1 && (
             <div className="mt-4">
               <Progress value={progress} className="h-2" />
               <div className="text-xs text-right mt-1 text-gray-500">
-                Question {currentStep + 1} of {elements.length}
+                Step {currentStep + 1} of {totalSteps}
               </div>
             </div>
           )}
         </CardHeader>
         
         <CardContent>
-          {currentElement && (
-            <div className="py-4">
-              {renderFormElement(currentElement)}
-            </div>
-          )}
+          <div className="py-4 space-y-6">
+            {visibleElements.map((element) => (
+              <div key={element.element_id}>
+                {renderFormElement(element)}
+              </div>
+            ))}
+          </div>
         </CardContent>
         
         <CardFooter className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={handlePreviousStep}
-            disabled={currentStep === 0 || submitting}
-          >
-            Previous
-          </Button>
+          {wizardMode && (
+            <Button
+              variant="outline"
+              onClick={handlePreviousStep}
+              disabled={currentStep === 0 || submitting}
+            >
+              Previous
+            </Button>
+          )}
+          
+          {!wizardMode && (
+            <div></div> // Empty div to maintain flex spacing when not in wizard mode
+          )}
           
           <Button
             onClick={handleNextStep}
             disabled={submitting}
           >
-            {currentStep < elements.length - 1 ? 'Next' : 'Submit'}
+            {wizardMode && currentStep < pageBreaks.length ? 'Next' : 'Submit'}
           </Button>
         </CardFooter>
       </Card>

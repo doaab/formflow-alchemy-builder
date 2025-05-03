@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\API;
@@ -43,6 +42,9 @@ class FormController extends Controller
             })
             ->when($request->has('sort'), function ($query) use ($request) {
                 return $query->orderBy($request->sort, $request->order ?? 'asc');
+            })
+            ->when($request->has('status'), function ($query) use ($request) {
+                return $query->where('status', $request->status);
             })
             ->orderBy('updated_at', 'desc') // Default sort by last updated
             ->paginate($request->per_page ?? 10);
@@ -112,12 +114,19 @@ class FormController extends Controller
     public function getBySlug($slug)
     {
         $form = Form::where('slug', $slug)
-            ->where('is_published', true)
+            ->where(function($query) {
+                $query->where('status', 'published')
+                      ->orWhere('status', 'paused');
+            })
             ->firstOrFail();
 
-        return response()->json(
-            $this->formService->getFormWithElementsPublic($form)
-        );
+        // If form is paused, add a flag to inform the frontend
+        $isPaused = $form->status === 'paused';
+
+        $formData = $this->formService->getFormWithElementsPublic($form);
+        $formData->is_paused = $isPaused;
+
+        return response()->json($formData);
     }
 
     /**
@@ -134,6 +143,33 @@ class FormController extends Controller
         $form->save();
 
         return response()->json(['is_published' => $form->is_published]);
+    }
+
+    /**
+     * Update form status.
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $form = Form::findOrFail($id);
+
+        // Skip authorization for now
+        // $this->authorize('update', $form);
+
+        $request->validate([
+            'status' => 'required|in:draft,published,paused',
+        ]);
+
+        $form->status = $request->status;
+        
+        // Keep is_published in sync with status
+        $form->is_published = ($request->status === 'published');
+        
+        $form->save();
+
+        return response()->json([
+            'status' => $form->status, 
+            'is_published' => $form->is_published
+        ]);
     }
 
     /**

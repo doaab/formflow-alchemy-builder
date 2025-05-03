@@ -54,6 +54,7 @@ Route::prefix('forms')->group(function () {
         Route::put('/{form}', [FormController::class, 'update']);
         Route::delete('/{form}', [FormController::class, 'destroy']);
         Route::post('/{form}/toggle-publish', [FormController::class, 'togglePublish']);
+        Route::post('/{form}/status', [FormController::class, 'updateStatus']);
         Route::get('/{form}/analytics', [FormController::class, 'analytics']);
         
         // Form elements management

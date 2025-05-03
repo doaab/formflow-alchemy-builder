@@ -1,8 +1,11 @@
+
 export interface Form {
   id?: number;
   title: string;
   description: string;
   is_published?: boolean;
+  status?: 'draft' | 'published' | 'paused';
+  is_paused?: boolean;
   slug?: string;
   theme?: string;
   collect_email?: boolean;

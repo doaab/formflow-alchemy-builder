@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Models;
@@ -20,6 +21,7 @@ class Form extends Model
         'description',
         'user_id',
         'is_published',
+        'status',
         'slug',
         'theme',
         'collect_email',
@@ -49,6 +51,7 @@ class Form extends Model
     protected $attributes = [
         'user_id' => 1, // Set default user ID to 1 for anonymous forms
         'is_published' => false,
+        'status' => 'draft',
         'theme' => 'default',
         'collect_email' => false,
         'one_response_per_user' => false,
@@ -106,6 +109,30 @@ class Form extends Model
     }
 
     /**
+     * Check if the form is published.
+     */
+    public function isPublished()
+    {
+        return $this->status === 'published';
+    }
+
+    /**
+     * Check if the form is paused.
+     */
+    public function isPaused()
+    {
+        return $this->status === 'paused';
+    }
+
+    /**
+     * Check if the form is draft.
+     */
+    public function isDraft()
+    {
+        return $this->status === 'draft';
+    }
+
+    /**
      * Boot the model.
      */
     protected static function boot()
@@ -122,6 +149,11 @@ class Form extends Model
             if (empty($form->user_id)) {
                 // Use a default system user ID (typically 1) for anonymous forms
                 $form->user_id = 1;
+            }
+
+            // Set default status if empty
+            if (empty($form->status)) {
+                $form->status = 'draft';
             }
         });
     }
