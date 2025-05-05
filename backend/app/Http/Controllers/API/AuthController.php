@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\API;
@@ -86,13 +87,16 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
-        // Create a token for API access if needed
-        // $token = $user->createToken('auth_token')->plainTextToken;
+        // Make sure the user is properly authenticated after login
+        if (!Auth::check()) {
+            return response()->json([
+                'message' => 'Authentication failed despite successful credentials'
+            ], 500);
+        }
 
         return response()->json([
             'user' => $user,
             'message' => 'User logged in successfully',
-            // 'token' => $token,
         ]);
     }
 
@@ -105,12 +109,6 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::guard('web')->logout();
-
-        // Revoke all tokens if using token authentication
-        // if (Auth::check()) {
-        //     $user = Auth::user();
-        //     $user->tokens()->delete();
-        // }
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

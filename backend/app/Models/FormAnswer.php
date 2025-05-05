@@ -27,7 +27,7 @@ class FormAnswer extends Model
      * @var array
      */
     protected $casts = [
-        'value' => 'string', // We'll handle JSON conversion in the service
+        'value' => 'string', // We'll handle JSON conversion in accessors and mutators
     ];
 
     /**

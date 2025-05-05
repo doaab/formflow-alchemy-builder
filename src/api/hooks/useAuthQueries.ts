@@ -85,9 +85,7 @@ export const useCurrentUser = () => {
     },
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    // Ensure we're returning a value even in case of errors
-    retryOnMount: false,
-    // Make sure query doesn't throw when we get undefined
-    throwOnError: false,
+    // Explicitly ensure we return null rather than undefined
+    select: (data) => data || null,
   });
 };

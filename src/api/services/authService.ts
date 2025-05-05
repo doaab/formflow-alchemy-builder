@@ -1,4 +1,3 @@
-
 import { User } from '../types/authTypes';
 import { API_URL } from './config';
 
@@ -104,14 +103,14 @@ export const login = async (email: string, password: string): Promise<{user: Use
     
     // Verify authentication was successful after login
     try {
-      const isAuthenticated = await checkAuthStatus();
-      if (!isAuthenticated) {
-        console.error('Authentication verification failed after login');
-        // Continue anyway, don't throw error here as the login was technically successful
+      const authStatus = await checkAuthStatus();
+      if (!authStatus) {
+        console.log("Authentication verification after login: Not authenticated but continuing");
+      } else {
+        console.log("Authentication verification after login: Successful");
       }
     } catch (error) {
-      console.error('Error checking auth after login:', error);
-      // Continue anyway, don't throw error here
+      console.log('Auth check error after login, continuing anyway:', error);
     }
     
     return data;

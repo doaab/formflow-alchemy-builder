@@ -32,7 +32,11 @@ return [
         'https://preview--formflow-alchemy-builder.lovable.app',
     ],
 
-    'allowed_origins_patterns' => ['#^https?://.+\.lovableproject\.com$#'],
+    'allowed_origins_patterns' => [
+        '#^https?://.+\.lovableproject\.com$#',
+        '#^https?://localhost:[0-9]+$#',
+        '#^https?://127.0.0.1:[0-9]+$#',
+    ],
 
     'allowed_headers' => ['*'],
 

@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\API;
@@ -27,12 +28,17 @@ class FormResponseController extends Controller
         try {
             $form = Form::findOrFail($formId);
             
-            // Temporarily comment out authorization to debug CORS issue
-            // $this->authorize('view', $form);
-
-            $responses = $this->formResponseService->getResponsesByForm($form);
-
-            return response()->json($responses);
+            // Check if user is allowed to view responses
+            // Only form owner can view responses
+            if (Auth::check() && Auth::id() === $form->user_id) {
+                $responses = $this->formResponseService->getResponsesByForm($form);
+                return response()->json($responses);
+            }
+            
+            return response()->json([
+                'message' => 'You do not have permission to view these responses'
+            ], 403);
+            
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error retrieving responses: ' . $e->getMessage()
@@ -103,18 +109,28 @@ class FormResponseController extends Controller
      */
     public function show(Request $request, $formId, $responseId)
     {
-        $form = Form::findOrFail($formId);
-        $this->authorize('view', $form);
+        try {
+            $form = Form::findOrFail($formId);
+            
+            // Only form owner can view response details
+            if (!Auth::check() || Auth::id() !== $form->user_id) {
+                return response()->json(['message' => 'You do not have permission to view this response'], 403);
+            }
 
-        $response = FormResponse::findOrFail($responseId);
+            $response = FormResponse::findOrFail($responseId);
 
-        if ($response->form_id !== $form->id) {
-            return response()->json(['message' => 'Response does not belong to this form'], 404);
+            if ($response->form_id !== $form->id) {
+                return response()->json(['message' => 'Response does not belong to this form'], 404);
+            }
+
+            $responseWithAnswers = $this->formResponseService->getResponseWithAnswers($response);
+
+            return response()->json($responseWithAnswers);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error retrieving response: ' . $e->getMessage()
+            ], 500);
         }
-
-        $response = $this->formResponseService->getResponseWithAnswers($response);
-
-        return response()->json($response);
     }
 
     /**
@@ -122,10 +138,20 @@ class FormResponseController extends Controller
      */
     public function export(Request $request, $formId)
     {
-        $form = Form::findOrFail($formId);
-        $this->authorize('view', $form);
+        try {
+            $form = Form::findOrFail($formId);
+            
+            // Only form owner can export responses
+            if (!Auth::check() || Auth::id() !== $form->user_id) {
+                return response()->json(['message' => 'You do not have permission to export these responses'], 403);
+            }
 
-        return $this->formResponseService->exportResponses($form);
+            return $this->formResponseService->exportResponses($form);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error exporting responses: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -133,12 +159,22 @@ class FormResponseController extends Controller
      */
     public function statistics(Request $request, $formId)
     {
-        $form = Form::findOrFail($formId);
-        $this->authorize('view', $form);
+        try {
+            $form = Form::findOrFail($formId);
+            
+            // Only form owner can view statistics
+            if (!Auth::check() || Auth::id() !== $form->user_id) {
+                return response()->json(['message' => 'You do not have permission to view these statistics'], 403);
+            }
 
-        $stats = $this->formResponseService->getResponseStatistics($form);
+            $stats = $this->formResponseService->getResponseStatistics($form);
 
-        return response()->json($stats);
+            return response()->json($stats);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error retrieving statistics: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -146,18 +182,28 @@ class FormResponseController extends Controller
      */
     public function destroy(Request $request, $formId, $responseId)
     {
-        $form = Form::findOrFail($formId);
-        $this->authorize('view', $form);
+        try {
+            $form = Form::findOrFail($formId);
+            
+            // Only form owner can delete responses
+            if (!Auth::check() || Auth::id() !== $form->user_id) {
+                return response()->json(['message' => 'You do not have permission to delete this response'], 403);
+            }
 
-        $response = FormResponse::findOrFail($responseId);
+            $response = FormResponse::findOrFail($responseId);
 
-        if ($response->form_id !== $form->id) {
-            return response()->json(['message' => 'Response does not belong to this form'], 404);
+            if ($response->form_id !== $form->id) {
+                return response()->json(['message' => 'Response does not belong to this form'], 404);
+            }
+
+            $response->answers()->delete();
+            $response->delete();
+
+            return response()->json(['message' => 'Response deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error deleting response: ' . $e->getMessage()
+            ], 500);
         }
-
-        $response->answers()->delete();
-        $response->delete();
-
-        return response()->json(['message' => 'Response deleted successfully']);
     }
 }
