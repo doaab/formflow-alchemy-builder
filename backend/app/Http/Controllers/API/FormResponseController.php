@@ -24,12 +24,20 @@ class FormResponseController extends Controller
      */
     public function index(Request $request, $formId)
     {
-        $form = Form::findOrFail($formId);
-//        $this->authorize('view', $form);
+        try {
+            $form = Form::findOrFail($formId);
+            
+            // Temporarily comment out authorization to debug CORS issue
+            // $this->authorize('view', $form);
 
-        $responses = $this->formResponseService->getResponsesByForm($form);
+            $responses = $this->formResponseService->getResponsesByForm($form);
 
-        return response()->json($responses);
+            return response()->json($responses);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error retrieving responses: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -38,40 +46,56 @@ class FormResponseController extends Controller
      */
     public function store(Request $request, $slugOrId)
     {
-        // Check if the parameter is a numeric ID or a string slug
-        if (is_numeric($slugOrId)) {
-            $form = Form::findOrFail($slugOrId);
-        } else {
-            // Find by slug instead
-            $form = Form::where('slug', $slugOrId)
-                ->where('is_published', true)
-                ->firstOrFail();
-        }
-
-        // Check if one response per user is enabled and user has already submitted
-        if ($form->one_response_per_user && Auth::check()) {
-            $existingResponse = $form->responses()
-                ->where('user_id', Auth::id())
-                ->exists();
-
-            if ($existingResponse) {
-                return response()->json([
-                    'message' => 'You have already submitted a response to this form'
-                ], 422);
+        try {
+            // Check if the parameter is a numeric ID or a string slug
+            if (is_numeric($slugOrId)) {
+                $form = Form::findOrFail($slugOrId);
+            } else {
+                // Find by slug instead
+                $form = Form::where('slug', $slugOrId)
+                    ->where(function($query) {
+                        $query->where('status', 'published')
+                             ->orWhere('is_published', true);
+                    })
+                    ->firstOrFail();
             }
+
+            // Check if form is paused
+            if ($form->status === 'paused') {
+                return response()->json([
+                    'message' => 'This form is currently paused and not accepting responses'
+                ], 403);
+            }
+
+            // Check if one response per user is enabled and user has already submitted
+            if ($form->one_response_per_user && Auth::check()) {
+                $existingResponse = $form->responses()
+                    ->where('user_id', Auth::id())
+                    ->exists();
+
+                if ($existingResponse) {
+                    return response()->json([
+                        'message' => 'You have already submitted a response to this form'
+                    ], 422);
+                }
+            }
+
+            $startTime = $request->input('start_time');
+            $completionTime = null;
+
+            if ($startTime) {
+                $completionTime = time() - $startTime;
+            }
+
+            // Use all request data for now to avoid validation issues
+            $response = $this->formResponseService->createResponse($form, $request->all(), $completionTime);
+
+            return response()->json($response, 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        $startTime = $request->input('start_time');
-        $completionTime = null;
-
-        if ($startTime) {
-            $completionTime = time() - $startTime;
-        }
-
-        // Use all request data for now to avoid validation issues
-        $response = $this->formResponseService->createResponse($form, $request->all(), $completionTime);
-
-        return response()->json($response, 201);
     }
 
     /**

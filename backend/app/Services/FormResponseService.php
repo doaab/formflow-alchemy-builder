@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Services;
@@ -6,217 +5,183 @@ namespace App\Services;
 use App\Models\Form;
 use App\Models\FormResponse;
 use App\Models\FormAnswer;
-use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class FormResponseService
 {
     /**
-     * Get all responses for a form.
+     * Get all responses for a form with pagination
      */
-    public function getResponsesByForm(Form $form)
+    public function getResponsesByForm(Form $form, int $perPage = 10)
     {
         return $form->responses()
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate($perPage);
     }
-
+    
     /**
-     * Create a new form response.
+     * Create a new form response
      */
-    public function createResponse(Form $form, array $data, $completionTime = null)
+    public function createResponse(Form $form, array $data, ?int $completionTime = null)
     {
-        DB::beginTransaction();
-
-        try {
-            $response = $form->responses()->create([
-                'user_id' => $data['user_id'] ?? null,
-                'ip_address' => $data['ip_address'] ?? null,
-                'user_agent' => $data['user_agent'] ?? null,
-                'respondent_email' => $data['respondent_email'] ?? null,
-                'completion_time' => $completionTime,
-            ]);
-
-            // Create answers
-            foreach ($data['answers'] as $answer) {
-                // Get the form element by element_id
-                $element = $form->elements()->where('element_id', $answer['element_id'])->first();
-
-                if ($element) {
-                    // Store the answer, handling arrays properly with JSON encoding
-                    $response->answers()->create([
-                        'form_element_id' => $element->id,
-                        'value' => $answer['value'], // The model will automatically handle JSON encoding/decoding
-                    ]);
+        // Create the response
+        $response = new FormResponse();
+        $response->form_id = $form->id;
+        $response->user_id = Auth::check() ? Auth::id() : null;
+        $response->ip_address = request()->ip();
+        $response->user_agent = request()->userAgent();
+        $response->completion_time = $completionTime;
+        $response->respondent_email = $data['email'] ?? null;
+        $response->save();
+        
+        // Process the answers
+        if (isset($data['answers']) && is_array($data['answers'])) {
+            foreach ($data['answers'] as $elementId => $value) {
+                try {
+                    // Convert array values to JSON strings to prevent SQL errors
+                    if (is_array($value)) {
+                        $value = json_encode($value);
+                    }
+                    
+                    // Create the answer
+                    $answer = new FormAnswer();
+                    $answer->form_response_id = $response->id;
+                    $answer->form_element_id = $elementId;
+                    $answer->value = $value;
+                    $answer->save();
+                } catch (\Exception $e) {
+                    Log::error('Error saving form answer: ' . $e->getMessage() . ' for value: ' . json_encode($value));
+                    // Continue saving other answers even if one fails
                 }
             }
-
-            // Update analytics
-            $this->updateResponseAnalytics($form, $data['answers']);
-
-            DB::commit();
-            return $response;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
         }
+        
+        return $response;
     }
-
+    
     /**
-     * Get a response with all its answers.
+     * Get a response with its answers
      */
     public function getResponseWithAnswers(FormResponse $response)
     {
-        return $response->load([
-            'answers.formElement',
-            'user'
-        ]);
+        $response->load(['answers.formElement']);
+        
+        // Process any JSON values for display
+        foreach ($response->answers as $answer) {
+            if ($answer->value && $this->isJson($answer->value)) {
+                try {
+                    $answer->value = json_decode($answer->value);
+                } catch (\Exception $e) {
+                    // Keep as string if it can't be decoded
+                }
+            }
+        }
+        
+        return $response;
     }
-
+    
     /**
-     * Export form responses as CSV.
+     * Export responses as CSV
      */
     public function exportResponses(Form $form)
     {
-        // Get all form elements ordered by their order
-        $elements = $form->elements()
-            ->orderBy('order')
-            ->get();
-
-        // Get all responses with their answers
-        $responses = $form->responses()
-            ->with('answers')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $filename = 'form_responses_' . $form->id . '_' . date('Y-m-d') . '.csv';
-
+        $fileName = 'form_' . $form->id . '_responses_' . date('YmdHis') . '.csv';
+        
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
         ];
-
-        $callback = function() use ($responses, $elements) {
+        
+        $responses = $form->responses()->with('answers.formElement')->get();
+        
+        $callback = function() use ($responses) {
             $file = fopen('php://output', 'w');
-
-            // Create headers row
-            $headers = ['Response ID', 'Submitted At', 'Email', 'IP Address'];
-
-            foreach ($elements as $element) {
-                // Skip section and break elements
-                if (!in_array($element->type, ['section', 'break'])) {
-                    $headers[] = $element->label;
+            
+            // Add CSV header row
+            $header = ['Response ID', 'Submitted At', 'IP Address', 'User Agent', 'Completion Time', 'Email'];
+            $formElements = [];
+            
+            // Collect all unique form element labels
+            foreach ($responses as $response) {
+                foreach ($response->answers as $answer) {
+                    $label = $answer->formElement->label;
+                    if (!in_array($label, $formElements)) {
+                        $formElements[] = $label;
+                        $header[] = $label;
+                    }
                 }
             }
-
-            fputcsv($file, $headers);
-
-            // Add data rows
+            
+            fputcsv($file, $header);
+            
+            // Add CSV data rows
             foreach ($responses as $response) {
                 $row = [
                     $response->id,
-                    $response->created_at->format('Y-m-d H:i:s'),
-                    $response->respondent_email,
+                    $response->created_at,
                     $response->ip_address,
+                    $response->user_agent,
+                    $response->completion_time,
+                    $response->respondent_email,
                 ];
-
-                $answersByElementId = [];
-                foreach ($response->answers as $answer) {
-                    $answersByElementId[$answer->form_element_id] = $answer->value;
-                }
-
-                foreach ($elements as $element) {
-                    // Skip section and break elements
-                    if (!in_array($element->type, ['section', 'break'])) {
-                        $row[] = $answersByElementId[$element->id] ?? '';
+                
+                // Collect answers for each form element
+                $answers = [];
+                foreach ($formElements as $label) {
+                    $answerValue = '';
+                    foreach ($response->answers as $answer) {
+                        if ($answer->formElement->label === $label) {
+                            $answerValue = $answer->value;
+                            break;
+                        }
                     }
+                    $answers[] = $answerValue;
                 }
-
+                
+                $row = array_merge($row, $answers);
+                
                 fputcsv($file, $row);
             }
-
+            
             fclose($file);
         };
-
-        return new StreamedResponse($callback, 200, $headers);
+        
+        return response()->stream($callback, 200, $headers);
     }
-
+    
     /**
-     * Get response statistics.
+     * Get statistics about responses
      */
     public function getResponseStatistics(Form $form)
     {
         $totalResponses = $form->responses()->count();
-
-        $responsesByDay = $form->responses()
-            ->select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as count')
-            )
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
-
-        $avgCompletionTime = $form->responses()
-            ->whereNotNull('completion_time')
-            ->avg('completion_time');
-
+        
+        // Calculate average completion time
+        $totalCompletionTime = $form->responses()->sum('completion_time');
+        $averageCompletionTime = $totalResponses > 0 ? $totalCompletionTime / $totalResponses : 0;
+        
+        // Calculate completion rate (example, you might need to adjust based on your specific needs)
+        $totalStarts = $totalResponses; // Assuming each response is a completion
+        $completionRate = $totalStarts > 0 ? ($totalResponses / $totalStarts) * 100 : 0;
+        
         return [
             'total_responses' => $totalResponses,
-            'responses_by_day' => $responsesByDay,
-            'avg_completion_time' => round($avgCompletionTime),
+            'average_completion_time' => $averageCompletionTime,
+            'completion_rate' => $completionRate,
         ];
     }
-
+    
     /**
-     * Update response analytics.
+     * Check if a string is valid JSON
      */
-    private function updateResponseAnalytics(Form $form, array $answers)
+    private function isJson($string) 
     {
-        // Implementation for analytics update
-        // This can be moved to a background job for better performance
-        foreach ($answers as $answer) {
-            // Skip empty answers
-            if (empty($answer['value'])) {
-                continue;
-            }
-
-            $element = $form->elements()->where('element_id', $answer['element_id'])->first();
-
-            if ($element) {
-                // Handle both array and scalar values for analytics
-                if (is_array($answer['value'])) {
-                    // For array values (like checkboxes), create an entry for each selected option
-                    foreach ($answer['value'] as $selectedValue) {
-                        $this->incrementAnswerCount($form->id, $answer['element_id'], $selectedValue);
-                    }
-                } else {
-                    // For scalar values
-                    $this->incrementAnswerCount($form->id, $answer['element_id'], $answer['value']);
-                }
-            }
+        if (!is_string($string)) {
+            return false;
         }
-    }
-
-    /**
-     * Increment answer count in analytics
-     */
-    private function incrementAnswerCount($formId, $elementId, $value)
-    {
-        DB::table('form_response_analytics')
-            ->updateOrInsert(
-                [
-                    'form_id' => $formId,
-                    'element_id' => $elementId,
-                    'answer_value' => (string) $value
-                ],
-                [
-                    'count' => DB::raw('count + 1'),
-                    'updated_at' => now()
-                ]
-            );
+        
+        json_decode($string);
+        return json_last_error() === JSON_ERROR_NONE;
     }
 }

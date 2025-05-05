@@ -1,3 +1,4 @@
+
 <?php
 
 return [
@@ -17,7 +18,6 @@ return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout', 'register'],
 
-//    'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
@@ -30,7 +30,6 @@ return [
         'https://e005b4a0-4ab9-477a-8ffb-cd1345d72df5.lovableproject.com',
         'https://lovable.dev/projects/e005b4a0-4ab9-477a-8ffb-cd1345d72df5',
         'https://preview--formflow-alchemy-builder.lovable.app',
-        '*', // Allow all origins temporarily for debugging
     ],
 
     'allowed_origins_patterns' => ['#^https?://.+\.lovableproject\.com$#'],

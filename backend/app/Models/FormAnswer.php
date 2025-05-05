@@ -24,18 +24,18 @@ class FormAnswer extends Model
     /**
      * The attributes that should be cast.
      *
-     * @var array<string, string>
+     * @var array
      */
     protected $casts = [
-        'value' => 'json', // Cast value to JSON to handle arrays properly
+        'value' => 'string', // We'll handle JSON conversion in the service
     ];
 
     /**
-     * Get the response that owns the answer.
+     * Get the form response that this answer belongs to.
      */
-    public function response()
+    public function formResponse()
     {
-        return $this->belongsTo(FormResponse::class, 'form_response_id');
+        return $this->belongsTo(FormResponse::class);
     }
 
     /**
@@ -44,5 +44,41 @@ class FormAnswer extends Model
     public function formElement()
     {
         return $this->belongsTo(FormElement::class);
+    }
+    
+    /**
+     * Getter for value that handles JSON values
+     */
+    public function getValueAttribute($value)
+    {
+        if ($value && $this->isJson($value)) {
+            return json_decode($value);
+        }
+        return $value;
+    }
+    
+    /**
+     * Setter for value that handles arrays
+     */
+    public function setValueAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['value'] = json_encode($value);
+        } else {
+            $this->attributes['value'] = $value;
+        }
+    }
+    
+    /**
+     * Check if a string is valid JSON
+     */
+    private function isJson($string) 
+    {
+        if (!is_string($string)) {
+            return false;
+        }
+        
+        json_decode($string);
+        return json_last_error() === JSON_ERROR_NONE;
     }
 }
