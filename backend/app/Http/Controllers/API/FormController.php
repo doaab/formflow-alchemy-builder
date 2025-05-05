@@ -73,9 +73,12 @@ class FormController extends Controller
         // Skip authorization for now
         // $this->authorize('view', $form);
 
-        return response()->json(
-            $this->formService->getFormWithElements($form)
-        );
+        $formWithElements = $this->formService->getFormWithElements($form);
+        
+        // Debug output to ensure elements are loaded
+        \Log::info("Form elements count: " . count($formWithElements->elements));
+
+        return response()->json($formWithElements);
     }
 
     /**
@@ -140,9 +143,13 @@ class FormController extends Controller
         // $this->authorize('update', $form);
 
         $form->is_published = !$form->is_published;
+        $form->status = $form->is_published ? 'published' : 'draft';
         $form->save();
 
-        return response()->json(['is_published' => $form->is_published]);
+        return response()->json([
+            'is_published' => $form->is_published,
+            'status' => $form->status
+        ]);
     }
 
     /**
@@ -168,7 +175,8 @@ class FormController extends Controller
 
         return response()->json([
             'status' => $form->status, 
-            'is_published' => $form->is_published
+            'is_published' => $form->is_published,
+            'status_label' => $form->status_label
         ]);
     }
 

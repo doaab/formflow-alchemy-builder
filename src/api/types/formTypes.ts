@@ -5,6 +5,7 @@ export interface Form {
   description: string;
   is_published?: boolean;
   status?: 'draft' | 'published' | 'paused';
+  status_label?: string;
   is_paused?: boolean;
   slug?: string;
   theme?: string;

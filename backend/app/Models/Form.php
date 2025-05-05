@@ -63,7 +63,7 @@ class Form extends Model
      *
      * @var array
      */
-    protected $appends = ['responses_count'];
+    protected $appends = ['responses_count', 'status_label'];
 
     /**
      * Get the route key for the model.
@@ -73,6 +73,25 @@ class Form extends Model
     public function getRouteKeyName()
     {
         return 'slug';
+    }
+
+    /**
+     * Get a human-readable status label.
+     *
+     * @return string
+     */
+    public function getStatusLabelAttribute()
+    {
+        switch ($this->status) {
+            case 'published':
+                return 'Published';
+            case 'draft':
+                return 'Draft';
+            case 'paused':
+                return 'Paused';
+            default:
+                return ucfirst($this->status);
+        }
     }
 
     /**
@@ -154,6 +173,11 @@ class Form extends Model
             if (empty($form->status)) {
                 $form->status = 'draft';
             }
+        });
+
+        // Keep is_published in sync with status
+        static::saving(function ($form) {
+            $form->is_published = ($form->status === 'published');
         });
     }
 }

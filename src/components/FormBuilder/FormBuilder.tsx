@@ -7,15 +7,16 @@ import FormTitle from "./FormTitle";
 import DragDrop from "./DragDrop";
 import FormPreviewDialog from "./FormPreviewDialog";
 import { Button } from "../ui/button";
-import { Save, Loader2, BookOpen, List, AlertCircle, LogIn } from "lucide-react";
+import { Save, Loader2, BookOpen, List, AlertCircle, LogIn, Play, PauseCircle, FileEdit } from "lucide-react";
 import { useEffect, useState } from "react";
 import { saveFormToLocalStorage, prepareFormDataForBackend } from "@/utils/formUtils";
 import { useToast } from "@/components/ui/use-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { API_URL, checkBackendConnection } from "@/api/services/config";
-import { useSaveForm, useFormById, useFormElements } from "@/api/hooks/useFormQueries";
+import { useSaveForm, useFormById, useFormElements, useUpdateFormStatus } from "@/api/hooks/useFormQueries";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext";
+import FormStatusControl from "./FormStatusControl";
 
 const FormBuilder = () => {
   const [isSaving, setIsSaving] = useState(false);
@@ -44,6 +45,13 @@ const FormBuilder = () => {
     
     checkConnection();
   }, [toast]);
+  
+  useEffect(() => {
+    if (formData && formElements) {
+      console.log("Form data loaded:", formData);
+      console.log("Form elements loaded:", formElements);
+    }
+  }, [formData, formElements]);
   
   const handleSaveForm = async () => {
     try {
@@ -137,6 +145,7 @@ const FormBuilder = () => {
                   </Button>
                 </Link>
               )}
+              {formId && <FormStatusControl formId={parseInt(formId)} initialStatus={formData?.status} />}
               <FormPreviewDialog />
               <Button 
                 onClick={handleSaveForm} 

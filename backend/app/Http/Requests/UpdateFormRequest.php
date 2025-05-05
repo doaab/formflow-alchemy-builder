@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Requests;
@@ -32,6 +33,7 @@ class UpdateFormRequest extends FormRequest
                 Rule::unique('forms', 'slug')->ignore($this->route('form')),
             ],
             'theme' => 'nullable|string|max:50',
+            'status' => 'sometimes|string|in:draft,published,paused',
             'collect_email' => 'boolean',
             'one_response_per_user' => 'boolean',
             'show_progress_bar' => 'boolean',

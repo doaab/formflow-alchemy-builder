@@ -35,6 +35,9 @@ export const useFormElements = (formId: number) => {
     queryKey: ['form-elements', formId],
     queryFn: async () => {
       try {
+        if (!formId) return [];
+        
+        console.log(`Fetching elements for form ${formId}`);
         const response = await fetch(`${API_URL}/forms/${formId}/elements`, {
           headers: {
             'Content-Type': 'application/json',
@@ -46,7 +49,9 @@ export const useFormElements = (formId: number) => {
         
         if (!response.ok) throw new Error(`Failed to fetch elements: ${response.status}`);
         
-        return await response.json() as FormElement[];
+        const elements = await response.json() as FormElement[];
+        console.log(`Loaded ${elements.length} elements for form ${formId}`);
+        return elements;
       } catch (error) {
         console.error('Error fetching form elements:', error);
         return [] as FormElement[];
@@ -63,6 +68,7 @@ export const useFormById = (formId: number | string | undefined) => {
       try {
         if (!formId) throw new Error('No form ID provided');
         
+        console.log(`Fetching form ${formId} details`);
         const response = await fetch(`${API_URL}/forms/${formId}`, {
           headers: {
             'Content-Type': 'application/json',
@@ -74,7 +80,9 @@ export const useFormById = (formId: number | string | undefined) => {
         
         if (!response.ok) throw new Error(`Failed to fetch form: ${response.status}`);
         
-        return await response.json();
+        const form = await response.json();
+        console.log(`Form ${formId} loaded successfully:`, form);
+        return form;
       } catch (error) {
         console.error('Error fetching form:', error);
         throw error;
@@ -161,6 +169,50 @@ export const useSaveForm = () => {
     },
     onError: (error: Error) => {
       toast.error(`Error saving form: ${error.message}`);
+    }
+  });
+};
+
+export const useUpdateFormStatus = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ formId, status }: { formId: number, status: string }) => {
+      try {
+        // First get CSRF token
+        await getCsrfCookie();
+        
+        const response = await fetch(`${API_URL}/forms/${formId}/status`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ status }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData?.message || `Failed to update status: ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error("Error updating form status:", error);
+        throw error;
+      }
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ['forms'] });
+      queryClient.invalidateQueries({ queryKey: ['form', variables.formId] });
+      
+      toast.success(`Form status updated to ${data.status_label}`);
+    },
+    onError: (error) => {
+      toast.error(`Failed to update status: ${error instanceof Error ? error.message : String(error)}`);
     }
   });
 };

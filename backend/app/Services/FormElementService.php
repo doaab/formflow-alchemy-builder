@@ -15,12 +15,16 @@ class FormElementService
      */
     public function getElementsByForm(Form $form)
     {
-        return $form->elements()
+        $elements = $form->elements()
             ->orderBy('order')
             ->with(['options' => function ($query) {
                 $query->orderBy('order');
             }, 'conditionalRules'])
             ->get();
+            
+        \Log::info("Found " . $elements->count() . " elements for form " . $form->id);
+        
+        return $elements;
     }
 
     /**
@@ -31,6 +35,8 @@ class FormElementService
         DB::beginTransaction();
 
         try {
+            \Log::info("Creating element of type " . $data['type'] . " for form " . $form->id);
+            
             $element = $form->elements()->create([
                 'element_id' => $data['element_id'],
                 'type' => $data['type'],
@@ -57,8 +63,11 @@ class FormElementService
                 'properties' => $data['properties'] ?? null,
             ]);
 
+            \Log::info("Element created with ID: " . $element->id);
+
             // Create options if provided
             if (isset($data['options']) && is_array($data['options'])) {
+                \Log::info("Creating " . count($data['options']) . " options for element " . $element->id);
                 foreach ($data['options'] as $option) {
                     $element->options()->create([
                         'option_id' => $option['option_id'],
@@ -71,6 +80,7 @@ class FormElementService
 
             // Create conditional rules if provided
             if (isset($data['conditional_rules']) && is_array($data['conditional_rules'])) {
+                \Log::info("Creating " . count($data['conditional_rules']) . " conditional rules for element " . $element->id);
                 foreach ($data['conditional_rules'] as $rule) {
                     $element->conditionalRules()->create([
                         'question_id' => $rule['question_id'],
@@ -84,6 +94,7 @@ class FormElementService
             return $this->getElementWithDetails($element);
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error("Error creating element: " . $e->getMessage());
             throw $e;
         }
     }

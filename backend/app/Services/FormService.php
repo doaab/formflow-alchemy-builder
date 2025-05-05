@@ -35,10 +35,21 @@ class FormService
             }
         }
 
+        // Set default status if not provided
+        if (empty($data['status'])) {
+            $data['status'] = 'draft';
+        }
+
+        // Keep is_published in sync with status
+        $data['is_published'] = ($data['status'] === 'published');
+
         $form = Form::create($data);
+
+        \Log::info("Form created with ID: " . $form->id);
 
         // Create elements if provided
         if (isset($data['elements']) && is_array($data['elements'])) {
+            \Log::info("Creating " . count($data['elements']) . " elements for form " . $form->id);
             foreach ($data['elements'] as $index => $elementData) {
                 $elementData['order'] = $index;
                 $this->formElementService->createElement($form, $elementData);
@@ -60,6 +71,13 @@ class FormService
             if (!isset($data['user_id'])) {
                 $data['user_id'] = $form->user_id;
             }
+            
+            // Set status if provided and keep is_published in sync
+            if (isset($data['status'])) {
+                $data['is_published'] = ($data['status'] === 'published');
+            } elseif (isset($data['is_published'])) {
+                $data['status'] = $data['is_published'] ? 'published' : 'draft';
+            }
 
             // Update basic form data
             $form->update([
@@ -67,6 +85,8 @@ class FormService
                 'description' => $data['description'] ?? $form->description,
                 'user_id' => $data['user_id'],
                 'theme' => $data['theme'] ?? $form->theme,
+                'status' => $data['status'] ?? $form->status,
+                'is_published' => $data['is_published'] ?? $form->is_published,
                 'collect_email' => $data['collect_email'] ?? $form->collect_email,
                 'one_response_per_user' => $data['one_response_per_user'] ?? $form->one_response_per_user,
                 'show_progress_bar' => $data['show_progress_bar'] ?? $form->show_progress_bar,
@@ -75,13 +95,20 @@ class FormService
 
             // Handle elements update if provided
             if (isset($data['elements']) && is_array($data['elements'])) {
+                \Log::info("Updating elements for form " . $form->id . " with " . count($data['elements']) . " elements");
+                
                 // Delete all existing elements if we're doing a complete replacement
                 $form->elements()->delete();
 
                 // Create new elements
                 foreach ($data['elements'] as $index => $elementData) {
                     $elementData['order'] = $index;
-                    $this->formElementService->createElement($form, $elementData);
+                    try {
+                        $this->formElementService->createElement($form, $elementData);
+                    } catch (\Exception $e) {
+                        \Log::error("Error creating element: " . $e->getMessage());
+                        \Log::error("Element data: " . json_encode($elementData));
+                    }
                 }
             }
 
@@ -89,6 +116,8 @@ class FormService
             return $this->getFormWithElements($form->fresh());
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error("Error updating form: " . $e->getMessage());
+            \Log::error("Form data: " . json_encode($data));
             throw $e;
         }
     }
@@ -106,7 +135,7 @@ class FormService
      */
     public function getFormWithElements(Form $form)
     {
-        return $form->load([
+        $form = $form->load([
             'elements' => function ($query) {
                 $query->orderBy('order');
             },
@@ -115,6 +144,10 @@ class FormService
             },
             'elements.conditionalRules',
         ]);
+        
+        \Log::info("Loaded form with " . $form->elements->count() . " elements");
+        
+        return $form;
     }
 
     /**
