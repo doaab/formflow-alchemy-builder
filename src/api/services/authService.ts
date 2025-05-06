@@ -1,3 +1,4 @@
+
 import { User } from '../types/authTypes';
 import { API_URL } from './config';
 
@@ -110,7 +111,7 @@ export const login = async (email: string, password: string): Promise<{user: Use
         console.log("Authentication verification after login: Successful");
       }
     } catch (error) {
-      console.log('Auth check error after login, continuing anyway:', error);
+      console.warn('Auth check error after login, continuing anyway:', error);
     }
     
     return data;
@@ -152,7 +153,7 @@ export const logout = async (): Promise<{message: string}> => {
 /**
  * Get the current authenticated user
  */
-export const getCurrentUser = async (): Promise<{user: User}> => {
+export const getCurrentUser = async (): Promise<{user: User | null}> => {
   try {
     const response = await fetch(`${API_URL}/user`, {
       headers: {
@@ -164,7 +165,7 @@ export const getCurrentUser = async (): Promise<{user: User}> => {
     });
     
     if (response.status === 401) {
-      throw new Error('User not authenticated');
+      return { user: null };
     }
     
     if (!response.ok) {
@@ -174,7 +175,7 @@ export const getCurrentUser = async (): Promise<{user: User}> => {
     return await response.json();
   } catch (error) {
     console.error('Error getting current user:', error);
-    throw error;
+    return { user: null };
   }
 };
 

@@ -18,7 +18,7 @@ return [
 
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
-        'localhost,localhost:3000,localhost:5173,localhost:8080,127.0.0.1,127.0.0.1:8000,127.0.0.1:5173,::1,e005b4a0-4ab9-477a-8ffb-cd1345d72df5.lovableproject.com,lovable.dev',
+        'localhost,localhost:3000,localhost:5173,localhost:8080,127.0.0.1,127.0.0.1:8000,127.0.0.1:5173,127.0.0.1:8080,::1,e005b4a0-4ab9-477a-8ffb-cd1345d72df5.lovableproject.com,lovable.dev,*.lovableproject.com,preview--formflow-alchemy-builder.lovable.app',
         env('APP_URL') ? ','.parse_url(env('APP_URL'), PHP_URL_HOST) : ''
     ))),
 

@@ -71,7 +71,7 @@ class AuthController extends Controller
         }
 
         // Attempt to login
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::attempt($request->only('email', 'password'), true)) {
             return response()->json([
                 'message' => 'The provided credentials are incorrect.'
             ], 401);
@@ -125,7 +125,7 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         if (!Auth::check()) {
-            return response()->json(['message' => 'Not authenticated'], 401);
+            return response()->json(['user' => null]);
         }
 
         return response()->json(['user' => $request->user()]);

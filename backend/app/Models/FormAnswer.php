@@ -51,7 +51,7 @@ class FormAnswer extends Model
      */
     public function getValueAttribute($value)
     {
-        if ($value && $this->isJson($value)) {
+        if (is_string($value) && $this->isJson($value)) {
             return json_decode($value);
         }
         return $value;
@@ -62,7 +62,7 @@ class FormAnswer extends Model
      */
     public function setValueAttribute($value)
     {
-        if (is_array($value)) {
+        if (is_array($value) || is_object($value)) {
             $this->attributes['value'] = json_encode($value);
         } else {
             $this->attributes['value'] = $value;

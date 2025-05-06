@@ -85,7 +85,8 @@ export const useCurrentUser = () => {
     },
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    // Explicitly ensure we return null rather than undefined
-    select: (data) => data || null,
+    // IMPORTANT: Make sure we always return a value (null, not undefined)
+    // This fixes the "Query data cannot be undefined" error
+    select: (data) => data ?? null,
   });
 };

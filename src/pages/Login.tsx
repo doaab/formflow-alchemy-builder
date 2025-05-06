@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useLoginMutation } from "../api/hooks/useAuthQueries";
+import { useLoginMutation, useCurrentUser } from "../api/hooks/useAuthQueries";
 import { getCsrfCookie, checkAuthStatus } from "../api/services/authService";
 import { toast } from "sonner";
 
@@ -33,6 +33,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const { mutate: login, isPending, error } = useLoginMutation();
+  const { data: user } = useCurrentUser();
   const location = useLocation();
   const navigate = useNavigate();
   const [statusMessage, setStatusMessage] = useState<string>("");
@@ -43,18 +44,12 @@ export default function Login() {
   
   useEffect(() => {
     // Check if user is already logged in
-    const checkLoginStatus = async () => {
-      try {
-        const isAuthenticated = await checkAuthStatus();
-        if (isAuthenticated) {
-          toast.success("Already Logged In");
-          navigate('/forms');
-        }
-      } catch (error) {
-        console.error("Error checking login status:", error);
-      }
-    };
-    
+    if (user) {
+      toast.success("Already Logged In");
+      navigate('/forms');
+      return;
+    }
+
     // Pre-fetch CSRF token when component loads
     const preloadCsrf = async () => {
       try {
@@ -67,7 +62,6 @@ export default function Login() {
       }
     };
     
-    checkLoginStatus();
     preloadCsrf();
     
     if (redirectMessage) {
@@ -75,7 +69,7 @@ export default function Login() {
         description: redirectMessage,
       });
     }
-  }, [redirectMessage, navigate]);
+  }, [user, redirectMessage, navigate]);
   
   // Form definition
   const form = useForm<LoginFormValues>({
