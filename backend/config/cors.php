@@ -24,6 +24,8 @@ return [
         env('FRONTEND_URL', 'http://localhost:5173'),
         'http://localhost:8080',
         'http://127.0.0.1:8080',
+        '#^https?://localhost:[0-9]+$#',
+        '#^https?://127.0.0.1:[0-9]+$#',
         'http://192.168.1.2:8080',
         'http://localhost:5173', // Vite dev server default
         'http://127.0.0.1:5173',

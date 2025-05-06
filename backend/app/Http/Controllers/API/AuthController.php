@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\API;
@@ -38,11 +37,13 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
+        \Log::info('User logged in:', ['user' => auth()->user(), 'session' => session()->all()]);
 
         // Start session if not started
         if (!$request->session()->isStarted()) {
             $request->session()->start();
         }
+        \Log::info('SESSION after login', session()->all());
 
         // Regenerate session ID for security
         $request->session()->regenerate();

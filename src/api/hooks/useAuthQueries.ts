@@ -64,29 +64,33 @@ export const useLogoutMutation = () => {
   });
 };
 
+
+
 export const useCurrentUser = () => {
   return useQuery({
     queryKey: ['user'],
     queryFn: async () => {
       try {
-        // Go directly to the user endpoint instead of the auth check
-        const { user } = await getCurrentUser().catch(() => ({ user: null }));
-        return user;
-      } catch (error) {
-        // For unauthorized errors (401), just return null instead of throwing
-        if (error instanceof Error && (error.message.includes('401') || error.message.includes('Unauthorized') || error.message.includes('not authenticated'))) {
+        const result = await getCurrentUser();
+        const user = (result && 'user' in result) ? result.user : null;
+        return user ?? null;
+      } catch (error: unknown) {
+        if (
+            error instanceof Error &&
+            (error.message.includes('401') ||
+                error.message.includes('Unauthorized') ||
+                error.message.includes('not authenticated'))
+        ) {
           console.info('User not logged in yet');
           return null;
         }
-        // Only log other types of errors that aren't authentication related
         console.error('Error fetching current user:', error);
         return null;
       }
     },
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    // IMPORTANT: Make sure we always return a value (null, not undefined)
-    // This fixes the "Query data cannot be undefined" error
+    staleTime: 5 * 60 * 1000,
     select: (data) => data ?? null,
+    initialData: null,
   });
 };

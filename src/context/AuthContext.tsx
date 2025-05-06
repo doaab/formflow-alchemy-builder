@@ -9,14 +9,15 @@ interface AuthContextType {
   isAuthenticated: boolean;
   logout: () => void;
 }
-
+//const isAuthenticated = !isLoading && !!user;
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { data: user, isLoading } = useCurrentUser();
   const { mutate: logout } = useLogoutMutation();
-  
-  const isAuthenticated = !!user;
+
+  const isAuthenticated = !isLoading && !!user;
+
   
   return (
     <AuthContext.Provider value={{ user, isLoading, isAuthenticated, logout }}>

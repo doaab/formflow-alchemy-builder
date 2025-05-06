@@ -153,7 +153,7 @@ export const logout = async (): Promise<{message: string}> => {
 /**
  * Get the current authenticated user
  */
-export const getCurrentUser = async (): Promise<{user: User | null}> => {
+export const getCurrentUser = async (): Promise<User | null> => {
   try {
     const response = await fetch(`${API_URL}/user`, {
       headers: {
@@ -163,19 +163,21 @@ export const getCurrentUser = async (): Promise<{user: User | null}> => {
       },
       credentials: 'include',
     });
-    
+    console.log("Current user hook running...");
+
     if (response.status === 401) {
-      return { user: null };
+      return null;
     }
-    
+
     if (!response.ok) {
       throw new Error(`Failed to get user with status: ${response.status}`);
     }
-    
-    return await response.json();
+
+    const data = await response.json();
+    return data.user; // ✅ هذا ما تتوقعه React Query
   } catch (error) {
     console.error('Error getting current user:', error);
-    return { user: null };
+    return null;
   }
 };
 

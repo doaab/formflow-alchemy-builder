@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Models;
@@ -45,7 +44,7 @@ class FormAnswer extends Model
     {
         return $this->belongsTo(FormElement::class);
     }
-    
+
     /**
      * Getter for value that handles JSON values
      */
@@ -56,7 +55,7 @@ class FormAnswer extends Model
         }
         return $value;
     }
-    
+
     /**
      * Setter for value that handles arrays
      */
@@ -68,16 +67,16 @@ class FormAnswer extends Model
             $this->attributes['value'] = $value;
         }
     }
-    
+
     /**
      * Check if a string is valid JSON
      */
-    private function isJson($string) 
+    private function isJson($string)
     {
         if (!is_string($string)) {
             return false;
         }
-        
+
         json_decode($string);
         return json_last_error() === JSON_ERROR_NONE;
     }

@@ -8,6 +8,7 @@ use App\Http\Controllers\API\FormController;
 use App\Http\Controllers\API\FormElementController;
 use App\Http\Controllers\API\FormResponseController;
 use App\Http\Controllers\API\QuestionTypeController;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,11 +20,14 @@ use App\Http\Controllers\API\QuestionTypeController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
-// Authentication routes
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::middleware([
+    'web',
+    EnsureFrontendRequestsAreStateful::class,
+])->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
+});
 
 // User route - protected by auth
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -41,13 +45,13 @@ Route::prefix('forms')->group(function () {
     // Public routes
     Route::get('/', [FormController::class, 'index']);
     Route::get('/{form}', [FormController::class, 'show']);
-    
+
     // Form elements - public read access
     Route::get('/{form}/elements', [FormElementController::class, 'index']);
-    
+
     // Submit form responses - public access
     Route::post('/{slug}/responses', [FormResponseController::class, 'store']);
-    
+
     // Routes that need auth
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [FormController::class, 'store']);
@@ -56,13 +60,13 @@ Route::prefix('forms')->group(function () {
         Route::post('/{form}/toggle-publish', [FormController::class, 'togglePublish']);
         Route::post('/{form}/status', [FormController::class, 'updateStatus']);
         Route::get('/{form}/analytics', [FormController::class, 'analytics']);
-        
+
         // Form elements management
         Route::post('/{form}/elements', [FormElementController::class, 'store']);
         Route::put('/{form}/elements/{element}', [FormElementController::class, 'update']);
         Route::delete('/{form}/elements/{element}', [FormElementController::class, 'destroy']);
         Route::post('/{form}/elements/reorder', [FormElementController::class, 'reorder']);
-        
+
         // Form responses
         Route::get('/{form}/responses', [FormResponseController::class, 'index']);
         Route::get('/{form}/responses/{response}', [FormResponseController::class, 'show']);

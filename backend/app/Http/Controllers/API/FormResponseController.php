@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\API;
@@ -27,18 +26,18 @@ class FormResponseController extends Controller
     {
         try {
             $form = Form::findOrFail($formId);
-            
+
             // Check if user is allowed to view responses
             // Only form owner can view responses
             if (Auth::check() && Auth::id() === $form->user_id) {
                 $responses = $this->formResponseService->getResponsesByForm($form);
                 return response()->json($responses);
             }
-            
+
             return response()->json([
                 'message' => 'You do not have permission to view these responses'
             ], 403);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error retrieving responses: ' . $e->getMessage()
@@ -111,7 +110,7 @@ class FormResponseController extends Controller
     {
         try {
             $form = Form::findOrFail($formId);
-            
+
             // Only form owner can view response details
             if (!Auth::check() || Auth::id() !== $form->user_id) {
                 return response()->json(['message' => 'You do not have permission to view this response'], 403);
@@ -140,7 +139,7 @@ class FormResponseController extends Controller
     {
         try {
             $form = Form::findOrFail($formId);
-            
+
             // Only form owner can export responses
             if (!Auth::check() || Auth::id() !== $form->user_id) {
                 return response()->json(['message' => 'You do not have permission to export these responses'], 403);
@@ -161,7 +160,7 @@ class FormResponseController extends Controller
     {
         try {
             $form = Form::findOrFail($formId);
-            
+
             // Only form owner can view statistics
             if (!Auth::check() || Auth::id() !== $form->user_id) {
                 return response()->json(['message' => 'You do not have permission to view these statistics'], 403);
@@ -184,7 +183,7 @@ class FormResponseController extends Controller
     {
         try {
             $form = Form::findOrFail($formId);
-            
+
             // Only form owner can delete responses
             if (!Auth::check() || Auth::id() !== $form->user_id) {
                 return response()->json(['message' => 'You do not have permission to delete this response'], 403);
