@@ -7,14 +7,14 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Button } from "@/components/ui/button.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
 import { format } from "date-fns";
-import { fetchForms } from "@/api/formApi.ts";
+import { getAllForms, Form } from "@/api/formApi.ts";
 import { toast } from "sonner";
 import { API_URL } from "@/api/services/config.ts";
 
 const FormList = () => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['forms'],
-    queryFn: fetchForms,
+    queryFn: getAllForms,
     enabled: true, // Enable actual API calls
   });
   
@@ -80,7 +80,7 @@ const FormList = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              data?.data?.map((form) => (
+              data?.data?.map((form: Form) => (
                 <TableRow key={form.id}>
                   <TableCell className="font-medium">
                     <Link to={`/forms/${form.id}`} className="hover:underline text-primary">
@@ -110,11 +110,11 @@ const FormList = () => {
                   <TableCell>
                     <span className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
-                      {format(new Date(form.created_at), 'MMM d, yyyy')}
+                      {format(new Date(form.created_at || ''), 'MMM d, yyyy')}
                     </span>
                   </TableCell>
                   <TableCell>
-                    {format(new Date(form.updated_at), 'MMM d, yyyy')}
+                    {format(new Date(form.updated_at || ''), 'MMM d, yyyy')}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">

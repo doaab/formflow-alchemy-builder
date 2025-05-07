@@ -1,6 +1,10 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchForms, fetchFormResponses, fetchFormResponseDetails } from '../services/formService';
+import { 
+  getAllForms as fetchForms, 
+  getFormResponses as fetchFormResponses, 
+  getFormResponse as fetchFormResponseDetails 
+} from '../services/formService';
 import { API_URL } from '../services/config';
 import { toast } from 'sonner';
 import { getCsrfCookie } from '../services/authService';

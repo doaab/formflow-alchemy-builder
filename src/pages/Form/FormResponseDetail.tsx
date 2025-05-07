@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +8,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { fetchFormResponseDetails } from "@/api/formApi.ts";
+import { useFormResponseDetails } from "@/api/hooks/useFormQueries.ts";
 
 const ResponseMetadataCard = ({ icon: Icon, title, value, loading }: { 
   icon: React.ElementType, 
@@ -39,7 +38,8 @@ const FormResponseDetail = () => {
   
   const { data, isLoading, error } = useQuery({
     queryKey: ["form-response", Number(formId), Number(responseId)],
-    queryFn: () => fetchFormResponseDetails(Number(formId), Number(responseId)),
+    queryFn: () => useFormResponseDetails(Number(formId), Number(responseId)).data,
+    enabled: !!formId && !!responseId,
   });
 
   if (error) {
@@ -47,7 +47,7 @@ const FormResponseDetail = () => {
       <div className="container py-10">
         <div className="mx-auto max-w-3xl">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <p className="text-red-600">Failed to load response: {error.message}</p>
+            <p className="text-red-600">Failed to load response: {(error as Error).message}</p>
             <Button asChild className="mt-4">
               <Link to={`/forms/${formId}/responses`}>Return to Responses</Link>
             </Button>

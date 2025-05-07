@@ -1,9 +1,12 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { getCurrentUser, login, logout, register } from '../services/authService';
 import { AuthResponse } from '../types/authTypes';
 
 export const useAuth = () => {
-    const { data: user, isLoading, error } = useQuery(['currentUser'], getCurrentUser, {
+    const { data: user, isLoading, error } = useQuery({
+        queryKey: ['currentUser'],
+        queryFn: getCurrentUser,
         retry: 1,
         refetchOnWindowFocus: false,
     });

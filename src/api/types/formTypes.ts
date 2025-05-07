@@ -4,7 +4,7 @@ export interface Form {
   title: string;
   description: string;
   is_published?: boolean;
-  status?: 'draft' | 'published' | 'paused';
+  status?: FormStatus;
   status_label?: string;
   is_paused?: boolean;
   slug?: string;
@@ -134,4 +134,17 @@ export interface FormResponsesResponse {
   to: number | null;
   links?: PaginationLinks;
   meta?: PaginationMeta;
+}
+
+// Add missing types
+export type FormStatus = 'draft' | 'published' | 'paused';
+
+export interface QuestionType {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  created_at: string;
+  updated_at: string;
 }
