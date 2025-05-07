@@ -74,7 +74,7 @@ const FormDetail = () => {
 
   const handleEdit = () => {
     // Navigate to FormBuilder with the form ID
-    navigate(`/?formId=${formId}`);
+    navigate(`/forms/${formId}/edit`);
   };
 
   const handleViewResponses = () => {

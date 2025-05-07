@@ -17,14 +17,15 @@ class FormElementController extends Controller
     public function __construct(FormElementService $formElementService)
     {
         $this->formElementService = $formElementService;
+
     }
 
     /**
      * Display a listing of the resource.
      */
-    public function index(Form $form)
+    public function index(Request $request)
     {
-        // Public route - no need to check authorization
+        $form = \App\Models\Form::find($request->form);
         $elements = $this->formElementService->getElementsByForm($form);
 
         return response()->json($elements);

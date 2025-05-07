@@ -3,7 +3,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\API\FormController;
 use App\Http\Controllers\API\FormElementController;
 use App\Http\Controllers\API\FormResponseController;
@@ -38,7 +38,7 @@ Route::prefix('forms')->group(function () {
     Route::get('/{form}', [FormController::class, 'show']);
 
     // Form elements - public read access
-    Route::get('/{form}/elements', [FormElementController::class, 'index']);
+    Route::get('/{form}/element', [FormElementController::class, 'index']);
 
     // Submit form responses - public access
     Route::post('/{slug}/responses', [FormResponseController::class, 'store']);

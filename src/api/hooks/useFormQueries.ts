@@ -42,7 +42,7 @@ export const useFormElements = (formId: number) => {
         if (!formId) return [];
         
         console.log(`Fetching elements for form ${formId}`);
-        const response = await fetch(`${API_URL}/forms/${formId}/elements`, {
+        const response = await fetch(`${API_URL}/forms/${formId}/element`, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
