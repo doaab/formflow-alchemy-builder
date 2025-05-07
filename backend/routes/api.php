@@ -8,7 +8,6 @@ use App\Http\Controllers\API\FormController;
 use App\Http\Controllers\API\FormElementController;
 use App\Http\Controllers\API\FormResponseController;
 use App\Http\Controllers\API\QuestionTypeController;
-//use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,7 +44,7 @@ Route::prefix('forms')->group(function () {
     Route::post('/{slug}/responses', [FormResponseController::class, 'store']);
 
     // Routes that need auth
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware('auth:api')->group(function () {
         Route::post('/', [FormController::class, 'store']);
         Route::put('/{form}', [FormController::class, 'update']);
         Route::delete('/{form}', [FormController::class, 'destroy']);

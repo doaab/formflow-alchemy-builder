@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect } from 'react';
 import { User } from '../api/types/authTypes';
 import { useCurrentUser, useLogoutMutation } from '../api/hooks/useAuthQueries';
 
@@ -8,19 +8,27 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   logout: () => void;
+  token: string | null;
 }
-//const isAuthenticated = !isLoading && !!user;
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { data: user, isLoading } = useCurrentUser();
+  const { data: user, isLoading, refetch } = useCurrentUser();
   const { mutate: logout } = useLogoutMutation();
-
-  const isAuthenticated = !isLoading && !!user;
-
+  const token = localStorage.getItem('access_token');
+  
+  const isAuthenticated = !isLoading && !!user && !!token;
+  
+  // Refetch user when token changes
+  useEffect(() => {
+    if (token) {
+      refetch();
+    }
+  }, [token, refetch]);
   
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, logout, token }}>
       {children}
     </AuthContext.Provider>
   );

@@ -8,10 +8,10 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-export default function ProtectedRoute({ authenticationRequired = true, redirectTo = "/" }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+export default function ProtectedRoute({ authenticationRequired = true, redirectTo = "/login" }: ProtectedRouteProps) {
+  const { isAuthenticated, isLoading, token } = useAuth();
   const location = useLocation();
-
+  
   // Show loading spinner while checking authentication
   if (isLoading) {
     return (
@@ -22,12 +22,18 @@ export default function ProtectedRoute({ authenticationRequired = true, redirect
   }
 
   // If authentication is required but user is not authenticated, redirect to login
-  if (authenticationRequired && !isAuthenticated) {
-    return <Navigate to={redirectTo || "/login"} state={{ from: location }} replace />;
+  if (authenticationRequired && (!isAuthenticated || !token)) {
+    return (
+      <Navigate 
+        to={redirectTo || "/login"} 
+        state={{ from: location, message: "Please log in to access this page" }} 
+        replace 
+      />
+    );
   }
 
   // If authentication is not required and user is authenticated (e.g. login page), redirect to forms
-  if (!authenticationRequired && isAuthenticated) {
+  if (!authenticationRequired && isAuthenticated && token) {
     return <Navigate to="/forms" replace />;
   }
 

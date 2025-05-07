@@ -38,7 +38,7 @@ export const getCsrfCookie = async (): Promise<void> => {
 /**
  * Register a new user
  */
-export const register = async (name: string, email: string, password: string, passwordConfirmation: string): Promise<{user: User, message: string}> => {
+export const register = async (name: string, email: string, password: string, passwordConfirmation: string): Promise<{user: User, message: string, access_token?: string}> => {
   try {
     // Get CSRF cookie first
     await getCsrfCookie();
@@ -66,6 +66,11 @@ export const register = async (name: string, email: string, password: string, pa
     
     const data = await response.json();
     
+    // If we got a token, store it
+    if (data.access_token) {
+      localStorage.setItem('access_token', data.access_token);
+    }
+    
     return data;
   } catch (error) {
     console.error('Error during registration:', error);
@@ -76,7 +81,7 @@ export const register = async (name: string, email: string, password: string, pa
 /**
  * Login a user
  */
-export const login = async (email: string, password: string): Promise<{user: User, message: string}> => {
+export const login = async (email: string, password: string): Promise<{user: User, message: string, access_token?: string}> => {
   try {
     // Get CSRF cookie first
     await getCsrfCookie();
@@ -102,6 +107,11 @@ export const login = async (email: string, password: string): Promise<{user: Use
     
     const data = await response.json();
     
+    // Store the token for future requests
+    if (data.access_token) {
+      localStorage.setItem('access_token', data.access_token);
+    }
+    
     // Verify authentication was successful after login
     try {
       const authStatus = await checkAuthStatus();
@@ -126,8 +136,7 @@ export const login = async (email: string, password: string): Promise<{user: Use
  */
 export const logout = async (): Promise<{message: string}> => {
   try {
-    // Get CSRF cookie first
-    await getCsrfCookie();
+    const token = localStorage.getItem('access_token');
     
     const response = await fetch(`${API_URL}/logout`, {
       method: 'POST',
@@ -135,9 +144,13 @@ export const logout = async (): Promise<{message: string}> => {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
+        'Authorization': `Bearer ${token}`,
       },
       credentials: 'include',
     });
+    
+    // Remove the token regardless of server response
+    localStorage.removeItem('access_token');
     
     if (!response.ok) {
       throw new Error(`Logout failed with status: ${response.status}`);
@@ -146,6 +159,8 @@ export const logout = async (): Promise<{message: string}> => {
     return await response.json();
   } catch (error) {
     console.error('Error during logout:', error);
+    // Even if server logout failed, remove the local token
+    localStorage.removeItem('access_token');
     throw error;
   }
 };
@@ -155,17 +170,26 @@ export const logout = async (): Promise<{message: string}> => {
  */
 export const getCurrentUser = async (): Promise<User | null> => {
   try {
+    const token = localStorage.getItem('access_token');
+    
+    if (!token) {
+      console.log("No token found, user is not authenticated");
+      return null;
+    }
+
     const response = await fetch(`${API_URL}/user`, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
+        'Authorization': `Bearer ${token}`,
       },
       credentials: 'include',
     });
     console.log("Current user hook running...");
 
     if (response.status === 401) {
+      localStorage.removeItem('access_token'); // Clear invalid token
       return null;
     }
 
@@ -174,7 +198,7 @@ export const getCurrentUser = async (): Promise<User | null> => {
     }
 
     const data = await response.json();
-    return data.user; // ✅ هذا ما تتوقعه React Query
+    return data.user ?? null;
   } catch (error) {
     console.error('Error getting current user:', error);
     return null;
@@ -182,21 +206,28 @@ export const getCurrentUser = async (): Promise<User | null> => {
 };
 
 /**
- * Check auth status using the /user endpoint directly
- * This is more reliable than a separate auth/check endpoint
+ * Check auth status using the token directly
  */
 export const checkAuthStatus = async (): Promise<boolean> => {
   try {
+    const token = localStorage.getItem('access_token');
+    
+    if (!token) {
+      return false;
+    }
+    
     const response = await fetch(`${API_URL}/user`, {
       credentials: 'include',
       headers: {
         'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
+        'Authorization': `Bearer ${token}`,
       },
     });
     
     if (response.status === 401) {
       console.log('User not authenticated');
+      localStorage.removeItem('access_token'); // Clear invalid token
       return false;
     }
     
@@ -211,4 +242,24 @@ export const checkAuthStatus = async (): Promise<boolean> => {
     console.error('Error checking auth status:', error);
     return false;
   }
+};
+
+// Function to get auth headers for API calls
+export const getAuthHeaders = (): HeadersInit => {
+  const token = localStorage.getItem('access_token');
+  
+  if (!token) {
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+    };
+  }
+  
+  return {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    'Authorization': `Bearer ${token}`,
+  };
 };

@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useNavigate } from "react-router-dom";
-import { useRegisterMutation } from "../api/hooks/useAuthQueries";
-import { getCsrfCookie, checkAuthStatus } from "../api/services/authService";
+import { useRegisterMutation, useCurrentUser } from "../api/hooks/useAuthQueries";
+import { getCsrfCookie } from "../api/services/authService";
 import { toast } from "sonner";
 
 // UI Components
@@ -38,23 +38,18 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function Register() {
   const { mutate: register, isPending, error } = useRegisterMutation();
+  const { data: user } = useCurrentUser();
   const navigate = useNavigate();
   const [statusMessage, setStatusMessage] = useState<string>("");
   
   useEffect(() => {
     // Check if user is already logged in
-    const checkLoginStatus = async () => {
-      try {
-        const isAuthenticated = await checkAuthStatus();
-        if (isAuthenticated) {
-          toast.success("Already logged in");
-          navigate('/forms');
-        }
-      } catch (error) {
-        console.error("Error checking login status:", error);
-      }
-    };
-    
+    if (user && localStorage.getItem('access_token')) {
+      toast.success("Already logged in");
+      navigate('/forms');
+      return;
+    }
+
     // Pre-fetch CSRF token when component loads
     const preloadCsrf = async () => {
       try {
@@ -67,9 +62,8 @@ export default function Register() {
       }
     };
     
-    checkLoginStatus();
     preloadCsrf();
-  }, [navigate]);
+  }, [user, navigate]);
   
   // Form definition
   const form = useForm<RegisterFormValues>({
@@ -89,14 +83,6 @@ export default function Register() {
       email: values.email,
       password: values.password,
       passwordConfirmation: values.passwordConfirmation
-    }, {
-      onSuccess: () => {
-        toast.success("Registration successful");
-        navigate('/forms');
-      },
-      onError: (error) => {
-        toast.error(`Registration failed: ${error.message}`);
-      }
     });
   }
   

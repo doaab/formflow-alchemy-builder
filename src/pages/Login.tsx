@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLoginMutation, useCurrentUser } from "../api/hooks/useAuthQueries";
-import { getCsrfCookie, checkAuthStatus } from "../api/services/authService";
+import { getCsrfCookie } from "../api/services/authService";
 import { toast } from "sonner";
 
 // UI Components
@@ -40,11 +40,11 @@ export default function Login() {
   
   // Check if we were redirected from another page with a message
   const redirectMessage = location.state?.message;
-  const redirectFrom = location.state?.from;
+  const redirectFrom = location.state?.from?.pathname || "/forms";
   
   useEffect(() => {
     // Check if user is already logged in
-    if (user) {
+    if (user && localStorage.getItem('access_token')) {
       toast.success("Already Logged In");
       navigate('/forms');
       return;
@@ -85,19 +85,6 @@ export default function Login() {
     login({
       email: values.email,
       password: values.password
-    }, {
-      onSuccess: (data) => {
-        toast.success("Login successful");
-        // If there was a redirect path, go back to it after login
-        if (redirectFrom) {
-          navigate(redirectFrom);
-        } else {
-          navigate('/forms');
-        }
-      },
-      onError: (error) => {
-        toast.error(`Login failed: ${error.message}`);
-      }
     });
   }
   

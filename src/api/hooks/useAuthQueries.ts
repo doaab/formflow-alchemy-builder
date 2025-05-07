@@ -34,10 +34,9 @@ export const useLoginMutation = () => {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(['user'], data.user);
-      // Force refetch user data to ensure session is active
-      queryClient.invalidateQueries({ queryKey: ['user'] });
       toast.success(data.message || 'Login successful');
-      // Don't navigate here, we'll do it in the component with proper redirects
+      // Navigate after successful login
+      navigate('/forms');
     },
     onError: (error: Error) => {
       console.error("Login error:", error);
@@ -59,12 +58,13 @@ export const useLogoutMutation = () => {
       navigate('/login');
     },
     onError: (error: Error) => {
+      // Even if server logout fails, clear local user data
+      queryClient.setQueryData(['user'], null);
       toast.error(error.message || 'Logout failed');
+      navigate('/login');
     }
   });
 };
-
-
 
 export const useCurrentUser = () => {
   return useQuery({
@@ -72,14 +72,13 @@ export const useCurrentUser = () => {
     queryFn: async () => {
       try {
         const result = await getCurrentUser();
-        const user = (result && 'user' in result) ? result.user : null;
-        return user ?? null;
+        return result ?? null;
       } catch (error: unknown) {
         if (
-            error instanceof Error &&
-            (error.message.includes('401') ||
-                error.message.includes('Unauthorized') ||
-                error.message.includes('not authenticated'))
+          error instanceof Error &&
+          (error.message.includes('401') ||
+           error.message.includes('Unauthorized') ||
+           error.message.includes('not authenticated'))
         ) {
           console.info('User not logged in yet');
           return null;
@@ -90,7 +89,6 @@ export const useCurrentUser = () => {
     },
     retry: false,
     staleTime: 5 * 60 * 1000,
-    select: (data) => data ?? null,
     initialData: null,
   });
 };
