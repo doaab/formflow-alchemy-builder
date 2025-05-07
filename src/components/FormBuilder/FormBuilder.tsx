@@ -1,4 +1,3 @@
-
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { FormBuilderProvider, useFormBuilder } from "@/context/FormBuilderContext";
@@ -10,7 +9,7 @@ import { Button } from "../ui/button";
 import { Save, Loader2, BookOpen, List, AlertCircle, LogIn, Play, PauseCircle, FileEdit } from "lucide-react";
 import { useEffect, useState } from "react";
 import { saveFormToLocalStorage, prepareFormDataForBackend } from "@/utils/formUtils";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { API_URL, checkBackendConnection } from "@/api/services/config";
 import { useSaveForm, useFormById, useFormElements, useUpdateFormStatus } from "@/api/hooks/useFormQueries";
@@ -27,7 +26,7 @@ const FormBuilder = () => {
   const { user, isAuthenticated } = useAuth();
   const { formId } = useParams<{ formId?: string }>();
   
-  const { data: formData, isLoading: isLoadingForm } = useFormById(formId);
+  const { data: formData, isLoading: isLoadingForm } = useFormById(formId ? parseInt(formId) : undefined);
   const { data: formElements, isLoading: isLoadingElements } = useFormElements(formId ? parseInt(formId) : 0);
   
   useEffect(() => {

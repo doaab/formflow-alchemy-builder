@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.t
 import { Separator } from "@/components/ui/separator.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { useFormResponseDetails } from "@/api/hooks/useFormQueries.ts";
+import { FormResponseWithAnswers } from "@/api/types/formTypes.ts";
 
 const ResponseMetadataCard = ({ icon: Icon, title, value, loading }: { 
   icon: React.ElementType, 
@@ -38,9 +40,12 @@ const FormResponseDetail = () => {
   
   const { data, isLoading, error } = useQuery({
     queryKey: ["form-response", Number(formId), Number(responseId)],
-    queryFn: () => useFormResponseDetails(Number(formId), Number(responseId)).data,
+    queryFn: () => useFormResponseDetails(Number(formId), Number(responseId)),
     enabled: !!formId && !!responseId,
   });
+
+  // Type assertion to ensure TypeScript knows data has answers
+  const responseData = data as FormResponseWithAnswers;
 
   if (error) {
     return (
@@ -77,7 +82,7 @@ const FormResponseDetail = () => {
           {isLoading ? (
             <Skeleton className="h-4 w-16" />
           ) : (
-            new Date(data?.created_at || "").toLocaleDateString()
+            new Date(responseData?.created_at || "").toLocaleDateString()
           )}
         </Badge>
       </div>
@@ -88,14 +93,14 @@ const FormResponseDetail = () => {
         <ResponseMetadataCard
           icon={User}
           title="Respondent"
-          value={data?.respondent_email}
+          value={responseData?.respondent_email}
           loading={isLoading}
         />
         <ResponseMetadataCard
           icon={Clock}
           title="Completion Time"
-          value={data?.completion_time ? 
-            `${Math.floor(data.completion_time / 60)}m ${data.completion_time % 60}s` : 
+          value={responseData?.completion_time ? 
+            `${Math.floor(responseData.completion_time / 60)}m ${responseData.completion_time % 60}s` : 
             null
           }
           loading={isLoading}
@@ -103,8 +108,8 @@ const FormResponseDetail = () => {
         <ResponseMetadataCard
           icon={Calendar}
           title="Submitted On"
-          value={data?.created_at ? 
-            new Date(data.created_at).toLocaleString() : 
+          value={responseData?.created_at ? 
+            new Date(responseData.created_at).toLocaleString() : 
             null
           }
           loading={isLoading}
@@ -112,7 +117,7 @@ const FormResponseDetail = () => {
         <ResponseMetadataCard
           icon={Globe}
           title="IP Address"
-          value={data?.ip_address}
+          value={responseData?.ip_address}
           loading={isLoading}
         />
       </div>
@@ -137,8 +142,8 @@ const FormResponseDetail = () => {
                 <Skeleton className="h-16 w-full" />
               </div>
             </>
-          ) : data?.answers?.length ? (
-            data.answers.map((answer, index) => (
+          ) : responseData?.answers?.length ? (
+            responseData.answers.map((answer, index) => (
               <div key={index} className="space-y-2">
                 <h3 className="font-medium">{answer.formElement?.label || "Question"}</h3>
                 <div className="rounded-md border p-3 bg-muted/30">

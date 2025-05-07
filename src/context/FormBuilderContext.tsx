@@ -56,8 +56,12 @@ export const FormBuilderProvider: React.FC<FormBuilderProviderProps> = ({
   useEffect(() => {
     if (initialFormData && initialFormElements && !isInitialized) {
       try {
+        console.log("Initializing form builder with existing form:", initialFormData);
+        console.log("Elements loaded:", initialFormElements.length);
+        
         // Convert backend form model to frontend form data structure
         const convertedElements = initialFormElements.map(element => {
+          console.log("Converting element:", element);
           const baseElement: any = {
             id: element.element_id,
             type: element.type as QuestionType,
@@ -129,7 +133,7 @@ export const FormBuilderProvider: React.FC<FormBuilderProviderProps> = ({
         });
         
         setIsInitialized(true);
-        console.log("Initialized form builder with existing form:", initialFormData.title);
+        console.log("Successfully initialized form builder with existing form:", initialFormData.title);
         console.log("Elements loaded:", convertedElements.length);
         
       } catch (error) {
