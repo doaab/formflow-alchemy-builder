@@ -1,173 +1,73 @@
 <?php
+namespace App\Http\Controllers;
 
-namespace App\Http\Controllers\API;
-
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    /**
-     * Register a new user
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
         ]);
 
-        Auth::login($user);
-        \Log::info('User logged in:', ['user' => auth()->user(), 'session' => session()->all()]);
-
-        // Start session if not started
-        if (!$request->session()->isStarted()) {
-            $request->session()->start();
-        }
-        \Log::info('SESSION after login', session()->all());
-
-        // Regenerate session ID for security
-        $request->session()->regenerate();
+        $token = $user->createToken('auth_token')->accessToken;
 
         return response()->json([
             'user' => $user,
+            'access_token' => $token,
             'message' => 'User registered successfully',
-        ], 201);
+        ]);
     }
 
-    /**
-     * Login user and create session
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email',
-            'password' => 'required|string',
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            $token = $user->createToken('auth_token')->accessToken;
 
-        // Attempt to login
-        if (!Auth::attempt($request->only('email', 'password'), true)) {
             return response()->json([
-                'message' => 'The provided credentials are incorrect.'
-            ], 401);
+                'user' => $user,
+                'access_token' => $token,
+                'message' => 'User logged in successfully',
+            ]);
         }
 
-        // Start session if not started
-        if (!$request->session()->isStarted()) {
-            $request->session()->start();
-        }
-
-        // Regenerate session ID for security
-        $request->session()->regenerate();
-
-        $user = Auth::user();
-
-        // Make sure the user is properly authenticated after login
-        if (!Auth::check()) {
-            return response()->json([
-                'message' => 'Authentication failed despite successful credentials'
-            ], 500);
-        }
-
-        return response()->json([
-            'user' => $user,
-            'message' => 'User logged in successfully',
-        ]);
+        return response()->json(['message' => 'Invalid credentials'], 401);
     }
 
-    /**
-     * Log the user out of the application.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
+        $request->user()->token()->revoke();
         return response()->json(['message' => 'User logged out successfully']);
     }
 
-    /**
-     * Get the authenticated user.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function user(Request $request)
     {
-        if (!Auth::check()) {
-            return response()->json(['user' => null]);
-        }
-
         return response()->json(['user' => $request->user()]);
     }
 
-    /**
-     * Check if user is authenticated
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function check(Request $request)
-    {
-        return response()->json([
-            'authenticated' => Auth::check(),
-            'user' => Auth::check() ? Auth::user() : null,
-        ]);
-    }
-
-    /**
-     * Debug endpoint to check token information
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
-    public function debug(Request $request)
-    {
-        $sessionId = $request->session()->getId();
-        $tokens = [];
-
-        if (Auth::check()) {
-            $user = Auth::user();
-            $tokens = PersonalAccessToken::where('tokenable_id', $user->id)->get();
-        }
-
-        return response()->json([
-            'session_id' => $sessionId,
-            'tokens' => $tokens,
-            'authenticated' => Auth::check(),
-            'user' => Auth::check() ? Auth::user() : null,
-            'session_data' => $request->session()->all(),
-        ]);
-    }
+//    public function getForms(Request $request)
+//    {
+//// استخدم FormService لجلب النماذج
+//        $formService = app(\App\Services\FormService::class);
+//        $forms = $request->user()->forms; // افترض أن لديك علاقة في نموذج User
+//        return response()->json($forms);
+//    }
 }

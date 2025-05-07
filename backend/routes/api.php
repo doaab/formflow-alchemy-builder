@@ -8,7 +8,7 @@ use App\Http\Controllers\API\FormController;
 use App\Http\Controllers\API\FormElementController;
 use App\Http\Controllers\API\FormResponseController;
 use App\Http\Controllers\API\QuestionTypeController;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+//use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,20 +20,12 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-Route::middleware([
-    'web',
-    EnsureFrontendRequestsAreStateful::class,
-])->group(function () {
-    Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 });
-
-// User route - protected by auth
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 // Question types - public access
 Route::get('/question-types', [QuestionTypeController::class, 'index']);
 
