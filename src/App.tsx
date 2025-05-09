@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import AppRoutes from './routes/AppRoutes';
 import { AuthProvider } from './context/AuthContext';
+import { TranslationProvider } from './context/TranslationContext';
 import './App.css';
 
 // Create a query client
@@ -21,10 +22,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
-          <AppRoutes />
-          <Toaster position="top-right" />
-        </AuthProvider>
+        <TranslationProvider>
+          <AuthProvider>
+            <AppRoutes />
+            <Toaster position="top-right" />
+          </AuthProvider>
+        </TranslationProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );

@@ -1,150 +1,58 @@
-
 export interface Form {
-  id?: number;
+  id: number;
+  user_id: number | null;
   title: string;
-  description: string;
-  is_published?: boolean;
-  status?: FormStatus;
-  status_label?: string;
-  is_paused?: boolean;
-  slug?: string;
-  theme?: string;
-  collect_email?: boolean;
-  one_response_per_user?: boolean;
-  show_progress_bar?: boolean;
-  shuffle_questions?: boolean;
-  created_at?: string;
-  updated_at?: string;
-  deleted_at?: string;
-  responses_count?: number;
-  user_id?: number;
-  elements?: FormElement[]; // Add elements property
+  description: string | null;
+  slug: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  form_elements?: FormElement[];
 }
 
 export interface FormElement {
   id: number;
   form_id: number;
-  element_id: string;
+  question: string;
   type: string;
-  label: string;
-  placeholder: string | null;
-  default_value: string | null;
+  options: string[] | null;
   required: boolean;
   order: number;
-  confirm_email: boolean | null;
-  max_stars: number | null;
-  address_expanded: boolean | null;
-  address_street1: boolean | null;
-  address_street2: boolean | null;
-  address_city: boolean | null;
-  address_state: boolean | null;
-  address_zipcode: boolean | null;
-  address_country: boolean | null;
-  default_country: string | null;
-  allowed_countries: string[] | null;
-  description: string | null;
-  conditional_logic_enabled: boolean | null;
-  conditional_action: string | null;
-  conditional_logic_gate: string | null;
-  properties: any | null;
-  options?: FormElementOption[];
-  conditionalRules?: ConditionalRule[];
+  created_at: string;
+  updated_at: string;
 }
 
-export interface FormElementOption {
-  id: number;
-  form_element_id: number;
-  option_id: string;
-  label: string;
-  value: string;
-  order: number;
+export interface FormStatus {
+  DRAFT: string;
+  PUBLISHED: string;
+  ARCHIVED: string;
 }
 
-export interface ConditionalRule {
+export interface QuestionType {
   id: number;
-  form_element_id: number;
-  question_id: string;
-  operator: string;
-  value: string;
+  name: string;
+  slug: string;
 }
 
 export interface FormResponse {
   id: number;
   form_id: number;
   user_id: number | null;
-  ip_address: string | null;
-  location: string | null;
-  completion_time: number | null;
+  respondent_email?: string;
+  completed_at: string;
   created_at: string;
   updated_at: string;
-  user_agent?: string | null;
-  respondent_email?: string | null;
 }
 
 export interface FormAnswer {
   id: number;
   form_response_id: number;
   form_element_id: number;
-  value: string | null;
-  created_at?: string;
-  formElement?: FormElement;
+  answer: string;
+  question?: string;
 }
 
 export interface FormResponseWithAnswers extends FormResponse {
   answers: FormAnswer[];
-}
-
-// API response types
-export interface PaginationLinks {
-  first: string;
-  last: string;
-  prev: string | null;
-  next: string | null;
-}
-
-export interface PaginationMeta {
-  current_page: number;
-  from: number | null;
-  last_page: number;
-  path: string;
-  per_page: number;
-  to: number | null;
-  total: number;
-}
-
-export interface FormsResponse {
-  data: Form[];
-  total: number;
-  per_page: number;
-  current_page: number;
-  last_page: number;
-  from: number | null;
-  to: number | null;
-  links?: PaginationLinks;
-  meta?: PaginationMeta;
-}
-
-export interface FormResponsesResponse {
-  data: FormResponse[];
-  total: number;
-  per_page: number;
-  current_page: number;
-  last_page: number;
-  from: number | null;
-  to: number | null;
-  links?: PaginationLinks;
-  meta?: PaginationMeta;
-}
-
-// Add missing types
-export type FormStatus = 'draft' | 'published' | 'paused';
-
-export interface QuestionType {
-  id: number;
-  name: string;
-  slug: string;
-  description: string | null;
-  icon: string | null;
-  created_at: string;
-  updated_at: string;
+  form?: Form;
 }

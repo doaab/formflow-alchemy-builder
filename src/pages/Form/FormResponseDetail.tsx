@@ -1,159 +1,76 @@
 
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, User, Clock, Calendar, Globe, Monitor } from "lucide-react";
-
-import { Badge } from "@/components/ui/badge.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
-import { Separator } from "@/components/ui/separator.tsx";
-import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { useFormResponseDetails } from "@/api/hooks/useFormQueries.ts";
-import { FormResponseWithAnswers } from "@/api/types/formTypes.ts";
-
-const ResponseMetadataCard = ({ icon: Icon, title, value, loading }: { 
-  icon: React.ElementType, 
-  title: string, 
-  value: string | null | undefined,
-  loading?: boolean
-}) => (
-  <div className="flex items-start space-x-4 rounded-md border p-4">
-    <div className="rounded-full bg-primary/10 p-2">
-      <Icon className="h-4 w-4 text-primary" />
-    </div>
-    <div className="space-y-1">
-      <p className="text-sm font-medium">{title}</p>
-      {loading ? (
-        <Skeleton className="h-5 w-32" />
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          {value || <span className="italic">Not available</span>}
-        </p>
-      )}
-    </div>
-  </div>
-);
+import React, { useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useFormResponseDetails } from '@/api/hooks/useFormQueries';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowLeft } from 'lucide-react';
+import { FormResponseWithAnswers } from '@/api/types/formTypes';
 
 const FormResponseDetail = () => {
-  const { formId, responseId } = useParams<{ formId: string, responseId: string }>();
-  
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["form-response", Number(formId), Number(responseId)],
-    queryFn: () => useFormResponseDetails(Number(formId), Number(responseId)),
-    enabled: !!formId && !!responseId,
-  });
+  const { formId, responseId } = useParams<{ formId: string; responseId: string }>();
+  const { data, isLoading, refetch } = useFormResponseDetails(formId as string, responseId as string);
 
-  // Type assertion to ensure TypeScript knows data has answers
-  const responseData = data as FormResponseWithAnswers;
+  useEffect(() => {
+    if (formId && responseId) {
+      refetch();
+    }
+  }, [formId, responseId, refetch]);
 
-  if (error) {
+  if (isLoading) {
     return (
-      <div className="container py-10">
-        <div className="mx-auto max-w-3xl">
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <p className="text-red-600">Failed to load response: {(error as Error).message}</p>
-            <Button asChild className="mt-4">
-              <Link to={`/forms/${formId}/responses`}>Return to Responses</Link>
-            </Button>
-          </div>
-        </div>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-52" />
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-72" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
+  // Handle the typescript error by adding a type check and fallback
+  const responseData = data as FormResponseWithAnswers | undefined;
+
+  if (!responseData) {
+    return <div>Response not found</div>;
+  }
+
   return (
-    <div className="container py-6 max-w-4xl">
-      <div className="mb-6">
-        <Link 
-          to={`/forms/${formId}/responses`}
-          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ChevronLeft className="mr-1 h-4 w-4" />
-          Back to Responses
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <Link to={`/forms/${formId}/responses`}>
+          <Button variant="ghost" className="flex items-center gap-1">
+            <ArrowLeft className="h-4 w-4" /> Back to Responses
+          </Button>
         </Link>
       </div>
-
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Response #{responseId}
-        </h1>
-        <Badge variant="outline" className="text-sm">
-          {isLoading ? (
-            <Skeleton className="h-4 w-16" />
-          ) : (
-            new Date(responseData?.created_at || "").toLocaleDateString()
-          )}
-        </Badge>
-      </div>
-
-      <Separator className="my-6" />
-
-      <div className="grid gap-6 md:grid-cols-2 my-6">
-        <ResponseMetadataCard
-          icon={User}
-          title="Respondent"
-          value={responseData?.respondent_email}
-          loading={isLoading}
-        />
-        <ResponseMetadataCard
-          icon={Clock}
-          title="Completion Time"
-          value={responseData?.completion_time ? 
-            `${Math.floor(responseData.completion_time / 60)}m ${responseData.completion_time % 60}s` : 
-            null
-          }
-          loading={isLoading}
-        />
-        <ResponseMetadataCard
-          icon={Calendar}
-          title="Submitted On"
-          value={responseData?.created_at ? 
-            new Date(responseData.created_at).toLocaleString() : 
-            null
-          }
-          loading={isLoading}
-        />
-        <ResponseMetadataCard
-          icon={Globe}
-          title="IP Address"
-          value={responseData?.ip_address}
-          loading={isLoading}
-        />
-      </div>
-
-      <Card className="my-6">
+      
+      <Card>
         <CardHeader>
           <CardTitle>Response Details</CardTitle>
+          <CardDescription>Viewing response #{responseId} for form</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {isLoading ? (
-            <>
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="h-8 w-full" />
+        <CardContent>
+          <div className="space-y-6">
+            {responseData.answers.map((answer) => (
+              <div key={answer.id} className="space-y-1">
+                <h3 className="font-medium">{answer.question}</h3>
+                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                  {answer.answer || "No answer provided"}
+                </p>
               </div>
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-40" />
-                <Skeleton className="h-8 w-full" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-36" />
-                <Skeleton className="h-16 w-full" />
-              </div>
-            </>
-          ) : responseData?.answers?.length ? (
-            responseData.answers.map((answer, index) => (
-              <div key={index} className="space-y-2">
-                <h3 className="font-medium">{answer.formElement?.label || "Question"}</h3>
-                <div className="rounded-md border p-3 bg-muted/30">
-                  {answer.value || <span className="italic text-muted-foreground">No answer provided</span>}
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-muted-foreground italic">No answer data available</p>
-          )}
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>

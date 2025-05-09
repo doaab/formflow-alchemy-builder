@@ -1,171 +1,95 @@
 
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useLoginMutation, useCurrentUser } from "../api/hooks/useAuthQueries";
-import { getCsrfCookie } from "../api/services/authService";
-import { toast } from "sonner";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
+import { useLogin } from '@/api/hooks/useAuthQueries';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTranslation } from '@/context/TranslationContext';
 
-// UI Components
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+interface LoginFormData {
+  email: string;
+  password: string;
+}
 
-// Form schema
-const loginSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
-});
+const Login: React.FC = () => {
+  const { t } = useTranslation();
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
+  const { mutate: login, isLoading } = useLogin();
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+  const onSubmit = (data: LoginFormData) => {
+    login(data);
+  };
 
-export default function Login() {
-  const { mutate: login, isPending, error } = useLoginMutation();
-  const { data: user } = useCurrentUser();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [statusMessage, setStatusMessage] = useState<string>("");
-  
-  // Check if we were redirected from another page with a message
-  const redirectMessage = location.state?.message;
-  const redirectFrom = location.state?.from?.pathname || "/forms";
-  
-  useEffect(() => {
-    // Check if user is already logged in
-    if (user && localStorage.getItem('access_token')) {
-      toast.success("Already Logged In");
-      navigate('/forms');
-      return;
-    }
-
-    // Pre-fetch CSRF token when component loads
-    const preloadCsrf = async () => {
-      try {
-        setStatusMessage("Establishing secure connection...");
-        await getCsrfCookie();
-        setStatusMessage("");
-      } catch (error) {
-        console.error("Failed to preload CSRF token:", error);
-        setStatusMessage("Warning: Could not establish secure connection. Login may fail.");
-      }
-    };
-    
-    preloadCsrf();
-    
-    if (redirectMessage) {
-      toast.info("Authentication Required", {
-        description: redirectMessage,
-      });
-    }
-  }, [user, redirectMessage, navigate]);
-  
-  // Form definition
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-  
-  // Form submission handler
-  function onSubmit(values: LoginFormValues) {
-    login({
-      email: values.email,
-      password: values.password
-    });
-  }
-  
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Login to Your Account</CardTitle>
-          <CardDescription className="text-center">
-            Enter your credentials to access your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {statusMessage && (
-            <Alert className="mb-4 bg-blue-50">
-              <AlertDescription>{statusMessage}</AlertDescription>
-            </Alert>
-          )}
-          
-          {redirectMessage && (
-            <Alert className="mb-6">
-              <AlertDescription>{redirectMessage}</AlertDescription>
-            </Alert>
-          )}
-          
-          {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertDescription>{error.message}</AlertDescription>
-            </Alert>
-          )}
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="your.email@example.com" type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input placeholder="********" type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                    Logging in...
-                  </>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-4">
+        <Card>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">{t('login')}</CardTitle>
+            <CardDescription className="text-center">
+              {t('enter')} {t('email')} {t('and')} {t('password')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">{t('email')}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  {...register('email', { 
+                    required: 'Email is required',
+                    pattern: {
+                      value: /^\S+@\S+$/i,
+                      message: 'Invalid email address'
+                    }
+                  })}
+                />
+                {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">{t('password')}</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  {...register('password', { 
+                    required: 'Password is required',
+                    minLength: {
+                      value: 8,
+                      message: 'Password must be at least 8 characters'
+                    }
+                  })}
+                />
+                {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                    {t('loading')}...
+                  </div>
                 ) : (
-                  "Login"
+                  t('login')
                 )}
               </Button>
             </form>
-          </Form>
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Link to="/register" className="font-medium text-primary hover:underline">
-              Register
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-center">
+              {t('dontHaveAccount')}?{' '}
+              <Link to="/register" className="text-primary hover:underline">
+                {t('register')}
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
-}
+};
+
+export default Login;

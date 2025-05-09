@@ -11,12 +11,12 @@ import SurveyForm from '@/pages/Form/SurveyForm.tsx';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ProtectedRoute from '@/components/Auth/ProtectedRoute';
+import AppLayout from '@/components/Layout/AppLayout';
 
 const AppRoutes = () => {
   return (
     <Routes>
       {/* Public routes - accessible to all */}
-      <Route path="/" element={<FormBuilder />} />
       <Route path="/survey/:slug" element={<SurveyForm />} />
       
       {/* Auth routes - accessible only when not logged in */}
@@ -27,12 +27,15 @@ const AppRoutes = () => {
       
       {/* Protected routes - require authentication */}
       <Route element={<ProtectedRoute authenticationRequired={true} redirectTo="/login" />}>
-        <Route path="/forms" element={<FormList />} />
-        <Route path="/forms/:formId" element={<FormDetail />} />
-        <Route path="/forms/:formId/edit" element={<FormBuilder />} />
-        <Route path="/forms/:formId/responses" element={<FormResponses />} />
-        <Route path="/forms/:formId/responses/:responseId" element={<FormResponseDetail />} />
-        <Route path="/docs" element={<Documentation />} />
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<FormList />} />
+          <Route path="/forms" element={<FormList />} />
+          <Route path="/forms/:formId" element={<FormDetail />} />
+          <Route path="/forms/:formId/edit" element={<FormBuilder />} />
+          <Route path="/forms/:formId/responses" element={<FormResponses />} />
+          <Route path="/forms/:formId/responses/:responseId" element={<FormResponseDetail />} />
+          <Route path="/docs" element={<Documentation />} />
+        </Route>
       </Route>
       
       {/* 404 route */}
