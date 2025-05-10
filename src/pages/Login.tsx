@@ -2,7 +2,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import { useLogin } from '@/api/hooks/useAuthQueries';
+import { useLoginMutation } from '@/api/hooks/useAuthQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,7 +17,7 @@ interface LoginFormData {
 const Login: React.FC = () => {
   const { t } = useTranslation();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
-  const { mutate: login, isLoading } = useLogin();
+  const { mutate: login, isPending: isLoading } = useLoginMutation();
 
   const onSubmit = (data: LoginFormData) => {
     login(data);

@@ -24,6 +24,7 @@ export const useRegisterMutation = () => {
   });
 };
 
+// Export the login mutation hook with two names for backward compatibility
 export const useLoginMutation = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -44,6 +45,9 @@ export const useLoginMutation = () => {
     }
   });
 };
+
+// Export with alias for backward compatibility
+export const useLogin = useLoginMutation;
 
 export const useLogoutMutation = () => {
   const queryClient = useQueryClient();
