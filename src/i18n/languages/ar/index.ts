@@ -1,29 +1,62 @@
 
-// Export all Arabic translations
-import { auth } from './auth';
-import { navigation } from './navigation';
-import { dashboard } from './dashboard';
-import { Landing } from './landing';
-import { subscriptions } from './subscriptions';
-import { plans } from './plans';
-import { survey } from './survey';
-import { misc } from './misc';
-import { ads } from './ads';
-import { customerService } from './customerService';
-import { reviews } from './reviews';
-import { coupons } from './coupons';
+import auth from './auth';
+import dashboard from './dashboard';
+import navigation from './navigation';
+import survey from './survey';
+import landing from './landing';
+import plans from './plans';
+import reviews from './reviews';
+import customerService from './customerService';
+import coupons from './coupons';
+import ads from './ads';
+import subscriptions from './subscriptions';
+import misc from './misc';
 
-export const ar = {
+const ar = {
   ...auth,
-  ...Landing,
-  ...navigation,
   ...dashboard,
-  ...subscriptions,
-  ...plans,
+  ...navigation,
   ...survey,
-  ...misc,
-  ...ads,
-  ...customerService,
+  ...landing,
+  ...plans,
   ...reviews,
+  ...customerService,
   ...coupons,
+  ...ads,
+  ...subscriptions,
+  ...misc,
+  
+  // User management
+  users: 'المستخدمين',
+  user: 'مستخدم',
+  userName: 'اسم المستخدم',
+  phoneNumber: 'رقم الجوال',
+  email: 'البريد الإلكتروني',
+  status: 'الحالة',
+  active: 'نشط',
+  inactive: 'غير نشط',
+  actions: 'الإجراءات',
+  view: 'عرض',
+  edit: 'تعديل',
+  delete: 'حذف',
+  totalPoints: 'إجمالي النقاط',
+  totalTransactions: 'إجمالي التقييمات',
+  page: 'صفحة',
+  search: 'بحث',
+  userDetails: 'بيانات المستخدم',
+  userData: 'بيانات المستخدم',
+  registrationDate: 'تاريخ الإنضمام',
+  convertedPoints: 'عدد النقاط التي تم تحويلها',
+  evaluations: 'التقييمات',
+  evaluationDate: 'تاريخ التقييم',
+  evaluationStatus: 'حالة التقييم',
+  companyName: 'اسم الشركة',
+  branchName: 'فرع التقييم',
+  section: 'القسم المقيم',
+  evaluation: 'التقييم',
+  evaluationType: 'نوع التقييم',
+  directedQuestion: 'سؤال موجه',
+  back: 'رجوع'
 };
+
+export default ar;

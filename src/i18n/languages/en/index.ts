@@ -1,29 +1,62 @@
 
-// Export all English translations
-import { auth } from './auth';
-import { navigation } from './navigation';
-import { Landing } from './landing';
-import { dashboard } from './dashboard';
-import { subscriptions } from './subscriptions';
-import { plans } from './plans';
-import { survey } from './survey';
-import { misc } from './misc';
-import { ads } from './ads';
-import { customerService } from './customerService';
-import { reviews } from './reviews';
-import { coupons } from './coupons';
+import auth from './auth';
+import dashboard from './dashboard';
+import navigation from './navigation';
+import survey from './survey';
+import landing from './landing';
+import plans from './plans';
+import reviews from './reviews';
+import customerService from './customerService';
+import coupons from './coupons';
+import ads from './ads';
+import subscriptions from './subscriptions';
+import misc from './misc';
 
-export const en = {
+const en = {
   ...auth,
-  ...Landing,
-  ...navigation,
   ...dashboard,
-  ...subscriptions,
-  ...plans,
+  ...navigation,
   ...survey,
-  ...misc,
-  ...ads,
-  ...customerService,
+  ...landing,
+  ...plans,
   ...reviews,
+  ...customerService,
   ...coupons,
+  ...ads,
+  ...subscriptions,
+  ...misc,
+  
+  // User management
+  users: 'Users',
+  user: 'User',
+  userName: 'User Name',
+  phoneNumber: 'Phone Number',
+  email: 'Email',
+  status: 'Status',
+  active: 'Active',
+  inactive: 'Inactive',
+  actions: 'Actions',
+  view: 'View',
+  edit: 'Edit',
+  delete: 'Delete',
+  totalPoints: 'Total Points',
+  totalTransactions: 'Total Transactions',
+  page: 'Page',
+  search: 'Search',
+  userDetails: 'User Details',
+  userData: 'User Data',
+  registrationDate: 'Registration Date',
+  convertedPoints: 'Converted Points',
+  evaluations: 'Evaluations',
+  evaluationDate: 'Evaluation Date',
+  evaluationStatus: 'Status',
+  companyName: 'Company Name',
+  branchName: 'Branch',
+  section: 'Section',
+  evaluation: 'Evaluation',
+  evaluationType: 'Type',
+  directedQuestion: 'Directed Question',
+  back: 'Back'
 };
+
+export default en;

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from '@/context/TranslationContext';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
-import { MoreVertical, Search } from 'lucide-react';
+import { MoreVertical, Search, User } from 'lucide-react';
 
 // Mock user data
 const mockUsers = Array(20).fill(null).map((_, index) => ({
@@ -106,7 +107,9 @@ const Users: React.FC = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>{t('view')}</DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to={`/users/${user.id}`}>{t('view')}</Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem>{t('edit')}</DropdownMenuItem>
                       <DropdownMenuItem className="text-red-600">{t('delete')}</DropdownMenuItem>
                     </DropdownMenuContent>

@@ -1,48 +1,62 @@
 
-import { Routes, Route } from 'react-router-dom';
-import FormBuilder from '@/components/FormBuilder/FormBuilder';
-import Documentation from '@/pages/Documentation';
-import NotFound from '@/pages/NotFound';
-import FormList from '@/pages/Form/FormList.tsx';
-import FormDetail from '@/pages/Form/FormDetail.tsx';
-import FormResponses from '@/pages/Form/FormResponses.tsx';
-import FormResponseDetail from '@/pages/Form/FormResponseDetail.tsx';
-import SurveyForm from '@/pages/Form/SurveyForm.tsx';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
+import NotFound from '@/pages/NotFound';
 import Dashboard from '@/pages/Dashboard';
 import Users from '@/pages/Users';
+import UserDetail from '@/pages/UserDetail';
+import FormList from '@/pages/Form/FormList';
+import FormDetail from '@/pages/Form/FormDetail';
+import FormResponses from '@/pages/Form/FormResponses';
+import FormResponseDetail from '@/pages/Form/FormResponseDetail';
+import SurveyForm from '@/pages/Form/SurveyForm';
+import { FormBuilderProvider } from '@/context/FormBuilderContext';
 import ProtectedRoute from '@/components/Auth/ProtectedRoute';
-import AppLayout from '@/components/Layout/AppLayout';
+import { useAuth } from '@/context/AuthContext';
+import FormBuilder from '@/components/FormBuilder/FormBuilder';
 
-const AppRoutes = () => {
+const AppRoutes: React.FC = () => {
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <Routes>
-      {/* Public routes - accessible to all */}
-      <Route path="/survey/:slug" element={<SurveyForm />} />
+      {/* Public routes */}
+      <Route path="/login" element={!user ? <Login /> : <Navigate to="/forms" replace />} />
+      <Route path="/register" element={!user ? <Register /> : <Navigate to="/forms" replace />} />
       
-      {/* Auth routes - accessible only when not logged in */}
-      <Route element={<ProtectedRoute authenticationRequired={false} />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-      </Route>
+      {/* Protected routes */}
+      <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
+      <Route path="/users/:userId" element={<ProtectedRoute><UserDetail /></ProtectedRoute>} />
       
-      {/* Protected routes - require authentication */}
-      <Route element={<ProtectedRoute authenticationRequired={true} redirectTo="/login" />}>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/forms" element={<FormList />} />
-          <Route path="/forms/:formId" element={<FormDetail />} />
-          <Route path="/forms/:formId/edit" element={<FormBuilder />} />
-          <Route path="/forms/:formId/responses" element={<FormResponses />} />
-          <Route path="/forms/:formId/responses/:responseId" element={<FormResponseDetail />} />
-          <Route path="/docs" element={<Documentation />} />
-        </Route>
-      </Route>
+      {/* Form routes */}
+      <Route path="/forms" element={<ProtectedRoute><FormList /></ProtectedRoute>} />
+      <Route path="/forms/:formId" element={
+        <ProtectedRoute>
+          <FormBuilderProvider>
+            <FormDetail />
+          </FormBuilderProvider>
+        </ProtectedRoute>
+      } />
+      <Route path="/forms/:formId/edit" element={
+        <ProtectedRoute>
+          <FormBuilderProvider>
+            <FormBuilder />
+          </FormBuilderProvider>
+        </ProtectedRoute>
+      } />
+      <Route path="/forms/:formId/responses" element={<ProtectedRoute><FormResponses /></ProtectedRoute>} />
+      <Route path="/forms/:formId/responses/:responseId" element={<ProtectedRoute><FormResponseDetail /></ProtectedRoute>} />
+      <Route path="/forms/:formId/preview" element={<ProtectedRoute><SurveyForm /></ProtectedRoute>} />
       
-      {/* 404 route */}
+      {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
