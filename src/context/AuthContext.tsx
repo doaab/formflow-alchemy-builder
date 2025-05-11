@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, logout, getCurrentUser } from '@/api/services/authService';
+import { login as loginService, logout as logoutService, getCurrentUser } from '@/api/services/authService';
 import { User } from '@/api/types/authTypes';
 import { toast } from 'sonner';
 import { useTranslation } from './TranslationContext';
@@ -10,8 +10,11 @@ import { addLanguageToPath } from '@/i18n/languageUtils';
 interface AuthContextProps {
   user: User | null;
   isLoading: boolean;
+  isAuthenticated: boolean;
+  token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  hasPermission: (permission: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -19,20 +22,26 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const navigate = useNavigate();
   const { currentLanguage } = useTranslation();
+
+  // Derived state for authentication status
+  const isAuthenticated = !!user && !!token;
 
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (token) {
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+          setToken(storedToken);
           const userData = await getCurrentUser();
           setUser(userData);
         }
       } catch (error) {
         console.error('Error checking auth status:', error);
         localStorage.removeItem('token');
+        setToken(null);
       } finally {
         setIsLoading(false);
       }
@@ -44,9 +53,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginHandler = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
     try {
-      const response = await login(email, password);
-      localStorage.setItem('token', response.access_token || '');
+      const response = await loginService(email, password);
+      const newToken = response.access_token || '';
+      localStorage.setItem('token', newToken);
+      setToken(newToken);
       setUser(response.user);
+      
+      // Use the language parameter in the URL if it exists
       navigate(addLanguageToPath('/dashboard', currentLanguage));
       toast.success('Login successful');
     } catch (error) {
@@ -61,24 +74,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logoutHandler = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      await logout();
+      await logoutService();
       localStorage.removeItem('token');
+      setToken(null);
       setUser(null);
       navigate(addLanguageToPath('/login', currentLanguage));
       toast.success('Logged out successfully');
     } catch (error) {
       console.error('Logout error:', error);
+      // Even if server logout fails, clear local data
+      localStorage.removeItem('token');
+      setToken(null);
+      setUser(null);
+      navigate(addLanguageToPath('/login', currentLanguage));
       toast.error('Error during logout. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Simple permission check function
+  const hasPermission = (permission: string): boolean => {
+    // For now, just check if the user exists
+    // In a real app, this would check user roles or permissions
+    return !!user;
+  };
+
   const authContextValue: AuthContextProps = {
     user,
     isLoading,
+    isAuthenticated,
+    token,
     login: loginHandler,
-    logout: logoutHandler
+    logout: logoutHandler,
+    hasPermission
   };
 
   return <AuthContext.Provider value={authContextValue}>{children}</AuthContext.Provider>;

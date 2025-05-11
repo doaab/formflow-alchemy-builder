@@ -1,36 +1,32 @@
-
-import React, { useState } from "react";
-import { Sidebar } from "./Sidebar";
-import Header from "./Header";
-import { useTranslation } from "../hooks/useTranslation";
-import { useAuth } from "../contexts/AuthContext";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import Sidebar from './Sidebar';
+import Header from './Header';
+import { useTranslation } from '@/context/TranslationContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const { currentLanguage } = useTranslation();
-  const { user } = useAuth();
+  const { t } = useTranslation();
+  const { user, isLoading } = useAuth();
 
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-  // Add RTL class for Arabic language
-  const isRtl = currentLanguage === "ar";
+  if (!user) {
+    return <div>{t('loading')}</div>;
+  }
 
   return (
-    <div className={cn("flex min-h-screen", isRtl && "rtl")}>
-      <Sidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
-      
-      <div className="flex-1 flex flex-col">
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex-grow flex flex-col">
         <Header />
-        <main className="flex-1 p-6 bg-gray-50">
-          {children}
-        </main>
+        <main className="p-4">{children}</main>
       </div>
     </div>
   );

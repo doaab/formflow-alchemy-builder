@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
@@ -9,8 +8,7 @@ import { Label } from '@/components/ui/label';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useTranslation } from '@/context/TranslationContext';
 import { addLanguageToPath } from '@/i18n/languageUtils';
-// Fix the image import path
-import registerIllustration from '../assets/register-illustration.png';
+import registerIllustration from '/lovable-uploads/1712dd25-a22d-4a5a-adb1-56f4fa2502f8.png';
 
 interface RegisterFormData {
   name: string;

@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import { useLoginMutation } from '@/api/hooks/useAuthQueries';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,16 +21,18 @@ const Login: React.FC = () => {
   const { t, currentLanguage, toggleLanguage } = useTranslation();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<LoginFormData>();
-  const { mutate: login, isPending: isLoading } = useLoginMutation();
+  const { login, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email');
 
-  const onSubmit = (data: LoginFormData) => {
-    login(data, {
-      onSuccess: () => {
-        navigate(addLanguageToPath('/dashboard', currentLanguage));
-      }
-    });
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      await login(data.email, data.password);
+      // Navigation is handled inside the login function in AuthContext
+    } catch (error) {
+      console.error('Login error in component:', error);
+      // Error is already handled in the login function
+    }
   };
 
   const togglePasswordVisibility = () => {

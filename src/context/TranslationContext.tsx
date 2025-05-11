@@ -98,8 +98,6 @@ const translations = {
     loginWithPhone: 'Login with Phone Number',
     loginWithGoogle: 'Login with Google',
     loginWithApple: 'Login with Apple',
-    phoneNumber: 'Phone Number',
-    noAccount: 'Don\'t have an account',
     
     // Users page
     active: 'Active',
@@ -107,7 +105,6 @@ const translations = {
     status: 'Status',
     totalTransactions: 'Total Transactions',
     page: 'Page',
-    view: 'View',
   },
   ar: {
     // General
@@ -196,8 +193,6 @@ const translations = {
     loginWithPhone: 'الدخول بواسطة رقم الجوال',
     loginWithGoogle: 'الدخول بواسطة جوجل',
     loginWithApple: 'الدخول بواسطة أبل',
-    phoneNumber: 'رقم الجوال',
-    noAccount: 'لا يوجد لديك حساب',
     
     // Users page
     active: 'نشط',
@@ -205,7 +200,6 @@ const translations = {
     status: 'الحالة',
     totalTransactions: 'إجمالي التقييمات',
     page: 'صفحة',
-    view: 'عرض',
   }
 };
 

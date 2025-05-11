@@ -1,7 +1,7 @@
 
 import React from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { useTranslation } from "../hooks/useTranslation";
+import { useAuth } from "@/context/AuthContext";
+import { useTranslation } from "@/context/TranslationContext";
 import { Bell, User, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

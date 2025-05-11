@@ -1,219 +1,124 @@
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { FormBuilderProvider, useFormBuilder } from "@/context/FormBuilderContext";
-import SidePanel from "./SidePanel";
-import FormTitle from "./FormTitle";
-import DragDrop from "./DragDrop";
-import FormPreviewDialog from "./FormPreviewDialog";
-import { Button } from "../ui/button";
-import { Save, Loader2, BookOpen, List, AlertCircle, LogIn, Play, PauseCircle, FileEdit } from "lucide-react";
-import { useEffect, useState } from "react";
-import { saveFormToLocalStorage, prepareFormDataForBackend } from "@/utils/formUtils";
-import { useToast } from "@/hooks/use-toast";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { API_URL, checkBackendConnection } from "@/api/services/config";
-import { useSaveForm, useFormById, useFormElements, useUpdateFormStatus } from "@/api/hooks/useFormQueries";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useAuth } from "@/context/AuthContext";
-import FormStatusControl from "./FormStatusControl";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { toast } from 'sonner';
+import { useFormBuilder } from '@/context/FormBuilderContext';
+import { useAuth } from '@/context/AuthContext';
+import { getForm, updateForm } from '@/api/services/formService';
+import DragDrop from './DragDrop';
+import SidePanel from './SidePanel';
+import FormTitle from './FormTitle';
+import ElementEditor from './ElementEditor';
+import ElementConditions from './ElementConditions';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import FormPreviewDialog from './FormPreviewDialog';
+import FormStatusControl from './FormStatusControl';
+import { Loader2 } from 'lucide-react';
 
-const FormBuilder = () => {
-  const [isSaving, setIsSaving] = useState(false);
-  const [backendConnected, setBackendConnected] = useState<boolean | null>(null);
-  const { toast } = useToast();
+const FormBuilder: React.FC = () => {
+  const { formId } = useParams<{ formId: string }>();
   const navigate = useNavigate();
-  const saveFormMutation = useSaveForm();
-  const { user, isAuthenticated } = useAuth();
-  const { formId } = useParams<{ formId?: string }>();
-  
-  const { data: formData, isLoading: isLoadingForm } = useFormById(formId ? parseInt(formId) : undefined);
-  const { data: formElements, isLoading: isLoadingElements } = useFormElements(formId ? parseInt(formId) : 0);
-  
+  const { isAuthenticated } = useAuth();
+  const { updateFormInContext, form } = useFormBuilder();
+  const [activeTab, setActiveTab] = useState<string>('elements');
+
+  // Redirect if not authenticated
   useEffect(() => {
-    const checkConnection = async () => {
-      const isConnected = await checkBackendConnection();
-      setBackendConnected(isConnected);
-      if (!isConnected) {
-        toast({
-          title: "Backend Connection Issue",
-          description: `Cannot connect to backend at ${API_URL}. Forms cannot be saved to the server.`,
-          variant: "destructive",
-        });
-      }
-    };
-    
-    checkConnection();
-  }, [toast]);
-  
-  useEffect(() => {
-    if (formData && formElements) {
-      console.log("Form data loaded:", formData);
-      console.log("Form elements loaded:", formElements);
+    if (!isAuthenticated) {
+      navigate('/login', { replace: true });
     }
-  }, [formData, formElements]);
-  
-  const handleSaveForm = async () => {
-    try {
-      setIsSaving(true);
-      
-      const formData = document.getElementById('form-builder-provider')?.dataset.formdata;
-      if (!formData) throw new Error("Form data not found");
-      
-      const parsedForm = JSON.parse(formData);
-      
-      saveFormToLocalStorage(parsedForm);
-      
-      if (!backendConnected) {
-        toast({
-          title: "Saved Locally Only",
-          description: "Form saved to browser storage only. Backend connection not available.",
-        });
-        setIsSaving(false);
-        return;
-      }
-      
-      const backendData = prepareFormDataForBackend(parsedForm);
-      
-      // If editing existing form, include the ID
-      if (formId) {
-        backendData.id = parseInt(formId);
-      }
-      
-      if (isAuthenticated && user?.id) {
-        backendData.user_id = user.id;
-      } else {
-        backendData.user_id = 1;
-        console.log("Saving form as anonymous user with ID: 1");
-      }
-      
-      console.log("Data ready for backend submission:", backendData);
-      
-      const result = await saveFormMutation.mutateAsync(backendData);
-      
-      toast({
-        title: "Form saved",
-        description: isAuthenticated 
-          ? "Your form has been saved successfully" 
-          : "Your form has been saved anonymously. Create an account to access it later.",
-      });
-      
-      if (isAuthenticated) {
-        navigate('/forms');
-      }
-      
-    } catch (error) {
-      console.error("Error saving form:", error);
-      toast({
-        title: "Error",
-        description: "There was an error saving your form. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
+  }, [isAuthenticated, navigate]);
+
+  const { data: formData, isLoading, error } = useQuery(
+    ['form', formId],
+    () => getForm(formId!),
+    {
+      enabled: !!formId && isAuthenticated,
+      onSuccess: (data) => {
+        updateFormInContext(data);
+      },
+      onError: (error: any) => {
+        toast.error(`Failed to load form: ${error.message}`);
+      },
+    }
+  );
+
+  const mutation = useMutation(updateForm, {
+    onSuccess: () => {
+      toast.success('Form updated successfully!');
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to update form: ${error.message}`);
+    },
+  });
+
+  const handleSave = async () => {
+    if (form) {
+      mutation.mutate(form);
+    } else {
+      toast.error('No form data to save.');
     }
   };
-  
+
+  if (isLoading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+  if (error) return <p>Error: {error.message}</p>;
+
+  if (!formData) {
+    return <p>Loading form...</p>;
+  }
+
   return (
     <DndProvider backend={HTML5Backend}>
-      <FormBuilderProvider initialFormId={formId ? parseInt(formId) : undefined} initialFormData={formData} initialFormElements={formElements}>
-        <div 
-          id="form-builder-provider" 
-          className="flex flex-col h-screen"
-          data-formdata=""
-        >
-          <div className="flex items-center justify-between p-3 bg-white border-b">
-            <h1 className="text-xl font-bold text-primary">FormFlow Alchemy</h1>
-            <div className="flex items-center space-x-2">
-              <Link to="/forms">
-                <Button variant="outline" className="flex items-center">
-                  <List className="mr-2 h-4 w-4" />
-                  My Forms
-                </Button>
-              </Link>
-              <Link to="/docs">
-                <Button variant="outline" className="flex items-center">
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  Documentation
-                </Button>
-              </Link>
-              {!isAuthenticated && (
-                <Link to="/login">
-                  <Button variant="outline" className="flex items-center">
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Login
-                  </Button>
-                </Link>
-              )}
-              {formId && <FormStatusControl formId={parseInt(formId)} initialStatus={formData?.status} />}
-              <FormPreviewDialog />
-              <Button 
-                onClick={handleSaveForm} 
-                disabled={isSaving || saveFormMutation.isPending}
-                className="flex items-center"
-              >
-                {isSaving || saveFormMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="mr-2 h-4 w-4" />
-                )}
-                Save Form
-              </Button>
+      <div className="flex h-full">
+        {/* Main Content Area */}
+        <div className="flex flex-col w-full">
+          {/* Form Header */}
+          <div className="border-b px-6 py-4">
+            <div className="flex items-center justify-between">
+              <FormTitle />
+              <div className="flex gap-2 items-center">
+                <FormStatusControl formId={formId!} />
+                <FormPreviewDialog />
+                <button
+                  onClick={handleSave}
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Save
+                </button>
+              </div>
             </div>
           </div>
-          
-          {!isAuthenticated && (
-            <Alert className="m-4 bg-amber-50 border-amber-200">
-              <AlertCircle className="h-4 w-4 text-amber-500" />
-              <AlertTitle className="text-amber-700">Not Logged In</AlertTitle>
-              <AlertDescription className="text-amber-600">
-                You are currently not logged in. You can still save your form, but logging in will give you better access to manage your forms later.
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          {backendConnected === false && (
-            <Alert variant="destructive" className="m-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Backend Connection Issue</AlertTitle>
-              <AlertDescription>
-                Cannot connect to backend server at {API_URL}. Forms will be saved locally only.
-                Please ensure the backend server is running at the correct URL.
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          {(isLoadingForm || isLoadingElements) && (
-            <div className="flex justify-center items-center p-4">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <span className="ml-2">Loading form...</span>
-            </div>
-          )}
-          
-          <FormTitle />
-          
-          <div className="flex flex-1 overflow-hidden">
-            <DragDrop />
-            <SidePanel />
-          </div>
-          
-          <FormDataTracker />
+
+          {/* Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="m-4">
+            <TabsList>
+              <TabsTrigger value="elements">Elements</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+              <TabsTrigger value="conditions">Conditions</TabsTrigger>
+            </TabsList>
+            <TabsContent value="elements" className="mt-2">
+              <DragDrop />
+            </TabsContent>
+            <TabsContent value="settings" className="mt-2">
+              <ElementEditor />
+            </TabsContent>
+            <TabsContent value="conditions" className="mt-2">
+              <ElementConditions />
+            </TabsContent>
+          </Tabs>
         </div>
-      </FormBuilderProvider>
+
+        {/* Side Panel */}
+        <SidePanel />
+      </div>
     </DndProvider>
   );
-};
-
-const FormDataTracker = () => {
-  const { formData } = useFormBuilder();
-  
-  useEffect(() => {
-    const element = document.getElementById('form-builder-provider');
-    if (element) {
-      element.dataset.formdata = JSON.stringify(formData);
-    }
-  }, [formData]);
-  
-  return null;
 };
 
 export default FormBuilder;
