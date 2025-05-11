@@ -16,7 +16,11 @@ class VerifyCsrfToken extends Middleware
         'sanctum/csrf-cookie', // Allow fetching CSRF cookie without verification
         'login',
         'logout',
-        'register'
+        'register',
+        'dashboard',
+//        'register',
+//        'register',
+//        'register',
     ];
 
     /**

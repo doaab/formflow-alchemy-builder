@@ -41,7 +41,63 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+    /**
+     * Validation rules
+     *
+     * @var array
+     */
+    public static $rules = [
+        'phone' => 'required|regex:/(00966)[0-9]{9}/|unique:users',
+        'name' => 'required',
+        'email' => 'nullable|email',
+        'image' => 'nullable|image',
+    ];
 
+    /**
+     * Get notified if this is the first time of login
+     *
+     * @return bool
+     */
+    public function getIsFirstLoginAttribute()
+    {
+        return false;
+    }
+
+    /**
+     * Get all of the storesReview for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function storesReview()
+    {
+        return $this->hasMany(StoresReview::class);
+    }
+
+    /**
+     * Get all the storesSectionsReview for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function storesSectionsReview()
+    {
+        return $this->hasMany(StoresSectionsReview::class);
+    }
+
+    public function alerts()
+    {
+        return $this->hasMany(AlertUsersReview::class);
+    }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+
+    public function points_transfer_request()
+    {
+        return $this->hasMany(PointsTransferRequest::class);
+    }
     /**
      * Get the forms created by this user.
      */
