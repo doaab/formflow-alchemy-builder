@@ -1,14 +1,14 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginApi, logoutApi, getUserApi } from '@/api/services/authService';
-import { UserData } from '@/api/types/authTypes';
+import { login, logout, getCurrentUser } from '@/api/services/authService';
+import { User } from '@/api/types/authTypes';
 import { toast } from 'sonner';
 import { useTranslation } from './TranslationContext';
 import { addLanguageToPath } from '@/i18n/languageUtils';
 
 interface AuthContextProps {
-  user: UserData | null;
+  user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -17,7 +17,7 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const { currentLanguage } = useTranslation();
@@ -27,7 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          const userData = await getUserApi();
+          const userData = await getCurrentUser();
           setUser(userData);
         }
       } catch (error) {
@@ -41,11 +41,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuthStatus();
   }, []);
 
-  const login = async (email: string, password: string): Promise<void> => {
+  const loginHandler = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
     try {
-      const response = await loginApi(email, password);
-      localStorage.setItem('token', response.token);
+      const response = await login(email, password);
+      localStorage.setItem('token', response.access_token || '');
       setUser(response.user);
       navigate(addLanguageToPath('/dashboard', currentLanguage));
       toast.success('Login successful');
@@ -58,10 +58,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = async (): Promise<void> => {
+  const logoutHandler = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      await logoutApi();
+      await logout();
       localStorage.removeItem('token');
       setUser(null);
       navigate(addLanguageToPath('/login', currentLanguage));
@@ -77,8 +77,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const authContextValue: AuthContextProps = {
     user,
     isLoading,
-    login,
-    logout
+    login: loginHandler,
+    logout: logoutHandler
   };
 
   return <AuthContext.Provider value={authContextValue}>{children}</AuthContext.Provider>;
