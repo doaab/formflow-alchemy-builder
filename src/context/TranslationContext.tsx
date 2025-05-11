@@ -17,6 +17,7 @@ const translations = {
     hi: 'Hi',
     logout: 'Logout',
     search: 'Search',
+    loading: 'Loading',
     
     // Menu items
     main: 'Home',
@@ -33,6 +34,12 @@ const translations = {
     register: 'Register',
     name: 'Name',
     passwordConfirmation: 'Confirm Password',
+    dontHaveAccount: 'Don\'t have an account',
+    forgotPassword: 'Forgot Password?',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
+    rememberMe: 'Remember me',
+    or: 'Or',
     
     // Forms
     createForm: 'Create Form',
@@ -50,6 +57,12 @@ const translations = {
     edit: 'Edit',
     view: 'View',
     add: 'Add',
+    
+    // Content
+    welcomeBack: 'Welcome back',
+    signInToContinue: 'Sign in to continue',
+    and: 'and',
+    enter: 'Enter',
   },
   ar: {
     // General
@@ -57,6 +70,7 @@ const translations = {
     hi: 'مرحباً',
     logout: 'تسجيل الخروج',
     search: 'بحث',
+    loading: 'جاري التحميل',
     
     // Menu items
     main: 'الرئيسية',
@@ -73,6 +87,12 @@ const translations = {
     register: 'إنشاء حساب',
     name: 'الاسم',
     passwordConfirmation: 'تأكيد كلمة المرور',
+    dontHaveAccount: 'ليس لديك حساب',
+    forgotPassword: 'نسيت كلمة المرور؟',
+    showPassword: 'إظهار كلمة المرور',
+    hidePassword: 'إخفاء كلمة المرور',
+    rememberMe: 'تذكرني',
+    or: 'أو',
     
     // Forms
     createForm: 'إنشاء نموذج',
@@ -90,6 +110,12 @@ const translations = {
     edit: 'تعديل',
     view: 'عرض',
     add: 'إضافة',
+    
+    // Content
+    welcomeBack: 'مرحباً بعودتك',
+    signInToContinue: 'سجل الدخول للمتابعة',
+    and: 'و',
+    enter: 'أدخل',
   }
 };
 
