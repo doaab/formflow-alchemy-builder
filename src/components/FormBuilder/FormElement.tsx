@@ -1,6 +1,6 @@
 
 import { useFormBuilder } from "@/context/FormBuilderContext";
-import { FormElementTypes } from "@/types/formBuilder";
+import { FormElementTypes } from "@/api/types/formTypes";
 import { Card } from "../ui/card";
 import { 
   GripVertical, 
@@ -73,7 +73,7 @@ interface FormElementProps {
 }
 
 export const FormElement = ({ element, index }: FormElementProps) => {
-  const { activeElement, setActiveElement, deleteElement, duplicateElement, setIsDragging, reorderElements } = useFormBuilder();
+  const { activeElement, setActiveElement, removeElement, duplicateElement, setIsDragging, reorderElements } = useFormBuilder();
   
   const [{ isDragging }, dragRef] = useDrag(() => ({
     type: ItemTypes.ELEMENT,
@@ -193,7 +193,7 @@ export const FormElement = ({ element, index }: FormElementProps) => {
             size="icon"
             onClick={(e) => {
               e.stopPropagation();
-              deleteElement(element.id);
+              removeElement(element.id);
             }}
           >
             <Trash2 className="h-4 w-4" />

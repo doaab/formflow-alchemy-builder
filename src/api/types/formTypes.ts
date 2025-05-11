@@ -1,3 +1,4 @@
+
 export interface Form {
   id: number;
   user_id: number | null;
@@ -8,6 +9,7 @@ export interface Form {
   created_at: string;
   updated_at: string;
   form_elements?: FormElement[];
+  elements?: FormElementTypes[];
 }
 
 export interface FormElement {
@@ -20,7 +22,51 @@ export interface FormElement {
   order: number;
   created_at: string;
   updated_at: string;
+  // Additional fields needed by the implementation
+  placeholder?: string;
+  default_value?: string | null;
+  defaultValue?: string | null;
+  label?: string;
+  description?: string;
+  element_id?: string;
+  confirm_email?: boolean;
+  max_stars?: number;
+  address_expanded?: boolean;
+  address_street1?: boolean;
+  address_street2?: boolean;
+  address_city?: boolean;
+  address_state?: boolean;
+  address_zipcode?: boolean;
+  address_country?: boolean;
+  default_country?: string;
+  allowed_countries?: string[];
+  conditional_logic_enabled?: boolean;
+  conditional_action?: string;
+  conditional_logic_gate?: string;
+  properties?: any;
+  conditionalLogic?: {
+    enabled: boolean;
+    action: 'show' | 'hide';
+    conditions: any[];
+    logicGate: 'all' | 'any';
+  };
 }
+
+export type QuestionType = 
+  | 'text'
+  | 'paragraph'
+  | 'number'
+  | 'email'
+  | 'dropdown'
+  | 'radio'
+  | 'checkbox'
+  | 'date'
+  | 'face'
+  | 'star'
+  | 'phone'
+  | 'address'
+  | 'section'
+  | 'break';
 
 export interface FormStatus {
   DRAFT: string;
@@ -28,10 +74,14 @@ export interface FormStatus {
   ARCHIVED: string;
 }
 
-export interface QuestionType {
+export interface FormAnswer {
   id: number;
-  name: string;
-  slug: string;
+  form_response_id: number;
+  form_element_id: number;
+  answer: string;
+  value?: string; // Added to match implementation
+  question?: string;
+  formElement?: FormElement;
 }
 
 export interface FormResponse {
@@ -39,20 +89,116 @@ export interface FormResponse {
   form_id: number;
   user_id: number | null;
   respondent_email?: string;
-  completed_at: string;
+  ip_address?: string;
+  location?: any;
+  user_agent?: string;
+  completion_time?: number;
+  completed_at?: string;
   created_at: string;
   updated_at: string;
+  answers?: FormAnswer[];
+  form?: Form;
 }
 
-export interface FormAnswer {
-  id: number;
-  form_response_id: number;
-  form_element_id: number;
-  answer: string;
-  question?: string;
+// Add missing response interfaces for pagination
+export interface PaginationMeta {
+  current_page: number;
+  from: number;
+  last_page: number;
+  path: string;
+  per_page: number;
+  to: number;
+  total: number;
+}
+
+export interface PaginationLinks {
+  first: string;
+  last: string;
+  prev: string | null;
+  next: string | null;
+}
+
+export interface FormsResponse {
+  data: Array<{
+    id: number;
+    title: string;
+    description: string;
+    slug: string;
+    is_published: boolean;
+    created_at: string;
+    updated_at: string;
+    responses_count: number;
+  }>;
+  total: number;
+  per_page: number;
+  current_page: number;
+  last_page: number;
+  from: number;
+  to: number;
+  links: PaginationLinks;
+  meta: PaginationMeta;
+}
+
+export interface FormResponsesResponse {
+  data: FormResponse[];
+  total: number;
+  per_page: number;
+  current_page: number;
+  last_page: number;
+  from: number;
+  to: number;
+  links: PaginationLinks;
+  meta: PaginationMeta;
 }
 
 export interface FormResponseWithAnswers extends FormResponse {
   answers: FormAnswer[];
   form?: Form;
+}
+
+// Type definitions that match the implementation in src/types/formBuilder.ts
+export interface FormElementTypes {
+  id: string;
+  type: QuestionType;
+  label: string;
+  required: boolean;
+  placeholder?: string;
+  defaultValue?: string;
+  options?: Array<{
+    id: string;
+    label: string;
+    value: string;
+  }>;
+  maxStars?: number;
+  confirmEmail?: boolean;
+  conditionalLogic?: {
+    enabled: boolean;
+    action: 'show' | 'hide';
+    conditions: Condition[];
+    logicGate: 'all' | 'any';
+  };
+  description?: string;
+  expanded?: boolean;
+  fields?: {
+    street1: boolean;
+    street2: boolean;
+    city: boolean;
+    state: boolean;
+    zipCode: boolean;
+    country: boolean;
+  };
+  allowedCountries?: string[];
+  defaultCountry?: string;
+}
+
+export interface Condition {
+  questionId: string;
+  operator: string;
+  value: string;
+}
+
+export interface FormData {
+  title: string;
+  description: string;
+  elements: FormElementTypes[];
 }

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, UseQueryOptions } from '@tanstack/react-query';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { toast } from 'sonner';
@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FormPreviewDialog from './FormPreviewDialog';
 import FormStatusControl from './FormStatusControl';
 import { Loader2 } from 'lucide-react';
+import { Form } from '@/api/types/formTypes';
 
 const FormBuilder: React.FC = () => {
   const { formId } = useParams<{ formId: string }>();
@@ -24,7 +25,9 @@ const FormBuilder: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { 
     updateForm: updateFormInContext, 
-    form 
+    form,
+    formData,
+    activeElement
   } = useFormBuilder();
   const [activeTab, setActiveTab] = useState<string>('elements');
 
@@ -35,16 +38,18 @@ const FormBuilder: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const { data: formData, isLoading, error } = useQuery({
+  const { data: formApiData, isLoading, error } = useQuery<Form, Error>({
     queryKey: ['form', formId],
     queryFn: () => getFormById(Number(formId)),
     enabled: !!formId && isAuthenticated,
-    onSuccess: (data) => {
-      updateFormInContext(data);
-    },
-    onError: (error: any) => {
-      toast.error(`Failed to load form: ${error.message}`);
-    },
+    meta: {
+      onSuccess: (data: Form) => {
+        updateFormInContext(data);
+      },
+      onError: (error: Error) => {
+        toast.error(`Failed to load form: ${error.message}`);
+      }
+    }
   });
 
   const mutation = useMutation({
@@ -72,9 +77,12 @@ const FormBuilder: React.FC = () => {
   );
   if (error) return <p>Error: {(error as Error).message}</p>;
 
-  if (!formData) {
+  if (!formApiData) {
     return <p>Loading form...</p>;
   }
+
+  // Find the selected element for editor and conditions
+  const selectedElement = activeElement ? formData.elements.find(el => el.id === activeElement) : undefined;
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -86,7 +94,7 @@ const FormBuilder: React.FC = () => {
             <div className="flex items-center justify-between">
               <FormTitle />
               <div className="flex gap-2 items-center">
-                <FormStatusControl formId={formId!} />
+                <FormStatusControl formId={Number(formId)} />
                 <FormPreviewDialog />
                 <button
                   onClick={handleSave}
@@ -109,10 +117,10 @@ const FormBuilder: React.FC = () => {
               <DragDrop />
             </TabsContent>
             <TabsContent value="settings" className="mt-2">
-              {form && <ElementEditor />}
+              {selectedElement && <ElementEditor element={selectedElement} />}
             </TabsContent>
             <TabsContent value="conditions" className="mt-2">
-              {form && <ElementConditions />}
+              {selectedElement && <ElementConditions element={selectedElement} />}
             </TabsContent>
           </Tabs>
         </div>

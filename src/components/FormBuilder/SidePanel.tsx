@@ -1,6 +1,6 @@
 
 import { useFormBuilder } from "@/context/FormBuilderContext";
-import { FormElementTypes, QuestionType } from "@/types/formBuilder";
+import { FormElementTypes, QuestionType } from "@/api/types/formTypes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";

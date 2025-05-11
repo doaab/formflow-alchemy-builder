@@ -9,8 +9,8 @@ import { Edit2, Check } from "lucide-react";
 const FormTitle = () => {
   const { formData, updateFormTitle, updateFormDescription } = useFormBuilder();
   const [isEditing, setIsEditing] = useState(false);
-  const [tempTitle, setTempTitle] = useState(formData.title);
-  const [tempDesc, setTempDesc] = useState(formData.description);
+  const [tempTitle, setTempTitle] = useState(formData.title || '');
+  const [tempDesc, setTempDesc] = useState(formData.description || '');
   
   const handleSave = () => {
     updateFormTitle(tempTitle);
