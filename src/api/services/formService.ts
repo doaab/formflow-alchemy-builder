@@ -66,6 +66,9 @@ export const getFormById = async (id: number): Promise<Form> => {
   }
 };
 
+// Add alias for getForm to support existing code
+export const getForm = getFormById;
+
 /**
  * Fetch a single form by slug
  */

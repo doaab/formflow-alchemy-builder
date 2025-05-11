@@ -1,385 +1,199 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  FormData, 
-  FormElementTypes, 
-  QuestionType, 
-  AddressElement,
-  PhoneElement
-} from '../types/formBuilder';
+import React, { createContext, useContext, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { toast } from '../hooks/use-toast';
-import { Form, FormElement } from '../api/types/formTypes';
+import { Form, FormElement, QuestionType } from '@/api/types/formTypes';
 
+// Define context types
 interface FormBuilderContextType {
-  formData: FormData;
+  form: Form | null;
   activeElement: string | null;
-  isDragging: boolean;
-  setIsDragging: (isDragging: boolean) => void;
-  setActiveElement: (id: string | null) => void;
-  updateFormTitle: (title: string) => void;
-  updateFormDescription: (description: string) => void;
+  updateForm: (formData: Form) => void;
+  setActiveElement: (elementId: string | null) => void;
   addElement: (type: QuestionType) => void;
-  updateElement: (id: string, updates: Partial<FormElementTypes>) => void;
-  deleteElement: (id: string) => void;
-  duplicateElement: (id: string) => void;
-  reorderElements: (startIndex: number, endIndex: number) => void;
+  updateElement: (elementId: string, updates: Partial<FormElement>) => void;
+  removeElement: (elementId: string) => void;
+  moveElement: (dragId: string, hoverId: string) => void;
 }
 
-const initialForm: FormData = {
-  title: 'Untitled Form',
-  description: 'Form description',
-  elements: [],
-};
-
+// Create the context
 const FormBuilderContext = createContext<FormBuilderContextType | undefined>(undefined);
 
-interface FormBuilderProviderProps {
-  children: React.ReactNode;
-  initialFormId?: number;
-  initialFormData?: Form;
-  initialFormElements?: FormElement[];
-}
-
-export const FormBuilderProvider: React.FC<FormBuilderProviderProps> = ({ 
-  children, 
-  initialFormId, 
-  initialFormData, 
-  initialFormElements 
-}) => {
-  const [formData, setFormData] = useState<FormData>(initialForm);
+// Provider component
+export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [form, setForm] = useState<Form | null>(null);
   const [activeElement, setActiveElement] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  
-  // Initialize with existing form data if available
-  useEffect(() => {
-    if (initialFormData && initialFormElements && !isInitialized) {
-      try {
-        console.log("Initializing form builder with existing form:", initialFormData);
-        console.log("Elements loaded:", initialFormElements.length);
-        
-        // Convert backend form model to frontend form data structure
-        const convertedElements = initialFormElements.map(element => {
-          console.log("Converting element:", element);
-          const baseElement: any = {
-            id: element.element_id,
-            type: element.type as QuestionType,
-            label: element.label,
-            required: element.required,
-            placeholder: element.placeholder || undefined,
-            defaultValue: element.default_value || undefined,
-          };
-          
-          // Handle specific element types
-          switch (element.type) {
-            case 'email':
-              baseElement.confirmEmail = element.confirm_email || false;
-              break;
-            case 'star':
-              baseElement.maxStars = element.max_stars || 5;
-              break;
-            case 'section':
-              baseElement.description = element.description || '';
-              break;
-            case 'address':
-              baseElement.expanded = element.address_expanded || false;
-              baseElement.fields = {
-                street1: element.address_street1 || true,
-                street2: element.address_street2 || true,
-                city: element.address_city || true,
-                state: element.address_state || true,
-                zipCode: element.address_zipcode || true,
-                country: element.address_country || true,
-              };
-              baseElement.allowedCountries = element.allowed_countries || undefined;
-              break;
-            case 'phone':
-              baseElement.defaultCountry = element.default_country || 'US';
-              baseElement.allowedCountries = element.allowed_countries || undefined;
-              break;
-          }
-          
-          // Handle options for select, radio, checkbox
-          if (element.options && element.options.length > 0) {
-            baseElement.options = element.options.map(opt => ({
-              id: opt.option_id,
-              label: opt.label,
-              value: opt.value
-            }));
-          }
-          
-          // Handle conditional logic
-          if (element.conditional_logic_enabled) {
-            baseElement.conditionalLogic = {
-              enabled: true,
-              action: element.conditional_action as 'show' | 'hide',
-              logicGate: element.conditional_logic_gate as 'all' | 'any',
-              conditions: element.conditionalRules?.map(rule => ({
-                questionId: rule.question_id,
-                operator: rule.operator as any,
-                value: rule.value
-              })) || []
-            };
-          }
-          
-          return baseElement;
-        });
-        
-        setFormData({
-          title: initialFormData.title,
-          description: initialFormData.description,
-          elements: convertedElements,
-        });
-        
-        setIsInitialized(true);
-        console.log("Successfully initialized form builder with existing form:", initialFormData.title);
-        console.log("Elements loaded:", convertedElements.length);
-        
-      } catch (error) {
-        console.error("Error initializing form with existing data:", error);
-        toast({
-          title: "Error Loading Form",
-          description: "There was an error loading the form data. Starting with a blank form.",
-          variant: "destructive",
-        });
-      }
-    }
-  }, [initialFormData, initialFormElements, isInitialized]);
 
-  const updateFormTitle = (title: string) => {
-    setFormData(prev => ({ ...prev, title }));
+  // Update the entire form
+  const updateForm = (formData: Form) => {
+    setForm(formData);
   };
 
-  const updateFormDescription = (description: string) => {
-    setFormData(prev => ({ ...prev, description }));
-  };
+  // Add a new element
+  const addElement = (type: QuestionType) => {
+    if (!form) return;
 
-  const createDefaultElement = (type: QuestionType): FormElementTypes => {
-    const id = uuidv4();
-
-    // Default properties for all element types
-    const baseElement = {
-      id,
+    const newElementId = uuidv4();
+    
+    // Create basic element with defaults
+    const newElement: FormElement = {
+      id: newElementId,
       type,
-      label: `New ${type.charAt(0).toUpperCase() + type.slice(1)}`,
+      label: `New ${type.charAt(0).toUpperCase() + type.slice(1)} Question`,
       required: false,
     };
-
-    switch (type) {
-      case 'text':
-      case 'paragraph':
-      case 'number':
-        return {
-          ...baseElement,
-          placeholder: 'Enter your answer',
-        };
-      case 'email':
-        return {
-          ...baseElement,
-          placeholder: 'Enter your email',
-          confirmEmail: false, // Default to not requiring confirmation
-        };
-      case 'dropdown':
-      case 'radio':
-      case 'checkbox':
-        return {
-          ...baseElement,
-          options: [
-            { id: uuidv4(), label: 'Option 1', value: 'option_1' },
-            { id: uuidv4(), label: 'Option 2', value: 'option_2' },
-            { id: uuidv4(), label: 'Option 3', value: 'option_3' },
-          ],
-        };
-      case 'date':
-        return {
-          ...baseElement,
-        };
-      case 'star':
-        return {
-          ...baseElement,
-          maxStars: 5,
-        };
-      case 'face':
-        return {
-          ...baseElement,
-        };
-      case 'phone':
-        // Default to common countries with expanded list
-        return {
-          ...baseElement,
-          type: 'phone',
-          placeholder: 'Enter phone number',
-          defaultCountry: 'US',
-          allowedCountries: [
-            'US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP', 'IN', 'BR', 'MX', 
-            'ES', 'IT', 'CN', 'RU', 'ZA', 'AE', 'SG', 'CH', 'SE', 'NL'
-          ],
-        } as PhoneElement;
-      case 'address':
-        // Default to common countries with expanded list
-        return {
-          ...baseElement,
-          type: 'address',
-          expanded: false,
-          fields: {
-            street1: true,
-            street2: true,
-            city: true,
-            state: true,
-            zipCode: true,
-            country: true,
-          },
-          allowedCountries: [
-            'US', 'CA', 'GB', 'AU', 'DE', 'FR', 'JP', 'IN', 'BR', 'MX',
-            'ES', 'IT', 'CN', 'RU', 'ZA', 'AE', 'SG', 'CH', 'SE', 'NL'
-          ],
-        } as AddressElement;
-      case 'section':
-        return {
-          ...baseElement,
-          description: 'Section description',
-        };
-      case 'break':
-        return {
-          ...baseElement,
-          label: '',
-        };
-      default:
-        return baseElement;
+    
+    // Add appropriate defaults based on element type
+    if (['text', 'paragraph', 'email', 'number'].includes(type)) {
+      newElement.placeholder = '';
+      newElement.defaultValue = '';
     }
+    
+    // Add options for select/choice type elements
+    if (['dropdown', 'radio', 'checkbox'].includes(type)) {
+      newElement.options = [
+        { id: uuidv4(), label: 'Option 1', value: 'option_1' },
+        { id: uuidv4(), label: 'Option 2', value: 'option_2' }
+      ];
+    }
+    
+    // Add email confirmation for email type
+    if (type === 'email') {
+      newElement.confirmEmail = false;
+    }
+    
+    // Add rating options
+    if (type === 'star') {
+      newElement.maxStars = 5;
+    }
+    
+    // Add section description
+    if (type === 'section') {
+      newElement.description = '';
+    }
+    
+    // Add address fields configuration
+    if (type === 'address') {
+      (newElement as any).expanded = true;
+      (newElement as any).fields = {
+        street1: true,
+        street2: true,
+        city: true,
+        state: true,
+        zipCode: true,
+        country: true
+      };
+      (newElement as any).allowedCountries = ['US', 'CA'];
+    }
+    
+    // Add phone configuration
+    if (type === 'phone') {
+      (newElement as any).defaultCountry = 'US';
+      (newElement as any).allowedCountries = ['US', 'CA'];
+    }
+
+    // Add conditional logic
+    newElement.conditionalLogic = {
+      enabled: false,
+      action: 'show',
+      conditions: [],
+      logicGate: 'all'
+    };
+
+    // Update the form with the new element
+    setForm(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        elements: [...prev.elements, newElement]
+      };
+    });
+    
+    // Set the new element as active
+    setActiveElement(newElementId);
   };
 
-  const addElement = (type: QuestionType) => {
-    const newElement = createDefaultElement(type);
-    setFormData(prev => ({
-      ...prev,
-      elements: [...prev.elements, newElement],
-    }));
-    setActiveElement(newElement.id);
-    toast({
-      title: "Added Element",
-      description: `Added new ${type} element`,
+  // Update an existing element
+  const updateElement = (elementId: string, updates: Partial<FormElement>) => {
+    if (!form) return;
+    
+    setForm(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        elements: prev.elements.map(el => 
+          el.id === elementId ? { ...el, ...updates } : el
+        )
+      };
     });
   };
 
-  const updateElement = (id: string, updates: Partial<FormElementTypes>) => {
-    setFormData(prev => ({
-      ...prev,
-      elements: prev.elements.map(element =>
-        element && element.id === id ? { ...element, ...updates } : element
-      ),
-    }));
-  };
-
-  const deleteElement = (id: string) => {
-    setFormData(prev => ({
-      ...prev,
-      elements: prev.elements.filter(element => element && element.id !== id),
-    }));
+  // Remove an element
+  const removeElement = (elementId: string) => {
+    if (!form) return;
     
-    if (activeElement === id) {
+    // If the active element is being removed, clear the selection
+    if (activeElement === elementId) {
       setActiveElement(null);
     }
     
-    toast({
-      title: "Element Deleted",
-      description: "The element was successfully deleted",
+    setForm(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        elements: prev.elements.filter(el => el.id !== elementId)
+      };
     });
   };
 
-  const duplicateElement = (id: string) => {
-    const elementToDuplicate = formData.elements.find(element => element && element.id === id);
+  // Move an element (reorder)
+  const moveElement = (dragId: string, hoverId: string) => {
+    if (!form) return;
     
-    if (elementToDuplicate) {
-      const duplicatedElement = {
-        ...elementToDuplicate,
-        id: uuidv4(),
-        label: `${elementToDuplicate.label} (Copy)`,
+    setForm(prev => {
+      if (!prev) return prev;
+      
+      const dragIndex = prev.elements.findIndex(el => el.id === dragId);
+      const hoverIndex = prev.elements.findIndex(el => el.id === hoverId);
+      
+      if (dragIndex === -1 || hoverIndex === -1) return prev;
+      
+      const newElements = [...prev.elements];
+      const dragElement = newElements[dragIndex];
+      
+      // Remove the dragged element
+      newElements.splice(dragIndex, 1);
+      // Insert it at the new position
+      newElements.splice(hoverIndex, 0, dragElement);
+      
+      return {
+        ...prev,
+        elements: newElements
       };
-      
-      const elementIndex = formData.elements.findIndex(element => element && element.id === id);
-      
-      const newElements = [...formData.elements];
-      newElements.splice(elementIndex + 1, 0, duplicatedElement);
-      
-      setFormData({
-        ...formData,
-        elements: newElements,
-      });
-      
-      setActiveElement(duplicatedElement.id);
-      
-      toast({
-        title: "Element Duplicated",
-        description: "The element was successfully duplicated",
-      });
-    }
+    });
   };
 
-  const reorderElements = (startIndex: number, endIndex: number) => {
-    // Make sure we have valid indices and they're different
-    if (
-      startIndex < 0 || 
-      startIndex >= formData.elements.length || 
-      endIndex < 0 || 
-      endIndex > formData.elements.length || 
-      startIndex === endIndex
-    ) {
-      console.warn("Invalid indices for reordering:", startIndex, endIndex);
-      return;
-    }
-    
-    // Create a new array from the existing elements
-    const updatedElements = [...formData.elements];
-    
-    // Get the element to move
-    const [elementToMove] = updatedElements.splice(startIndex, 1);
-    
-    // Check if the element exists
-    if (!elementToMove) {
-      console.warn("Attempted to reorder an undefined element at index:", startIndex);
-      return;
-    }
-    
-    // Insert the element at the new position
-    updatedElements.splice(endIndex, 0, elementToMove);
-    
-    // Update the form data
-    setFormData(prev => ({
-      ...prev,
-      elements: updatedElements
-    }));
-    
-    // Update active element to the moved element
-    setActiveElement(elementToMove.id);
+  const value = {
+    form,
+    activeElement,
+    updateForm,
+    setActiveElement,
+    addElement,
+    updateElement,
+    removeElement,
+    moveElement
   };
 
   return (
-    <FormBuilderContext.Provider
-      value={{
-        formData,
-        activeElement,
-        isDragging,
-        setIsDragging,
-        setActiveElement,
-        updateFormTitle,
-        updateFormDescription,
-        addElement,
-        updateElement,
-        deleteElement,
-        duplicateElement,
-        reorderElements,
-      }}
-    >
+    <FormBuilderContext.Provider value={value}>
       {children}
     </FormBuilderContext.Provider>
   );
 };
 
+// Custom hook to use the context
 export const useFormBuilder = () => {
   const context = useContext(FormBuilderContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useFormBuilder must be used within a FormBuilderProvider');
   }
   return context;

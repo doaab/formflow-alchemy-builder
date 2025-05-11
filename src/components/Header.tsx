@@ -7,11 +7,7 @@ import { Button } from "@/components/ui/button";
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
-  const { t, currentLanguage, changeLanguage, supportedLanguages } = useTranslation();
-
-  const handleLanguageChange = (language: string) => {
-    changeLanguage(language);
-  };
+  const { t, currentLanguage, toggleLanguage } = useTranslation();
 
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm">
@@ -29,16 +25,20 @@ const Header: React.FC = () => {
       <div className="flex items-center gap-4">
         {/* Language Switcher */}
         <div className="flex items-center gap-2">
-          {supportedLanguages.map((lang) => (
-            <Button
-              key={lang}
-              variant={currentLanguage === lang ? "default" : "outline"}
-              className={currentLanguage === lang ? "bg-purple-600" : ""}
-              onClick={() => handleLanguageChange(lang)}
-            >
-              {lang === "ar" ? "العربية" : "English"}
-            </Button>
-          ))}
+          <Button
+            variant={currentLanguage === 'en' ? "default" : "outline"}
+            className={currentLanguage === 'en' ? "bg-purple-600" : ""}
+            onClick={() => toggleLanguage()}
+          >
+            English
+          </Button>
+          <Button
+            variant={currentLanguage === 'ar' ? "default" : "outline"} 
+            className={currentLanguage === 'ar' ? "bg-purple-600" : ""}
+            onClick={() => toggleLanguage()}
+          >
+            العربية
+          </Button>
         </div>
 
         {/* Notifications */}
