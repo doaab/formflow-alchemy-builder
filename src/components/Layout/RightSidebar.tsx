@@ -4,9 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, 
   Settings, 
-  ChevronDown,
   FileText, 
-  BarChart2, 
   HelpCircle,
   Users,
   Bell,
@@ -15,9 +13,10 @@ import {
   LayoutDashboard
 } from 'lucide-react';
 import { useTranslation } from '@/context/TranslationContext';
+import { addLanguageToPath } from '@/i18n/languageUtils';
 
 const RightSidebar: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const location = useLocation();
   
   const menuItems = [
@@ -96,7 +95,7 @@ const RightSidebar: React.FC = () => {
           {menuItems.map((item) => (
             <li key={item.name}>
               <Link
-                to={item.path}
+                to={addLanguageToPath(item.path, currentLanguage)}
                 className={`flex items-center p-3 rounded-md transition-colors ${
                   isActive(item.path) 
                     ? 'bg-white/10' 
@@ -113,7 +112,7 @@ const RightSidebar: React.FC = () => {
       
       <div className="p-4 border-t border-white/20">
         <Link 
-          to="/login" 
+          to={addLanguageToPath('/login', currentLanguage)} 
           className="flex items-center p-2 rounded-md hover:bg-white/10 transition-colors"
         >
           <LogOut className="h-5 w-5 ltr:mr-2 rtl:ml-2" />

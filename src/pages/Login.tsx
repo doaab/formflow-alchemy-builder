@@ -1,13 +1,14 @@
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '@/api/hooks/useAuthQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useTranslation } from '@/context/TranslationContext';
+import { addLanguageToPath } from '@/i18n/languageUtils';
 import loginIllustration from '/public/lovable-uploads/1712dd25-a22d-4a5a-adb1-56f4fa2502f8.png';
 
 interface LoginFormData {
@@ -17,12 +18,18 @@ interface LoginFormData {
 
 const Login: React.FC = () => {
   const { t, currentLanguage, toggleLanguage } = useTranslation();
+  const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
   const { mutate: login, isPending: isLoading } = useLoginMutation();
   const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = (data: LoginFormData) => {
-    login(data);
+    login(data, {
+      onSuccess: () => {
+        // Redirect to dashboard with current language
+        navigate(addLanguageToPath('/dashboard', currentLanguage));
+      }
+    });
   };
 
   const togglePasswordVisibility = () => {
@@ -137,7 +144,7 @@ const Login: React.FC = () => {
               <div className="text-center">
                 <p className="text-sm text-gray-600">
                   {t('dontHaveAccount')}?{' '}
-                  <Link to="/register" className="text-purple-600 hover:text-purple-800 font-medium">
+                  <Link to={addLanguageToPath('/register', currentLanguage)} className="text-purple-600 hover:text-purple-800 font-medium">
                     {t('register')}
                   </Link>
                 </p>

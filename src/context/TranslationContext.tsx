@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getLanguageFromUrl, setDocumentLanguage, updateUrlLanguage } from '@/i18n/languageUtils';
 
 type LanguageType = 'en' | 'ar';
 
@@ -82,7 +83,7 @@ const translations = {
     requestedPoints: 'Requested Points',
     requestDate: 'Request Date',
     transfer: 'Transfer',
-    cancel: 'Cancel',
+    actions: 'Actions',
     users: 'Users',
     advertisingCampaigns: 'Advertising Campaigns',
     bank: 'Bank',
@@ -91,7 +92,7 @@ const translations = {
     customerService: 'Customer Service',
     settings: 'Settings',
     helpCenter: 'Help Center',
-    logout: 'Logout',
+    feedback: 'Feedback',
   },
   ar: {
     // General
@@ -164,7 +165,7 @@ const translations = {
     requestedPoints: 'النقاط المراد تحويلها',
     requestDate: 'تاريخ الطلب',
     transfer: 'تم التحويل',
-    cancel: 'إلغاء',
+    actions: 'الإجراءات',
     users: 'المستخدمين',
     advertisingCampaigns: 'الحملات الإعلانية',
     bank: 'بنك الأسئلة',
@@ -173,7 +174,7 @@ const translations = {
     customerService: 'خدمة العملاء',
     settings: 'الإعدادات',
     helpCenter: 'مركز المساعدة',
-    logout: 'تسجيل الخروج',
+    feedback: 'تقييم',
   }
 };
 
@@ -181,7 +182,13 @@ const TranslationContext = createContext<TranslationContextType | undefined>(und
 
 export const TranslationProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const [currentLanguage, setCurrentLanguage] = useState<LanguageType>(() => {
-    // Check local storage for saved language preference
+    // Use URL parameter first, then local storage, then default
+    const urlLang = getLanguageFromUrl();
+    if (urlLang === 'ar' || urlLang === 'en') {
+      return urlLang;
+    }
+    
+    // Fallback to local storage if no URL parameter
     const savedLang = localStorage.getItem('language');
     return (savedLang === 'ar' || savedLang === 'en') ? savedLang : 'en';
   });
@@ -190,9 +197,11 @@ export const TranslationProvider: React.FC<{children: React.ReactNode}> = ({ chi
     // Save language preference to local storage
     localStorage.setItem('language', currentLanguage);
     
-    // Set direction on document
-    document.documentElement.dir = currentLanguage === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = currentLanguage;
+    // Update document language attributes
+    setDocumentLanguage(currentLanguage);
+    
+    // Update URL with language parameter
+    updateUrlLanguage(currentLanguage);
   }, [currentLanguage]);
 
   const setLanguage = (lang: LanguageType) => {

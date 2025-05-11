@@ -1,42 +1,92 @@
 
-import React, { createContext, useContext, ReactNode, useEffect } from 'react';
-import { User } from '../api/types/authTypes';
-import { useCurrentUser, useLogoutMutation } from '../api/hooks/useAuthQueries';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { loginApi, logoutApi, getUserApi } from '@/api/services/authService';
+import { UserData } from '@/api/types/authTypes';
+import { toast } from 'sonner';
+import { useTranslation } from './TranslationContext';
+import { addLanguageToPath } from '@/i18n/languageUtils';
 
-interface AuthContextType {
-  user: User | null | undefined;
+interface AuthContextProps {
+  user: UserData | null;
   isLoading: boolean;
-  isAuthenticated: boolean;
-  logout: () => void;
-  token: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { data: user, isLoading, refetch } = useCurrentUser();
-  const { mutate: logout } = useLogoutMutation();
-  const token = localStorage.getItem('access_token');
-  
-  const isAuthenticated = !isLoading && !!user && !!token;
-  
-  // Refetch user when token changes
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
+  const { currentLanguage } = useTranslation();
+
   useEffect(() => {
-    if (token) {
-      refetch();
+    const checkAuthStatus = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const userData = await getUserApi();
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+        localStorage.removeItem('token');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
+
+  const login = async (email: string, password: string): Promise<void> => {
+    setIsLoading(true);
+    try {
+      const response = await loginApi(email, password);
+      localStorage.setItem('token', response.token);
+      setUser(response.user);
+      navigate(addLanguageToPath('/dashboard', currentLanguage));
+      toast.success('Login successful');
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Login failed. Please check your credentials.');
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
-  }, [token, refetch]);
-  
-  return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, logout, token }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  };
+
+  const logout = async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      await logoutApi();
+      localStorage.removeItem('token');
+      setUser(null);
+      navigate(addLanguageToPath('/login', currentLanguage));
+      toast.success('Logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Error during logout. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const authContextValue: AuthContextProps = {
+    user,
+    isLoading,
+    login,
+    logout
+  };
+
+  return <AuthContext.Provider value={authContextValue}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = (): AuthContextProps => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

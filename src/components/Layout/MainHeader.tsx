@@ -4,13 +4,19 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from '@/context/TranslationContext';
-import { LogOut, Menu, Search } from 'lucide-react';
+import { LogOut, Search } from 'lucide-react';
+import { updateUrlLanguage } from '@/i18n/languageUtils';
 
 const MainHeader: React.FC = () => {
   const { user, logout } = useAuth();
   const { toggleLanguage, t, currentLanguage } = useTranslation();
   
   const isRtl = currentLanguage === 'ar';
+
+  const handleToggleLanguage = () => {
+    // Toggle language and update URL
+    toggleLanguage();
+  };
 
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center">
@@ -38,7 +44,7 @@ const MainHeader: React.FC = () => {
         <Button 
           variant="outline" 
           size="sm"
-          onClick={toggleLanguage}
+          onClick={handleToggleLanguage}
           className="font-semibold"
         >
           {currentLanguage === 'ar' ? 'EN' : 'AR'}
@@ -47,7 +53,7 @@ const MainHeader: React.FC = () => {
         <Button 
           variant="ghost" 
           size="icon"
-          onClick={() => logout()}
+          onClick={logout}
           title={t('logout')}
         >
           <LogOut className="h-5 w-5" />

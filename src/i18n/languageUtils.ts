@@ -36,3 +36,20 @@ export const updateUrlLanguage = (language: string): void => {
   url.searchParams.set("lang", language);
   window.history.pushState({}, "", url.toString());
 };
+
+/**
+ * Adds language parameter to a given URL/path
+ * @param path The URL or path to add language parameter to
+ * @param language The language code to add
+ * @returns The URL with language parameter
+ */
+export const addLanguageToPath = (path: string, language: string): string => {
+  // If path already contains query params
+  if (path.includes('?')) {
+    const url = new URL(path, window.location.origin);
+    url.searchParams.set("lang", language);
+    return url.pathname + url.search;
+  } 
+  // If no query params yet
+  return `${path}?lang=${language}`;
+};
