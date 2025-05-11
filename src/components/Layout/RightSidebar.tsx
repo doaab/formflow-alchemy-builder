@@ -7,7 +7,12 @@ import {
   ChevronDown,
   FileText, 
   BarChart2, 
-  HelpCircle
+  HelpCircle,
+  Users,
+  Bell,
+  Mail,
+  LogOut,
+  LayoutDashboard
 } from 'lucide-react';
 import { useTranslation } from '@/context/TranslationContext';
 
@@ -16,6 +21,11 @@ const RightSidebar: React.FC = () => {
   const location = useLocation();
   
   const menuItems = [
+    {
+      name: 'dashboard',
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      path: '/dashboard'
+    },
     {
       name: 'main',
       icon: <Home className="h-5 w-5" />,
@@ -27,14 +37,34 @@ const RightSidebar: React.FC = () => {
       path: '/forms'
     },
     {
-      name: 'responses',
-      icon: <FileText className="h-5 w-5" />,
-      path: '/forms'
+      name: 'users',
+      icon: <Users className="h-5 w-5" />,
+      path: '/users'
     },
     {
-      name: 'analytics',
-      icon: <BarChart2 className="h-5 w-5" />,
-      path: '/forms'
+      name: 'advertisingCampaigns',
+      icon: <Bell className="h-5 w-5" />,
+      path: '/campaigns'
+    },
+    {
+      name: 'bank',
+      icon: <FileText className="h-5 w-5" />,
+      path: '/bank'
+    },
+    {
+      name: 'notifications',
+      icon: <Bell className="h-5 w-5" />,
+      path: '/notifications'
+    },
+    {
+      name: 'conversations',
+      icon: <Mail className="h-5 w-5" />,
+      path: '/conversations'
+    },
+    {
+      name: 'customerService',
+      icon: <Users className="h-5 w-5" />,
+      path: '/service'
     },
     {
       name: 'settings',
@@ -42,9 +72,9 @@ const RightSidebar: React.FC = () => {
       path: '/settings'
     },
     {
-      name: 'help',
+      name: 'helpCenter',
       icon: <HelpCircle className="h-5 w-5" />,
-      path: '/docs'
+      path: '/help'
     }
   ];
 
@@ -75,17 +105,20 @@ const RightSidebar: React.FC = () => {
               >
                 <span className="ltr:mr-3 rtl:ml-3">{item.icon}</span>
                 <span className="flex-1">{t(item.name)}</span>
-                {item.name === 'analytics' && (
-                  <ChevronDown className="h-4 w-4" />
-                )}
               </Link>
             </li>
           ))}
         </ul>
       </nav>
       
-      <div className="p-4 border-t border-white/20 text-sm text-center">
-        <p>© {new Date().getFullYear()} {t('formBuilder')}</p>
+      <div className="p-4 border-t border-white/20">
+        <Link 
+          to="/login" 
+          className="flex items-center p-2 rounded-md hover:bg-white/10 transition-colors"
+        >
+          <LogOut className="h-5 w-5 ltr:mr-2 rtl:ml-2" />
+          <span>{t('logout')}</span>
+        </Link>
       </div>
     </aside>
   );

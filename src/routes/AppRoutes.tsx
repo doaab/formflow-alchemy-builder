@@ -10,6 +10,7 @@ import FormResponseDetail from '@/pages/Form/FormResponseDetail.tsx';
 import SurveyForm from '@/pages/Form/SurveyForm.tsx';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
+import Dashboard from '@/pages/Dashboard';
 import ProtectedRoute from '@/components/Auth/ProtectedRoute';
 import AppLayout from '@/components/Layout/AppLayout';
 
@@ -28,7 +29,8 @@ const AppRoutes = () => {
       {/* Protected routes - require authentication */}
       <Route element={<ProtectedRoute authenticationRequired={true} redirectTo="/login" />}>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<FormList />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/forms" element={<FormList />} />
           <Route path="/forms/:formId" element={<FormDetail />} />
           <Route path="/forms/:formId/edit" element={<FormBuilder />} />

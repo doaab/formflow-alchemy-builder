@@ -26,6 +26,7 @@ const translations = {
     analytics: 'Analytics',
     settings: 'Settings',
     help: 'Help',
+    dashboard: 'Dashboard',
     
     // Auth
     email: 'Email',
@@ -63,6 +64,34 @@ const translations = {
     signInToContinue: 'Sign in to continue',
     and: 'and',
     enter: 'Enter',
+    
+    // Dashboard
+    statistics: 'Statistics',
+    financialAffairs: 'Financial Affairs',
+    registeredCompanies: 'Registered Companies',
+    paidSubscriptions: 'Paid Subscriptions',
+    purchasedPoints: 'Points Purchased',
+    totalSales: 'Total Sales',
+    totalSubscriptions: 'Total Subscriptions', 
+    totalPoints: 'Total Points',
+    totalProfit: 'Total Profit',
+    latestPointTransfers: 'Latest Point Transfer Requests',
+    requestNumber: 'Request No.',
+    userName: 'User Name',
+    phoneNumber: 'Phone Number',
+    requestedPoints: 'Requested Points',
+    requestDate: 'Request Date',
+    transfer: 'Transfer',
+    cancel: 'Cancel',
+    users: 'Users',
+    advertisingCampaigns: 'Advertising Campaigns',
+    bank: 'Bank',
+    notifications: 'Notifications',
+    conversations: 'Conversations',
+    customerService: 'Customer Service',
+    settings: 'Settings',
+    helpCenter: 'Help Center',
+    logout: 'Logout',
   },
   ar: {
     // General
@@ -79,6 +108,7 @@ const translations = {
     analytics: 'التحليلات',
     settings: 'الإعدادات',
     help: 'المساعدة',
+    dashboard: 'لوحة التحكم',
     
     // Auth
     email: 'البريد الإلكتروني',
@@ -116,6 +146,34 @@ const translations = {
     signInToContinue: 'سجل الدخول للمتابعة',
     and: 'و',
     enter: 'أدخل',
+    
+    // Dashboard
+    statistics: 'إحصائيات',
+    financialAffairs: 'الأمور المالية',
+    registeredCompanies: 'عدد الشركات المسجلة',
+    paidSubscriptions: 'الاشتراكات المدفوعة',
+    purchasedPoints: 'النقاط التي تم شرائها',
+    totalSales: 'إجمالي عدد المبيعات',
+    totalSubscriptions: 'إجمالي الاشتراكات', 
+    totalPoints: 'إجمالي ربح النقاط',
+    totalProfit: 'إجمالي الربح',
+    latestPointTransfers: 'أحدث طلبات تحويل النقاط',
+    requestNumber: 'رقم الطلب',
+    userName: 'اسم المستخدم',
+    phoneNumber: 'رقم الجوال',
+    requestedPoints: 'النقاط المراد تحويلها',
+    requestDate: 'تاريخ الطلب',
+    transfer: 'تم التحويل',
+    cancel: 'إلغاء',
+    users: 'المستخدمين',
+    advertisingCampaigns: 'الحملات الإعلانية',
+    bank: 'بنك الأسئلة',
+    notifications: 'الإشعارات',
+    conversations: 'المحادثات',
+    customerService: 'خدمة العملاء',
+    settings: 'الإعدادات',
+    helpCenter: 'مركز المساعدة',
+    logout: 'تسجيل الخروج',
   }
 };
 
