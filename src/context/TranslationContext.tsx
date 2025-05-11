@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getLanguageFromUrl, setDocumentLanguage, updateUrlLanguage } from '@/i18n/languageUtils';
 
@@ -93,6 +92,22 @@ const translations = {
     customerService: 'Customer Service',
     helpCenter: 'Help Center',
     feedback: 'Feedback',
+    
+    // Login methods
+    loginWithEmail: 'Login with Email',
+    loginWithPhone: 'Login with Phone Number',
+    loginWithGoogle: 'Login with Google',
+    loginWithApple: 'Login with Apple',
+    phoneNumber: 'Phone Number',
+    noAccount: 'Don\'t have an account',
+    
+    // Users page
+    active: 'Active',
+    inactive: 'Inactive',
+    status: 'Status',
+    totalTransactions: 'Total Transactions',
+    page: 'Page',
+    view: 'View',
   },
   ar: {
     // General
@@ -175,6 +190,22 @@ const translations = {
     customerService: 'خدمة العملاء',
     helpCenter: 'مركز المساعدة',
     feedback: 'تقييم',
+    
+    // Login methods
+    loginWithEmail: 'الدخول بواسطة البريد الإلكتروني',
+    loginWithPhone: 'الدخول بواسطة رقم الجوال',
+    loginWithGoogle: 'الدخول بواسطة جوجل',
+    loginWithApple: 'الدخول بواسطة أبل',
+    phoneNumber: 'رقم الجوال',
+    noAccount: 'لا يوجد لديك حساب',
+    
+    // Users page
+    active: 'نشط',
+    inactive: 'موقف',
+    status: 'الحالة',
+    totalTransactions: 'إجمالي التقييمات',
+    page: 'صفحة',
+    view: 'عرض',
   }
 };
 

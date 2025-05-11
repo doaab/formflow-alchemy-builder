@@ -11,6 +11,7 @@ import SurveyForm from '@/pages/Form/SurveyForm.tsx';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import Dashboard from '@/pages/Dashboard';
+import Users from '@/pages/Users';
 import ProtectedRoute from '@/components/Auth/ProtectedRoute';
 import AppLayout from '@/components/Layout/AppLayout';
 
@@ -31,6 +32,7 @@ const AppRoutes = () => {
         <Route element={<AppLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/users" element={<Users />} />
           <Route path="/forms" element={<FormList />} />
           <Route path="/forms/:formId" element={<FormDetail />} />
           <Route path="/forms/:formId/edit" element={<FormBuilder />} />
