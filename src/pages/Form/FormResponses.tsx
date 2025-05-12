@@ -70,13 +70,13 @@ const FormResponses = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Form Responses</h1>
-          <p className="text-muted-foreground mt-1">
+          <div className="text-muted-foreground mt-1">
             {isLoading ? (
               <Skeleton className="h-4 w-40 inline-block" />
             ) : (
               `${filteredResponses.length} total responses`
             )}
-          </p>
+          </div>
         </div>
         
         <div className="flex flex-col sm:flex-row gap-2">

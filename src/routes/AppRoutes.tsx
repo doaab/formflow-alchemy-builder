@@ -53,8 +53,18 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
       <Route path="/forms/:formId/responses" element={<ProtectedRoute><FormResponses /></ProtectedRoute>} />
-      <Route path="/forms/:formId/responses/:responseId" element={<ProtectedRoute><FormResponseDetail /></ProtectedRoute>} />
-      <Route path="/forms/:formId/preview" element={<ProtectedRoute><SurveyForm /></ProtectedRoute>} />
+      <Route path="/forms/:formId/responses/:responseId" element={
+        <ProtectedRoute>
+          <FormResponseDetail />
+        </ProtectedRoute>
+      } />
+      <Route path="/forms/:formId/preview" element={
+        <ProtectedRoute>
+          <FormBuilderProvider>
+            <SurveyForm />
+          </FormBuilderProvider>
+        </ProtectedRoute>
+      } />
       
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
