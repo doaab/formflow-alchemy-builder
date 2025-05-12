@@ -1,17 +1,17 @@
 
-// Import individual translations directly
-import auth from './auth';
-import dashboard from './dashboard';
-import navigation from './navigation';
-import survey from './survey';
-import landing from './landing';
-import plans from './plans';
-import reviews from './reviews';
-import customerService from './customerService';
-import coupons from './coupons';
-import ads from './ads';
-import subscriptions from './subscriptions';
-import misc from './misc';
+// Import individual translations using named imports
+import { auth } from './auth';
+import { dashboard } from './dashboard';
+import { navigation } from './navigation';
+import { survey } from './survey';
+import { landing } from './landing';
+import { plans } from './plans';
+import { reviews } from './reviews';
+import { customerService } from './customerService';
+import { coupons } from './coupons';
+import { ads } from './ads';
+import { subscriptions } from './subscriptions';
+import { misc } from './misc';
 
 // Use a simple object merge approach
 const en = {

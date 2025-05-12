@@ -8,7 +8,8 @@ export const TranslationContext = createContext<TranslationHook>({
   t: (key: string) => key,
   currentLanguage: 'en',
   changeLanguage: () => {},
-  supportedLanguages: ['en']
+  supportedLanguages: ['en'],
+  toggleLanguage: () => {}
 });
 
 interface TranslationProviderProps {
@@ -37,6 +38,12 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
     }
   };
 
+  // Function to toggle between supported languages
+  const toggleLanguage = () => {
+    const nextLang = currentLanguage === 'en' ? 'ar' : 'en';
+    changeLanguage(nextLang);
+  };
+
   // Initialize language from localStorage
   useEffect(() => {
     const savedLanguage = localStorage.getItem('preferredLanguage');
@@ -53,7 +60,8 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
     t,
     currentLanguage,
     changeLanguage,
-    supportedLanguages
+    supportedLanguages,
+    toggleLanguage
   };
 
   return (
@@ -61,4 +69,13 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
       {children}
     </TranslationContext.Provider>
   );
+};
+
+// Add useTranslation hook directly in the TranslationContext file
+export const useTranslation = (): TranslationHook => {
+  const context = useContext(TranslationContext);
+  if (context === undefined) {
+    throw new Error('useTranslation must be used within a TranslationProvider');
+  }
+  return context;
 };

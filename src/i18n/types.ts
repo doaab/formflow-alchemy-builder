@@ -19,4 +19,9 @@ export interface TranslationHook {
    * List of supported languages
    */
   supportedLanguages: string[];
+
+  /**
+   * Function to toggle between available languages
+   */
+  toggleLanguage: () => void;
 }
