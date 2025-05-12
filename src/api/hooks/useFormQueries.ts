@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   getAllForms as fetchForms, 
@@ -7,7 +6,7 @@ import {
 } from '../services/formService';
 import { API_URL } from '../services/config';
 import { toast } from 'sonner';
-import { getCsrfCookie } from '../services/authService';
+import { getCsrfCookie, getAuthHeaders } from '../services/authService';
 import { FormElement } from '../types/formTypes';
 
 // React Query hooks
@@ -188,11 +187,7 @@ export const useUpdateFormStatus = () => {
         
         const response = await fetch(`${API_URL}/forms/${formId}/status`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-          },
+          headers: getAuthHeaders(), // Use the auth headers helper
           credentials: 'include',
           body: JSON.stringify({ status }),
         });
@@ -302,3 +297,5 @@ export const useExportResponses = () => {
     }
   });
 };
+
+export { useForm };

@@ -16,6 +16,7 @@ import { FormBuilderProvider } from '@/context/FormBuilderContext';
 import ProtectedRoute from '@/components/Auth/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
 import FormBuilder from '@/components/FormBuilder/FormBuilder';
+import FormEditorLayout from '@/components/Layout/FormEditorLayout';
 
 const AppRoutes: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -38,33 +39,33 @@ const AppRoutes: React.FC = () => {
       
       {/* Form routes */}
       <Route path="/forms" element={<ProtectedRoute><FormList /></ProtectedRoute>} />
+      
+      {/* Form editor routes with new layout */}
       <Route path="/forms/:formId" element={
         <ProtectedRoute>
-          <FormBuilderProvider>
-            <FormDetail />
-          </FormBuilderProvider>
+          <FormDetail />
         </ProtectedRoute>
       } />
-      <Route path="/forms/:formId/edit" element={
+      
+      {/* Form builder routes */}
+      <Route element={
         <ProtectedRoute>
+          <FormEditorLayout />
+        </ProtectedRoute>
+      }>
+        <Route path="/forms/:formId/edit" element={
           <FormBuilderProvider>
             <FormBuilder />
           </FormBuilderProvider>
-        </ProtectedRoute>
-      } />
-      <Route path="/forms/:formId/responses" element={<ProtectedRoute><FormResponses /></ProtectedRoute>} />
-      <Route path="/forms/:formId/responses/:responseId" element={
-        <ProtectedRoute>
-          <FormResponseDetail />
-        </ProtectedRoute>
-      } />
-      <Route path="/forms/:formId/preview" element={
-        <ProtectedRoute>
+        } />
+        <Route path="/forms/:formId/responses" element={<FormResponses />} />
+        <Route path="/forms/:formId/responses/:responseId" element={<FormResponseDetail />} />
+        <Route path="/forms/:formId/preview" element={
           <FormBuilderProvider>
             <SurveyForm />
           </FormBuilderProvider>
-        </ProtectedRoute>
-      } />
+        } />
+      </Route>
       
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<NotFound />} />
