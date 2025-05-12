@@ -1,4 +1,3 @@
-
 export interface Form {
   id: number;
   user_id: number | null;
@@ -10,6 +9,14 @@ export interface Form {
   updated_at: string;
   form_elements?: FormElement[];
   elements?: FormElementTypes[];
+  status_label?: string;
+  is_published?: boolean;
+  responses_count?: number;
+}
+
+// This was missing and needed for the FormDetail page
+export interface FormWithElements extends Form {
+  elements: FormElementTypes[];
 }
 
 export interface FormElement {

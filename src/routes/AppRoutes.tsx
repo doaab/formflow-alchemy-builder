@@ -40,14 +40,13 @@ const AppRoutes: React.FC = () => {
       {/* Form routes */}
       <Route path="/forms" element={<ProtectedRoute><FormList /></ProtectedRoute>} />
       
-      {/* Form editor routes with new layout */}
       <Route path="/forms/:formId" element={
         <ProtectedRoute>
           <FormDetail />
         </ProtectedRoute>
       } />
       
-      {/* Form builder routes */}
+      {/* Form editor routes with new layout */}
       <Route element={
         <ProtectedRoute>
           <FormEditorLayout />

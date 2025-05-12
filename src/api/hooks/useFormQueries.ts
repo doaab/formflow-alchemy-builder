@@ -2,7 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   getAllForms as fetchForms, 
   getFormResponses as fetchFormResponses, 
-  getFormResponse as fetchFormResponseDetails 
+  getFormResponse as fetchFormResponseDetails,
+  getFormById 
 } from '../services/formService';
 import { API_URL } from '../services/config';
 import { toast } from 'sonner';
@@ -14,6 +15,14 @@ export const useForms = () => {
   return useQuery({
     queryKey: ['forms'],
     queryFn: fetchForms,
+  });
+};
+
+export const useForm = (formId: number | undefined) => {
+  return useQuery({
+    queryKey: ['form', formId],
+    queryFn: () => getFormById(Number(formId)),
+    enabled: !!formId,
   });
 };
 
@@ -297,5 +306,3 @@ export const useExportResponses = () => {
     }
   });
 };
-
-export { useForm };
