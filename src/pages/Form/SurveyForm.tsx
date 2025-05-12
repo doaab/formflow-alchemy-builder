@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -7,9 +6,15 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from 'sonner';
 import { API_URL } from '@/api/services/config';
-import { Form } from '@/api/types/formTypes';
+import { Form, FormElementTypes } from '@/api/types/formTypes';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+
+// Define a type for server-side form elements that include element_id and order
+interface ServerFormElement extends FormElementTypes {
+  element_id: string;
+  order: number;
+}
 
 // Define the interface for URL parameters
 interface SurveyParams {
@@ -28,7 +33,7 @@ const SurveyForm = () => {
   const [wizardMode, setWizardMode] = useState<boolean>(false);
   const [pageBreaks, setPageBreaks] = useState<number[]>([]);
   
-  const params = useParams<{ slug: string }>();
+  const params = useParams<{ slug?: string }>();
   const slug = params.slug;
   const navigate = useNavigate();
   
@@ -67,9 +72,9 @@ const SurveyForm = () => {
         // Initialize form data with default values if available
         if (data.elements) {
           const initialFormData: Record<string, any> = {};
-          data.elements.forEach((element: any) => {
-            if (element.default_value) {
-              initialFormData[element.element_id] = element.default_value;
+          data.elements.forEach((element: ServerFormElement) => {
+            if (element.defaultValue) {
+              initialFormData[element.element_id] = element.defaultValue;
             } else if (element.type === 'checkbox') {
               // Initialize checkbox values as empty arrays
               initialFormData[element.element_id] = [];
@@ -79,7 +84,7 @@ const SurveyForm = () => {
           
           // Check if form has break elements (for wizard mode)
           const breakIndices: number[] = [];
-          data.elements.forEach((element: any, index: number) => {
+          data.elements.forEach((element: ServerFormElement, index: number) => {
             if (element.type === 'break') {
               breakIndices.push(index);
             }
@@ -110,9 +115,9 @@ const SurveyForm = () => {
     if (!form?.elements) return [];
     
     // Sort elements by order
-    return form.elements
+    return (form.elements as ServerFormElement[])
       .filter(element => !['break'].includes(element.type))
-      .sort((a, b) => a.order - b.order);
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
   };
   
   // Get visible elements for current wizard step
@@ -124,7 +129,7 @@ const SurveyForm = () => {
     
     // In wizard mode, return only elements for the current step
     const allElements = form?.elements || [];
-    const sortedElements = [...allElements].sort((a, b) => a.order - b.order);
+    const sortedElements = [...allElements].sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
     
     let startIndex = 0;
     let endIndex = sortedElements.length;
@@ -251,7 +256,7 @@ const SurveyForm = () => {
   };
   
   // Render form element based on type
-  const renderFormElement = (element: any) => {
+  const renderFormElement = (element: ServerFormElement) => {
     const { type, element_id, label, placeholder, required, options } = element;
     
     switch (type) {
@@ -523,7 +528,7 @@ const SurveyForm = () => {
   }
   
   // Active form
-  const visibleElements = getVisibleElements();
+  const visibleElements = getVisibleElements() as ServerFormElement[];
   const totalSteps = wizardMode ? pageBreaks.length + 1 : 1; // In wizard mode, total steps = number of page breaks + 1
   const progress = wizardMode ? ((currentStep / totalSteps) * 100) : 0;
   

@@ -1,46 +1,42 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 
 interface SidebarItemProps {
-  to: string;
   icon: React.ReactNode;
   label: string;
-  active?: boolean;
-  permission?: string;
+  path: string;
+  adminOnly?: boolean;
 }
 
-const SidebarItem: React.FC<SidebarItemProps> = ({
-  to,
-  icon,
-  label,
-  active = false,
-  permission,
+const SidebarItem: React.FC<SidebarItemProps> = ({ 
+  icon, 
+  label, 
+  path,
+  adminOnly = false
 }) => {
-  const { hasPermission } = useAuth();
-
-  // Hide menu item if user doesn't have permission
-  if (permission && !hasPermission(permission)) {
+  const { pathname } = useLocation();
+  const isActive = pathname === path || pathname.startsWith(`${path}/`);
+  const { user } = useAuth();
+  
+  // Show only if user is admin when adminOnly is true
+  if (adminOnly && user?.role !== 'admin') {
     return null;
   }
-
+  
   return (
-    <li className="mb-2">
-      <Link
-        to={to}
-        className={cn(
-          "flex items-center gap-3 px-4 py-2 rounded-md transition-colors",
-          active
-            ? "bg-purple-600 text-white"
-            : "hover:bg-purple-100 dark:hover:bg-purple-900"
-        )}
-      >
-        <span className="text-lg">{icon}</span>
-        <span className="font-medium">{label}</span>
-      </Link>
-    </li>
+    <Link 
+      to={path}
+      className={cn(
+        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent',
+        isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
+      )}
+    >
+      <div className="w-5 h-5">{icon}</div>
+      <span>{label}</span>
+    </Link>
   );
 };
 

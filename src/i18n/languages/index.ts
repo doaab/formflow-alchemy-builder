@@ -1,10 +1,10 @@
 
-import { en } from './en';
-import { ar } from './ar';
+import en from './en';
+import ar from './ar';
 
-export const translations = {
+const languages = {
   en,
-  ar,
+  ar
 };
 
-export type TranslationKey = keyof typeof en;
+export default languages;

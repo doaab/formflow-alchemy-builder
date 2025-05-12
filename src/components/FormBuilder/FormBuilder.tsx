@@ -15,7 +15,7 @@ import ElementConditions from './ElementConditions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FormPreviewDialog from './FormPreviewDialog';
 import { Loader2 } from 'lucide-react';
-import { Form } from '@/api/types/formTypes';
+import { Form, FormElementTypes } from '@/api/types/formTypes';
 
 const FormBuilder: React.FC = () => {
   const { formId } = useParams<{ formId: string }>();

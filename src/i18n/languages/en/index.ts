@@ -1,4 +1,5 @@
 
+// Import individual translations directly
 import auth from './auth';
 import dashboard from './dashboard';
 import navigation from './navigation';
@@ -12,6 +13,7 @@ import ads from './ads';
 import subscriptions from './subscriptions';
 import misc from './misc';
 
+// Use a simple object merge approach
 const en = {
   ...auth,
   ...dashboard,

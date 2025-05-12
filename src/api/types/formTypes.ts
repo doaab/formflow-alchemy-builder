@@ -1,3 +1,4 @@
+
 export interface Form {
   id: number;
   user_id: number | null;
@@ -163,6 +164,15 @@ export interface FormResponseWithAnswers extends FormResponse {
   form?: Form;
 }
 
+// Make the ConditionOperator type definition match the one in the formBuilder file
+export type ConditionOperator = 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than';
+
+export interface Condition {
+  questionId: string;
+  operator: ConditionOperator;
+  value: string;
+}
+
 // Type definitions that match the implementation in src/types/formBuilder.ts
 export interface FormElementTypes {
   id: string;
@@ -196,12 +206,8 @@ export interface FormElementTypes {
   };
   allowedCountries?: string[];
   defaultCountry?: string;
-}
-
-export interface Condition {
-  questionId: string;
-  operator: string;
-  value: string;
+  order?: number;
+  element_id?: string;
 }
 
 export interface FormData {

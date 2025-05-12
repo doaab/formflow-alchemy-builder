@@ -1,26 +1,26 @@
 
-import React from "react";
-import { LogOut } from "lucide-react";
-import { useAuth } from "../../contexts/AuthContext";
-import { useTranslation } from "../../hooks/useTranslation";
+import React from 'react';
+import { LogOut, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/hooks/useTranslation';
 
-interface SidebarFooterProps {
-  collapsed: boolean;
-}
-
-const SidebarFooter: React.FC<SidebarFooterProps> = ({ collapsed }) => {
+const SidebarFooter = () => {
   const { logout } = useAuth();
   const { t } = useTranslation();
-
+  
   return (
-    <div className="p-4">
-      <button
-        onClick={logout}
-        className="flex items-center gap-3 w-full px-4 py-2 text-left rounded-md hover:bg-purple-800 transition-colors"
-      >
-        <LogOut size={18} />
-        {!collapsed && <span>{t("logout")}</span>}
-      </button>
+    <div className="p-4 mt-auto border-t">
+      <div className="flex flex-col gap-2">
+        <Button variant="outline" size="sm" className="justify-start">
+          <Settings className="mr-2 h-4 w-4" />
+          {t('settings')}
+        </Button>
+        <Button variant="outline" size="sm" className="justify-start text-red-500" onClick={logout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          {t('logout')}
+        </Button>
+      </div>
     </div>
   );
 };
