@@ -1,5 +1,5 @@
 
-// Arabic translations for dashboard
+// English translations for landing page
 export const Landing = {
     Smart_Applications_Foundation_For_Information_Technology:"Smart Applications Foundation For Information Technology",
     features: "Features",
@@ -54,7 +54,4 @@ export const Landing = {
     proFeature5: "Activate participation via mobile numbers",
     proFeature6: "Diverse dashboard and advanced services",
     proFeature7: "Sentiment analysis of customers"
-
-
-
 };

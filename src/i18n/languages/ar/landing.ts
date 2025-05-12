@@ -1,5 +1,5 @@
 
-// Arabic translations for dashboard
+// Arabic translations for landing page
 export const Landing = {
     Smart_Applications_Foundation_For_Information_Technology:"مؤسسة تطبيقات ذكية لتقنية المعلومات",
     features: "الميزات",
@@ -24,12 +24,9 @@ export const Landing = {
     createSurvey:"البیانات ھي المحرك الأساسي لنجاح مشروعك",
     createSurveyDes:"بفضل التقییمات والآراء التي نقدمھا لك، یمكنك من تحدید نقاط القوة والضعف في مشروعك واتخاذ القرارات الصحیحة لتطویره وتنمیتھ بشكل فعال وسلس",
     survey_examples_title:"استخدم نماذج تقییم احترافیة مجانیة وابدأ رحلة تطویر علامتك التجاریة",
-    // createSurveyDes:"",
-    // createSurveyDes:"",
-    // createSurveyDes:"",
 
     whichPlanForYou: "ما هي الخطة المناسبة لك؟",
-        monthly: "شهري",
+    monthly: "شهري",
     annual: "سنوي",
     save: "وفر",
     sar: "ر.س",
@@ -57,5 +54,4 @@ export const Landing = {
     proFeature5: "تفعيل المشاركة عبر أرقام الجوال",
     proFeature6: "لوحة تحكم متنوعة وخدمات متقدمة",
     proFeature7: "تحليل مشاعر العملاء"
-
 };

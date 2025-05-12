@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { TranslationHook } from '@/i18n/types';
 import languages from '@/i18n/languages';
 

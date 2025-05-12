@@ -2,8 +2,8 @@
 // Type for translations
 export type TranslationRecord = Record<string, string>;
 
-// Import translations from the new structure
-import { translations as languageTranslations } from './languages';
+// Import translations directly from the languages index
+import languages from './languages';
 
 // Available translations
-export const translations: Record<string, TranslationRecord> = languageTranslations;
+export const translations: Record<string, TranslationRecord> = languages;

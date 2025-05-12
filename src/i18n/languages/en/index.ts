@@ -4,7 +4,7 @@ import { auth } from './auth';
 import { dashboard } from './dashboard';
 import { navigation } from './navigation';
 import { survey } from './survey';
-import { landing } from './landing';
+import { Landing } from './landing'; // Corrected case
 import { plans } from './plans';
 import { reviews } from './reviews';
 import { customerService } from './customerService';
@@ -19,7 +19,7 @@ const en = {
   ...dashboard,
   ...navigation,
   ...survey,
-  ...landing,
+  ...Landing, // Corrected case
   ...plans,
   ...reviews,
   ...customerService,
