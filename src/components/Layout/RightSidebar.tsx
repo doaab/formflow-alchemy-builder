@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from '@/context/TranslationContext';
@@ -6,78 +7,67 @@ import {
   LayoutDashboard,
   FileText,
   Inbox,
-  Users as UsersIcon
+  Users,
+  Settings,
+  HelpCircle,
+  MessageSquare,
+  Star,
+  CreditCard,
+  Cog
 } from 'lucide-react';
 
-interface SidebarItemProps {
-  id: string;
-  label: string;
-  icon: string;
-  path: string;
-}
-
-// Update the sidebar menu items to include Users
-const sidebarItems = [
-  {
-    id: 'dashboard',
-    label: 'dashboard',
-    icon: 'layout-dashboard',
-    path: '/dashboard'
-  },
-  {
-    id: 'users',
-    label: 'users',
-    icon: 'users',
-    path: '/users'
-  },
-  {
-    id: 'forms',
-    label: 'forms',
-    icon: 'file-text',
-    path: '/forms'
-  },
-  {
-    id: 'responses',
-    label: 'responses',
-    icon: 'inbox',
-    path: '/responses'
-  },
-];
-
-const iconMap: { [key: string]: React.ComponentType<any> } = {
-  'layout-dashboard': LayoutDashboard,
-  'file-text': FileText,
-  'inbox': Inbox,
-  'users': UsersIcon,
-};
-
 const RightSidebar: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const location = useLocation();
+  const isRtl = currentLanguage === 'ar';
+
+  const menuItems = [
+    { id: 'dashboard', icon: LayoutDashboard, label: 'dashboard', path: '/dashboard' },
+    { id: 'users', icon: Users, label: 'users', path: '/users' },
+    { id: 'forms', icon: FileText, label: 'forms', path: '/forms' },
+    { id: 'responses', icon: Inbox, label: 'responses', path: '/responses' },
+    { id: 'campaigns', icon: Star, label: 'campaigns', path: '/campaigns' },
+    { id: 'messages', icon: MessageSquare, label: 'customerService', path: '/messages' },
+    { id: 'subscriptions', icon: CreditCard, label: 'subscriptions', path: '/subscriptions' },
+    { id: 'settings', icon: Cog, label: 'settings', path: '/settings' },
+    { id: 'help', icon: HelpCircle, label: 'help', path: '/help' },
+  ];
 
   return (
-    <aside className="hidden border-l bg-secondary lg:block w-60">
-      <div className="px-4 py-6">
-        <h3 className="mb-4 text-sm font-semibold tracking-tight">Menu</h3>
-        <div className="space-y-1">
-          {sidebarItems.map((item) => {
-            const Icon = iconMap[item.icon] || (() => null);
-            const isActive = location.pathname.startsWith(item.path);
+    <aside className={`hidden md:block border-l border-gray-200 bg-[#2A2A3F] w-20 flex-shrink-0 text-white ${isRtl ? 'order-first border-r border-l-0' : 'order-last'}`}>
+      <div className="h-full flex flex-col items-center pt-6 pb-4">
+        <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-8">
+          <span className="text-xl font-semibold text-white">F</span>
+        </div>
+        
+        <div className="flex-1 w-full overflow-y-auto">
+          <nav className="flex flex-col items-center gap-6">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname.startsWith(item.path);
 
-            return (
-              <Link
-                key={item.id}
-                to={item.path}
-                className={cn(
-                  "group flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-                  isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-                )}
-              >
-                <Icon className="mr-2 h-4 w-4" />
-                <span>{t(item.label)}</span>
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.id}
+                  to={item.path}
+                  className={cn(
+                    "group flex flex-col items-center w-full relative px-2",
+                    isActive && "after:absolute after:left-0 after:w-1 after:h-8 after:bg-blue-500 after:rounded-r-md"
+                  )}
+                >
+                  <div className={cn(
+                    "flex items-center justify-center w-10 h-10 rounded-md transition-colors",
+                    isActive ? "bg-white/10 text-white" : "text-gray-400 group-hover:text-white"
+                  )}>
+                    <Icon size={20} />
+                  </div>
+                  <span className="text-xs mt-1 text-center">
+                    {t(item.label)}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
       </div>
     </aside>

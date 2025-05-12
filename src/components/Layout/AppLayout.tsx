@@ -1,13 +1,23 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import MainHeader from './MainHeader';
 import RightSidebar from './RightSidebar';
+import LeftSidebar from './LeftSidebar';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/context/TranslationContext';
 import { Navigate } from 'react-router-dom';
+import { setDocumentLanguage } from '@/i18n/languageUtils';
 
 const AppLayout: React.FC = () => {
   const { user, isLoading } = useAuth();
+  const { currentLanguage } = useTranslation();
+  const isRtl = currentLanguage === 'ar';
+
+  // Set document language and direction
+  useEffect(() => {
+    setDocumentLanguage(currentLanguage);
+  }, [currentLanguage]);
 
   if (isLoading) {
     return (
@@ -22,16 +32,20 @@ const AppLayout: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <div className="flex flex-col flex-1">
-        <MainHeader />
-        <main className="flex-1 overflow-auto p-4">
+    <div 
+      className={`flex flex-col h-screen ${isRtl ? 'rtl' : 'ltr'}`} 
+      dir={isRtl ? 'rtl' : 'ltr'}
+    >
+      <MainHeader />
+      <div className={`flex flex-1 overflow-hidden ${isRtl ? 'flex-row-reverse' : ''}`}>
+        <RightSidebar />
+        <LeftSidebar />
+        <main className="flex-1 overflow-auto p-4 bg-gray-50">
           <div className="container mx-auto">
             <Outlet />
           </div>
         </main>
       </div>
-      <RightSidebar />
     </div>
   );
 };

@@ -1,24 +1,34 @@
 
 import React from 'react';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
-import { useTranslation } from '@/hooks/useTranslation';
+import { useTranslation } from '@/context/TranslationContext';
 
-const SidebarFooter = () => {
+interface SidebarFooterProps {
+  collapsed?: boolean;
+}
+
+const SidebarFooter: React.FC<SidebarFooterProps> = ({ collapsed = false }) => {
   const { logout } = useAuth();
   const { t } = useTranslation();
   
   return (
-    <div className="p-4 mt-auto border-t">
-      <div className="flex flex-col gap-2">
-        <Button variant="outline" size="sm" className="justify-start">
-          <Settings className="mr-2 h-4 w-4" />
-          {t('settings')}
-        </Button>
-        <Button variant="outline" size="sm" className="justify-start text-red-500" onClick={logout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          {t('logout')}
+    <div className="p-4 border-t border-gray-700">
+      <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
+        {!collapsed && (
+          <div className="text-sm">
+            <p className="text-gray-400">{t('version')} 2.0</p>
+          </div>
+        )}
+        
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={logout}
+          className="text-gray-400 hover:text-white hover:bg-gray-700"
+        >
+          <LogOut className="h-5 w-5" />
         </Button>
       </div>
     </div>

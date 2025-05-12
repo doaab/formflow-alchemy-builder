@@ -2,6 +2,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { TranslationHook } from '@/i18n/types';
 import languages from '@/i18n/languages';
+import { setDocumentLanguage, updateUrlLanguage } from '@/i18n/languageUtils';
 
 // Create the context with default values
 export const TranslationContext = createContext<TranslationHook>({
@@ -33,8 +34,8 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
     if (supportedLanguages.includes(lang)) {
       setCurrentLanguage(lang);
       localStorage.setItem('preferredLanguage', lang);
-      document.documentElement.lang = lang;
-      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      setDocumentLanguage(lang);
+      updateUrlLanguage(lang);
     }
   };
 

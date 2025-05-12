@@ -102,10 +102,14 @@
 }
 
 /* RTL Support */
-html[dir="rtl"] {
-  /* Reverse margins/paddings where appropriate */
+[dir="rtl"] {
+  /* Margins/paddings for RTL */
   .rtl\:mr-0 {
     margin-right: 0;
+  }
+  
+  .rtl\:ml-0 {
+    margin-left: 0;
   }
   
   .rtl\:ml-auto {
@@ -116,18 +120,38 @@ html[dir="rtl"] {
     margin-right: auto;
   }
   
-  /* Flip menu */
+  /* Corners for RTL */
+  .rtl\:rounded-r-none {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  
+  .rtl\:rounded-l-none {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  
+  /* Positioning for RTL */
   .rtl\:right-0 {
-    right: auto;
+    right: 0;
+    left: auto;
+  }
+  
+  .rtl\:left-0 {
     left: 0;
+    right: auto;
   }
   
   /* Text alignment */
   .rtl\:text-right {
     text-align: right;
   }
+  
+  .rtl\:text-left {
+    text-align: left;
+  }
 
-  /* Reverse flex direction */
+  /* Flex direction */
   .rtl\:flex-row-reverse {
     flex-direction: row-reverse;
   }
@@ -142,4 +166,18 @@ html[dir="rtl"] {
     border-right: 1px solid;
     border-left: none;
   }
+  
+  /* Transforms for RTL */
+  .rtl\:rotate-180 {
+    transform: rotate(180deg);
+  }
+}
+
+/* Global RTL and LTR classes for full page control */
+.rtl {
+  direction: rtl;
+}
+
+.ltr {
+  direction: ltr;
 }
