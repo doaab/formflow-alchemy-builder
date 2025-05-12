@@ -18,15 +18,14 @@ const LeftSidebar: React.FC = () => {
   
   // These menu items match the ones shown in the reference image
   const menuItems: SidebarItem[] = [
-    { id: 'home', label: 'الرئيسية', path: '/dashboard', active: true },
-    { id: 'requests', label: 'الطلبات', path: '/requests' },
-    { id: 'users', label: 'المستخدمين', path: '/users' },
-    { id: 'ads', label: 'الحملات الإعلانية', path: '/ads' },
-    { id: 'coupons', label: 'الكوبونات', path: '/coupons' },
-    { id: 'questions', label: 'بنك الأسئلة', path: '/questions' },
-    { id: 'subscriptions', label: 'الاشتراكات', path: '/subscriptions' },
-    { id: 'settings', label: 'الإعدادات', path: '/settings' },
-    { id: 'help', label: 'مركز المساعدة', path: '/help' },
+    { id: 'dashboard', label: isRtl ? 'الرئيسية' : 'Dashboard', path: '/dashboard', active: true },
+    { id: 'forms', label: isRtl ? 'النماذج' : 'Forms', path: '/forms' },
+    { id: 'users', label: isRtl ? 'المستخدمين' : 'Users', path: '/users' },
+    { id: 'campaigns', label: isRtl ? 'الحملات الإعلانية' : 'Campaigns', path: '/campaigns' },
+    { id: 'coupons', label: isRtl ? 'الكوبونات' : 'Coupons', path: '/coupons' },
+    { id: 'questions', label: isRtl ? 'بنك الأسئلة' : 'Questions', path: '/questions' },
+    { id: 'settings', label: isRtl ? 'الإعدادات' : 'Settings', path: '/settings' },
+    { id: 'help', label: isRtl ? 'مركز المساعدة' : 'Help', path: '/help' },
   ];
 
   return (
@@ -42,7 +41,7 @@ const LeftSidebar: React.FC = () => {
           <ul className="space-y-1">
             {menuItems.map((item) => {
               const isActive = location.pathname === item.path || 
-                (item.id === 'home' && location.pathname === '/') ||
+                (item.id === 'dashboard' && location.pathname === '/') ||
                 (location.pathname.startsWith(item.path) && item.path !== '/');
 
               return (
@@ -56,7 +55,7 @@ const LeftSidebar: React.FC = () => {
                         : "text-gray-300 hover:bg-white/5"
                     )}
                   >
-                    {isRtl ? t(item.label) : item.label}
+                    {item.label}
                   </Link>
                 </li>
               );

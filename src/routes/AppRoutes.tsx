@@ -17,6 +17,7 @@ import ProtectedRoute from '@/components/Auth/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
 import FormBuilder from '@/components/FormBuilder/FormBuilder';
 import FormEditorLayout from '@/components/Layout/FormEditorLayout';
+import AppLayout from '@/components/Layout/AppLayout';
 
 const AppRoutes: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -28,30 +29,23 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* Public routes */}
-      <Route path="/login" element={!user ? <Login /> : <Navigate to="/forms" replace />} />
-      <Route path="/register" element={!user ? <Register /> : <Navigate to="/forms" replace />} />
+      <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" replace />} />
+      <Route path="/register" element={!user ? <Register /> : <Navigate to="/dashboard" replace />} />
       
-      {/* Protected routes */}
-      <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
-      <Route path="/users/:userId" element={<ProtectedRoute><UserDetail /></ProtectedRoute>} />
+      {/* Protected routes with AppLayout */}
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/users" element={<Users />} />
+        <Route path="/users/:userId" element={<UserDetail />} />
+        <Route path="/forms" element={<FormList />} />
+        <Route path="/forms/:formId" element={<FormDetail />} />
+        <Route path="/settings" element={<div>Settings Page</div>} />
+        <Route path="/help" element={<div>Help Page</div>} />
+      </Route>
       
-      {/* Form routes */}
-      <Route path="/forms" element={<ProtectedRoute><FormList /></ProtectedRoute>} />
-      
-      <Route path="/forms/:formId" element={
-        <ProtectedRoute>
-          <FormDetail />
-        </ProtectedRoute>
-      } />
-      
-      {/* Form editor routes with new layout */}
-      <Route element={
-        <ProtectedRoute>
-          <FormEditorLayout />
-        </ProtectedRoute>
-      }>
+      {/* Form editor routes with FormEditorLayout */}
+      <Route element={<FormEditorLayout />}>
         <Route path="/forms/:formId/edit" element={
           <FormBuilderProvider>
             <FormBuilder />

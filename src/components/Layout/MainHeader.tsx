@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslation } from '@/context/TranslationContext';
 import { LogOut, Search, Bell, Menu } from 'lucide-react';
-import { updateUrlLanguage } from '@/i18n/languageUtils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import MobileMenu from './MobileMenu';
 

@@ -37,11 +37,9 @@ export const setDocumentLanguage = (language: string): void => {
  * @param language The language code to set in URL
  */
 export const updateUrlLanguage = (language: string): void => {
-  if (!window.config?.supportedLanguages?.includes(language)) {
-    // Fallback if config is not available
-    const supportedLangs = ["en", "ar"];
-    if (!supportedLangs.includes(language)) return;
-  }
+  // Check if language is supported
+  const supportedLangs = ["en", "ar"]; // Fallback list of supported languages
+  if (!supportedLangs.includes(language)) return;
   
   const url = new URL(window.location.href);
   url.searchParams.set("lang", language);

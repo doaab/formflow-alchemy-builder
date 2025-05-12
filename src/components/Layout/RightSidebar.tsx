@@ -23,8 +23,8 @@ const RightSidebar: React.FC = () => {
 
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'dashboard', path: '/dashboard' },
-    { id: 'users', icon: Users, label: 'users', path: '/users' },
     { id: 'forms', icon: FileText, label: 'forms', path: '/forms' },
+    { id: 'users', icon: Users, label: 'users', path: '/users' },
     { id: 'responses', icon: Inbox, label: 'responses', path: '/responses' },
     { id: 'campaigns', icon: Star, label: 'campaigns', path: '/campaigns' },
     { id: 'messages', icon: MessageSquare, label: 'customerService', path: '/messages' },

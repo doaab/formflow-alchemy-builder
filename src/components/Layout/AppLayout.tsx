@@ -1,12 +1,11 @@
 
 import React, { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Navigate } from 'react-router-dom';
 import MainHeader from './MainHeader';
 import RightSidebar from './RightSidebar';
 import LeftSidebar from './LeftSidebar';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/context/TranslationContext';
-import { Navigate } from 'react-router-dom';
 import { setDocumentLanguage } from '@/i18n/languageUtils';
 
 const AppLayout: React.FC = () => {
@@ -38,13 +37,13 @@ const AppLayout: React.FC = () => {
     >
       <MainHeader />
       <div className={`flex flex-1 overflow-hidden ${isRtl ? 'flex-row-reverse' : ''}`}>
-        <RightSidebar />
         <LeftSidebar />
         <main className="flex-1 overflow-auto p-4 bg-gray-50">
           <div className="container mx-auto">
             <Outlet />
           </div>
         </main>
+        <RightSidebar />
       </div>
     </div>
   );

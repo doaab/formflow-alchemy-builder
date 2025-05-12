@@ -23,8 +23,8 @@ const MobileMenu: React.FC = () => {
   
   const menuItems = [
     { id: 'dashboard', icon: <LayoutDashboard size={20} />, label: t('dashboard'), path: '/dashboard' },
-    { id: 'users', icon: <Users size={20} />, label: t('users'), path: '/users' },
     { id: 'forms', icon: <FileText size={20} />, label: t('forms'), path: '/forms' },
+    { id: 'users', icon: <Users size={20} />, label: t('users'), path: '/users' },
     { id: 'responses', icon: <Inbox size={20} />, label: t('responses'), path: '/responses' },
     { id: 'campaigns', icon: <Star size={20} />, label: t('campaigns'), path: '/campaigns' },
     { id: 'messages', icon: <MessageSquare size={20} />, label: t('customerService'), path: '/messages' },
