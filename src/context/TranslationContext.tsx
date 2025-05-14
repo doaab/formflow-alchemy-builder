@@ -1,81 +1,78 @@
 
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { TranslationHook } from '@/i18n/types';
-import languages from '@/i18n/languages';
-import { setDocumentLanguage, updateUrlLanguage } from '@/i18n/languageUtils';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import translations from '@/i18n/translations';
+import { setDocumentLanguage } from '@/i18n/languageUtils';
 
-// Create the context with default values
-export const TranslationContext = createContext<TranslationHook>({
-  t: (key: string) => key,
-  currentLanguage: 'en',
-  changeLanguage: () => {},
-  supportedLanguages: ['en'],
-  toggleLanguage: () => {}
-});
+type Language = 'en' | 'ar';
+
+interface TranslationContextType {
+  t: (key: string) => string;
+  currentLanguage: Language;
+  toggleLanguage: () => void;
+  setLanguage: (lang: Language) => void;
+}
+
+const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
 interface TranslationProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const TranslationProvider: React.FC<TranslationProviderProps> = ({ children }) => {
-  const [currentLanguage, setCurrentLanguage] = useState<string>('en');
-  const supportedLanguages = Object.keys(languages);
-
-  // Function to get translation by key
-  const t = (key: string): string => {
-    const translations = languages[currentLanguage as keyof typeof languages];
-    return translations && key in translations
-      ? translations[key as keyof typeof translations]
-      : key;
+  // Get stored language or default to English
+  const getInitialLanguage = (): Language => {
+    const storedLang = localStorage.getItem('language');
+    return (storedLang === 'en' || storedLang === 'ar') ? storedLang : 'en';
   };
 
-  // Function to change the language
-  const changeLanguage = (lang: string) => {
-    if (supportedLanguages.includes(lang)) {
-      setCurrentLanguage(lang);
-      localStorage.setItem('preferredLanguage', lang);
-      setDocumentLanguage(lang);
-      updateUrlLanguage(lang);
-    }
-  };
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(getInitialLanguage);
 
-  // Function to toggle between supported languages
-  const toggleLanguage = () => {
-    const nextLang = currentLanguage === 'en' ? 'ar' : 'en';
-    changeLanguage(nextLang);
-  };
-
-  // Initialize language from localStorage
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('preferredLanguage');
-    if (savedLanguage && supportedLanguages.includes(savedLanguage)) {
-      changeLanguage(savedLanguage);
-    } else {
-      // Default to browser language if supported, otherwise use English
-      const browserLang = navigator.language.split('-')[0];
-      changeLanguage(supportedLanguages.includes(browserLang) ? browserLang : 'en');
-    }
-  }, []);
+    localStorage.setItem('language', currentLanguage);
+    setDocumentLanguage(currentLanguage);
+  }, [currentLanguage]);
 
-  const value: TranslationHook = {
+  const toggleLanguage = () => {
+    setCurrentLanguage(prev => prev === 'en' ? 'ar' : 'en');
+  };
+
+  const setLanguage = (lang: Language) => {
+    setCurrentLanguage(lang);
+  };
+
+  const t = (key: string): string => {
+    const keys = key.split('.');
+    let translated = translations[currentLanguage];
+    
+    for (const k of keys) {
+      if (translated && typeof translated === 'object' && k in translated) {
+        translated = translated[k];
+      } else {
+        // Return the key itself if translation not found
+        return key;
+      }
+    }
+    
+    return typeof translated === 'string' ? translated : key;
+  };
+
+  const contextValue = {
     t,
     currentLanguage,
-    changeLanguage,
-    supportedLanguages,
-    toggleLanguage
+    toggleLanguage,
+    setLanguage,
   };
 
   return (
-    <TranslationContext.Provider value={value}>
+    <TranslationContext.Provider value={contextValue}>
       {children}
     </TranslationContext.Provider>
   );
 };
 
-// Add useTranslation hook directly in the TranslationContext file
-export const useTranslation = (): TranslationHook => {
+export const useTranslation = (): TranslationContextType => {
   const context = useContext(TranslationContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useTranslation must be used within a TranslationProvider');
   }
   return context;

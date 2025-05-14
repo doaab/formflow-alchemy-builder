@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
+import { AuthProvider } from "./context/AuthContext";
+import { TranslationProvider } from "./context/TranslationContext";
 
 // Import layouts and pages
 import AppLayout from "./components/Layout/AppLayout";
@@ -22,20 +24,24 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<AppLayout />}>
-            {/* Form routes */}
-            <Route index element={<FormsPage />} />
-            <Route path="forms" element={<FormsPage />} />
-            <Route path="forms/create" element={<CreateForm />} />
-            <Route path="forms/:formId/responses" element={<FormResponses />} />
-            <Route path="forms/:formId/responses/:responseId" element={<FormResponseDetail />} />
-            {/* Keep other routes */}
-          </Route>
-        </Routes>
-      </Router>
-      <Toaster position="top-right" />
+      <TranslationProvider>
+        <AuthProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<AppLayout />}>
+                {/* Form routes */}
+                <Route index element={<FormsPage />} />
+                <Route path="forms" element={<FormsPage />} />
+                <Route path="forms/create" element={<CreateForm />} />
+                <Route path="forms/:formId/responses" element={<FormResponses />} />
+                <Route path="forms/:formId/responses/:responseId" element={<FormResponseDetail />} />
+                {/* Keep other routes */}
+              </Route>
+            </Routes>
+          </Router>
+          <Toaster position="top-right" />
+        </AuthProvider>
+      </TranslationProvider>
     </QueryClientProvider>
   );
 }
