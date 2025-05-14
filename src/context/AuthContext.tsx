@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { login as loginService, logout as logoutService, getCurrentUser } from '@/api/services/authService';
 import { User } from '@/api/types/authTypes';
 import { toast } from 'sonner';
@@ -24,6 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentLanguage } = useTranslation();
 
   // Derived state for authentication status

@@ -10,6 +10,9 @@ import FormsPage from "./pages/Form/FormsPage";
 import CreateForm from "./pages/Form/CreateForm";
 import FormResponses from "./pages/Form/FormResponses";
 import FormResponseDetail from "./pages/Form/FormResponseDetail";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import NotFound from "./pages/NotFound";
 
 // Create a react-query client
 const queryClient = new QueryClient({
@@ -25,9 +28,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TranslationProvider>
-        <AuthProvider>
-          <Router>
+        <Router>
+          <AuthProvider>
             <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="/" element={<AppLayout />}>
                 {/* Form routes */}
                 <Route index element={<FormsPage />} />
@@ -37,10 +42,11 @@ function App() {
                 <Route path="forms/:formId/responses/:responseId" element={<FormResponseDetail />} />
                 {/* Keep other routes */}
               </Route>
+              <Route path="*" element={<NotFound />} />
             </Routes>
-          </Router>
-          <Toaster position="top-right" />
-        </AuthProvider>
+            <Toaster position="top-right" />
+          </AuthProvider>
+        </Router>
       </TranslationProvider>
     </QueryClientProvider>
   );
