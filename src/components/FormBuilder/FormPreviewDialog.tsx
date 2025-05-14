@@ -1,4 +1,4 @@
-// Import necessary dependencies and components
+
 import React, { useState } from 'react';
 import {
   AlertDialog,
@@ -20,10 +20,9 @@ interface Props {
 const FormPreviewDialog = ({ children }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Fix the function call with missing parameter
-  const handleSomeFunction = (param1: string, param2: number, param3: number = 0) => {
-    // Add the third parameter with a default value
-    console.log(param1, param2, param3);
+  // Fix the function call with proper parameters
+  const handleSomeFunction = (param1: string, param2: number) => {
+    console.log(param1, param2);
   };
 
   return (

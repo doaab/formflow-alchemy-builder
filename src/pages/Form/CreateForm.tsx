@@ -8,7 +8,7 @@ import * as z from "zod";
 import { toast } from "sonner";
 import { Plus, Save } from "lucide-react";
 
-import { Form, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -66,7 +66,12 @@ const CreateForm = () => {
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
-    createFormMutation.mutate(data);
+    createFormMutation.mutate({
+      ...data,
+      status: 'draft',
+      user_id: 1, // Default user ID
+      slug: ''  // The backend will generate a slug
+    });
   };
 
   return (
@@ -79,7 +84,7 @@ const CreateForm = () => {
               Design your form and collect responses easily
             </CardDescription>
           </CardHeader>
-          <Form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="title">
@@ -197,7 +202,7 @@ const CreateForm = () => {
                 )}
               </Button>
             </CardFooter>
-          </Form>
+          </form>
         </Card>
       </div>
     </div>

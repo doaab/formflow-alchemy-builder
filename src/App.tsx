@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 
 // Import layouts and pages
-import AppLayout from "./layouts/AppLayout";
+import AppLayout from "./components/Layout/AppLayout";
 import FormsPage from "./pages/Form/FormsPage";
 import CreateForm from "./pages/Form/CreateForm";
 import FormResponses from "./pages/Form/FormResponses";

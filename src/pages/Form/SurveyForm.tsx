@@ -1,10 +1,10 @@
-// Import necessary dependencies and components
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getFormBySlug } from '@/api/services/formService';
 import { Button } from '@/components/ui/button';
-import { Form, QuestionType } from '@/api/types/formTypes';
+import { Form as FormType, FormElementTypes } from '@/api/types/formTypes';
 import {
   Card,
   CardContent,
@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import {
   Select,
   SelectContent,
@@ -41,19 +41,17 @@ interface FormData {
 const SurveyForm = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   const [formData, setFormData] = useState<FormData>({});
   const [startTime, setStartTime] = useState<number | null>(null);
   const [completionTime, setCompletionTime] = useState<number | null>(null);
 
-  const { data: form, isLoading, error } = useQuery(
-    ['form', slug],
-    () => getFormBySlug(slug as string),
-    {
-      enabled: !!slug,
-    }
-  );
+  const { data: form, isLoading, error } = useQuery({
+    queryKey: ['form', slug],
+    queryFn: () => getFormBySlug(slug as string),
+    enabled: !!slug,
+  });
 
   useEffect(() => {
     if (isLoading) {
@@ -97,8 +95,10 @@ const SurveyForm = () => {
       return;
     }
 
+    const typedForm = form as FormType;
+
     // Check if email is required and provided
-    const collectEmail = form?.collect_email || false;
+    const collectEmail = typedForm.collect_email || false;
     if (collectEmail && !formData['email']) {
       toast({
         title: "Error",
@@ -109,7 +109,7 @@ const SurveyForm = () => {
     }
 
     // Validate required fields
-    for (const element of form?.elements || []) {
+    for (const element of typedForm.elements || []) {
       if (element.required && !formData[element.id]) {
         toast({
           title: "Error",
@@ -159,21 +159,11 @@ const SurveyForm = () => {
     });
   };
 
-  // Function to handle checkbox changes
-  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = event.target;
-    setFormData({
-      ...formData,
-      [name]: checked,
-    });
-  };
-
   // Function to handle select changes
-  const handleSelectChange = (event: React.ChangeEvent<{ name?: string; value: any }>) => {
-    const { name, value } = event.target;
+  const handleSelectChange = (value: string, elementId: string) => {
     setFormData({
       ...formData,
-      [name as string]: value,
+      [elementId]: value,
     });
   };
 
@@ -194,58 +184,17 @@ const SurveyForm = () => {
   };
 
   // Function to handle country changes
-  const handleCountryChange = (value: any, elementId: string) => {
+  const handleCountryChange = (value: string, elementId: string) => {
     setFormData({
       ...formData,
       [elementId]: value,
-    });
-  };
-
-  // Function to handle address changes
-  const handleAddressChange = (value: any, elementId: string) => {
-    setFormData({
-      ...formData,
-      [elementId]: value,
-    });
-  };
-
-  // Function to handle rating changes
-  const handleRatingChange = (value: number, elementId: string) => {
-    setFormData({
-      ...formData,
-      [elementId]: value,
-    });
-  };
-
-  // Function to handle file changes
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, elementId: string) => {
-    const { files } = event.target;
-    setFormData({
-      ...formData,
-      [elementId]: files,
-    });
-  };
-
-  // Function to handle phone changes
-  const handlePhoneChange = (value: any, elementId: string) => {
-    setFormData({
-      ...formData,
-      [elementId]: value,
-    });
-  };
-
-  // Function to handle email confirmation changes
-  const handleEmailConfirmationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = event.target;
-    setFormData({
-      ...formData,
-      [name]: checked,
     });
   };
 
   // Function to handle conditional logic
-  const handleConditionalLogic = (elementId: string) => {
-    const element = form?.elements?.find((element) => element.id === elementId);
+  const handleConditionalLogic = (elementId: string): boolean => {
+    const typedForm = form as FormType;
+    const element = typedForm.elements?.find((element) => element.id === elementId);
     if (!element || !element.conditionalLogic?.enabled) {
       return true;
     }
@@ -294,7 +243,8 @@ const SurveyForm = () => {
 
   // Function to render form elements
   const renderFormElements = () => {
-    return form?.elements?.map((element) => {
+    const typedForm = form as FormType;
+    return typedForm.elements?.map((element: FormElementTypes) => {
       // Check if the element should be displayed based on conditional logic
       if (!handleConditionalLogic(element.id)) {
         return null;
@@ -366,7 +316,7 @@ const SurveyForm = () => {
           return (
             <div key={element.id} className="grid gap-2">
               <Label htmlFor={element.id}>{element.label}</Label>
-              <Select onValueChange={(value) => handleSelectChange({ target: { name: element.id, value } })}>
+              <Select onValueChange={(value) => handleSelectChange(value, element.id)}>
                 <SelectTrigger id={element.id}>
                   <SelectValue placeholder={element.placeholder || element.label} />
                 </SelectTrigger>
@@ -476,34 +426,6 @@ const SurveyForm = () => {
               </p>
             </div>
           );
-        case 'phone':
-          return (
-            <div key={element.id} className="grid gap-2">
-              <Label htmlFor={element.id}>{element.label}</Label>
-              {/* <PhoneInput
-                id={element.id}
-                name={element.id}
-                placeholder={element.placeholder}
-                value={formData[element.id] || ''}
-                onChange={(value) => handlePhoneChange(value, element.id)}
-                required={element.required}
-              /> */}
-            </div>
-          );
-        case 'address':
-          return (
-            <div key={element.id} className="grid gap-2">
-              <Label htmlFor={element.id}>{element.label}</Label>
-              {/* <AddressInput
-                id={element.id}
-                name={element.id}
-                placeholder={element.placeholder}
-                value={formData[element.id] || ''}
-                onChange={(value) => handleAddressChange(value, element.id)}
-                required={element.required}
-              /> */}
-            </div>
-          );
         case 'section':
           return (
             <div key={element.id} className="grid gap-2">
@@ -521,11 +443,10 @@ const SurveyForm = () => {
     });
   };
 
-  // Fix the type check for form.is_paused by adding optional chaining
-  const isPaused = form?.is_paused || false;
+  const typedForm = form as FormType;
 
   // Check if the form is paused
-  if (isPaused) {
+  if (typedForm?.is_paused) {
     return (
       <div className="container py-6">
         <div className="mx-auto max-w-3xl">
@@ -537,75 +458,22 @@ const SurveyForm = () => {
     );
   }
 
-  // Fix the type check for form.collect_email by adding optional chaining
-  const collectEmail = form?.collect_email || false;
+  // Check if email is required
+  const collectEmail = typedForm?.collect_email || false;
+  
+  // Check for progress bar
+  const showProgressBar = typedForm?.show_progress_bar || true;
 
   return (
     <div className="container py-6">
       {isLoading && <p>Loading form...</p>}
-      {error && <p>Error: {error.message}</p>}
+      {error && <p>Error: {(error as Error).message}</p>}
       {form && (
         <div className="mx-auto max-w-3xl">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl font-bold">{form.title}</CardTitle>
-              <CardDescription>{form.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4">
-              {/* Collect email if enabled */}
-              {collectEmail && (
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    value={formData['email'] || ''}
-                    onChange={handleInputChange}
-                    required={collectEmail}
-                  />
-                </div>
-              )}
-
-              {/* Render form elements */}
-              {renderFormElements()}
-            </CardContent>
-            <div className="flex justify-end space-x-2 p-6">
-              <Button type="submit" onClick={handleSubmit}>Submit</Button>
-            </div>
-          </Card>
-        </div>
-      )}
-    </div>
-  );
-
-  // Fix the type check for form.is_paused by adding optional chaining
-  if (form?.is_paused) {
-    return (
-      <div className="container py-6">
-        <div className="mx-auto max-w-3xl">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-            <p className="text-yellow-600">This form is currently paused and not accepting responses.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Fix the type check for form.show_progress_bar by adding optional chaining
-  const showProgressBar = form?.show_progress_bar || true;
-
-  return (
-    <div className="container py-6">
-      {isLoading && <p>Loading form...</p>}
-      {error && <p>Error: {error.message}</p>}
-      {form && (
-        <div className="mx-auto max-w-3xl">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold">{form.title}</CardTitle>
-              <CardDescription>{form.description}</CardDescription>
+              <CardTitle className="text-2xl font-bold">{typedForm?.title}</CardTitle>
+              <CardDescription>{typedForm?.description}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
               {/* Collect email if enabled */}

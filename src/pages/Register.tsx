@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -155,15 +156,15 @@ const Register: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password_confirmation" className="text-base font-medium text-gray-700">
+                <Label htmlFor="passwordConfirmation" className="text-base font-medium text-gray-700">
                   {t('passwordConfirmation')}
                 </Label>
                 <div className="relative">
                   <Input
-                    id="password_confirmation"
+                    id="passwordConfirmation"
                     type={showConfirmPassword ? "text" : "password"}
                     className="h-12 bg-gray-50 border-gray-200 pr-10"
-                    {...register('password_confirmation', { 
+                    {...register('passwordConfirmation', { 
                       required: 'Please confirm your password',
                       validate: value => value === watch('password') || 'Passwords do not match'
                     })}
@@ -181,8 +182,8 @@ const Register: React.FC = () => {
                     )}
                   </button>
                 </div>
-                {errors.password_confirmation && (
-                  <p className="text-sm text-red-500">{errors.password_confirmation.message}</p>
+                {errors.passwordConfirmation && (
+                  <p className="text-sm text-red-500">{errors.passwordConfirmation.message}</p>
                 )}
               </div>
               
