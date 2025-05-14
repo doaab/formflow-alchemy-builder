@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -312,7 +311,7 @@ const SurveyForm = () => {
               />
             </div>
           );
-        case 'select':
+        case 'dropdown':
           return (
             <div key={element.id} className="grid gap-2">
               <Label htmlFor={element.id}>{element.label}</Label>

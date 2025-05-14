@@ -67,7 +67,13 @@ const CreateForm = () => {
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     createFormMutation.mutate({
-      ...data,
+      title: data.title, // Make sure title is always provided
+      description: data.description || "",
+      theme: data.theme,
+      collect_email: data.collect_email,
+      one_response_per_user: data.one_response_per_user,
+      show_progress_bar: data.show_progress_bar,
+      shuffle_questions: data.shuffle_questions,
       status: 'draft',
       user_id: 1, // Default user ID
       slug: ''  // The backend will generate a slug
