@@ -1,18 +1,14 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import translations from '@/i18n/translations';
+import { translations } from '@/i18n/translations';
 import { setDocumentLanguage } from '@/i18n/languageUtils';
+import { config } from '@/config/config';
+import { TranslationHook } from '@/i18n/types';
 
 type Language = 'en' | 'ar';
 
-interface TranslationContextType {
-  t: (key: string) => string;
-  currentLanguage: Language;
-  toggleLanguage: () => void;
-  setLanguage: (lang: Language) => void;
-}
-
-const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
+// Export the context so it can be imported in other files
+export const TranslationContext = createContext<TranslationHook | undefined>(undefined);
 
 interface TranslationProviderProps {
   children: ReactNode;
@@ -26,6 +22,7 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
   };
 
   const [currentLanguage, setCurrentLanguage] = useState<Language>(getInitialLanguage);
+  const supportedLanguages = ['en', 'ar'];
 
   useEffect(() => {
     localStorage.setItem('language', currentLanguage);
@@ -36,8 +33,10 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
     setCurrentLanguage(prev => prev === 'en' ? 'ar' : 'en');
   };
 
-  const setLanguage = (lang: Language) => {
-    setCurrentLanguage(lang);
+  const changeLanguage = (lang: string) => {
+    if (lang === 'en' || lang === 'ar') {
+      setCurrentLanguage(lang);
+    }
   };
 
   const t = (key: string): string => {
@@ -56,11 +55,12 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
     return typeof translated === 'string' ? translated : key;
   };
 
-  const contextValue = {
+  const contextValue: TranslationHook = {
     t,
     currentLanguage,
     toggleLanguage,
-    setLanguage,
+    changeLanguage,
+    supportedLanguages
   };
 
   return (
@@ -70,7 +70,7 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
   );
 };
 
-export const useTranslation = (): TranslationContextType => {
+export const useTranslation = (): TranslationHook => {
   const context = useContext(TranslationContext);
   if (!context) {
     throw new Error('useTranslation must be used within a TranslationProvider');
