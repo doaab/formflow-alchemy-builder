@@ -1,4 +1,3 @@
-
 export interface Form {
   id: number;
   user_id: number | null;
@@ -13,6 +12,12 @@ export interface Form {
   status_label?: string;
   is_published?: boolean;
   responses_count?: number;
+  collect_email?: boolean;
+  one_response_per_user?: boolean;
+  show_progress_bar?: boolean;
+  shuffle_questions?: boolean;
+  is_paused?: boolean;
+  theme?: string;
 }
 
 // This was missing and needed for the FormDetail page

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { useRegisterMutation } from '@/api/hooks/useAuthQueries';
@@ -14,7 +15,7 @@ interface RegisterFormData {
   name: string;
   email: string;
   password: string;
-  password_confirmation: string;
+  passwordConfirmation: string;
 }
 
 const Register: React.FC = () => {
@@ -24,8 +25,17 @@ const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const onSubmit = (data: RegisterFormData) => {
-    registerUser(data);
+  const onSubmit = async (data: RegisterFormData) => {
+    try {
+      await registerUser({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        passwordConfirmation: data.passwordConfirmation
+      });
+    } catch (error) {
+      // Handle error
+    }
   };
 
   const togglePasswordVisibility = () => {
