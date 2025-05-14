@@ -45,7 +45,7 @@ export const TranslationProvider: React.FC<TranslationProviderProps> = ({ childr
     
     for (const k of keys) {
       if (translated && typeof translated === 'object' && k in translated) {
-        translated = translated[k];
+        translated = translated[k] as any;
       } else {
         // Return the key itself if translation not found
         return key;
