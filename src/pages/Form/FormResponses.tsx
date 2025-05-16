@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -19,17 +18,28 @@ const FormResponses = () => {
   const { formId } = useParams<{ formId: string }>();
   const [searchTerm, setSearchTerm] = useState("");
   
-  const { data, isLoading, error } = useQuery({
+  const { data: responseData, isLoading, error } = useQuery({
     queryKey: ["form-responses", formId],
     queryFn: () => getFormResponses(Number(formId)),
     enabled: !!formId,
   });
 
+  // Process the response data to handle both paginated and non-paginated formats
+  const responses = React.useMemo(() => {
+    if (!responseData) return [];
+    
+    // Check if the response is paginated (has data property)
+    if (responseData.data) {
+      return responseData.data;
+    }
+    
+    // Otherwise assume it's a direct array
+    return Array.isArray(responseData) ? responseData : [];
+  }, [responseData]);
+  
   // Filter responses by search term (email or IP)
   const filteredResponses = React.useMemo(() => {
-    if (!data) return [];
-    
-    const responses = Array.isArray(data) ? data : [];
+    if (!responses || responses.length === 0) return [];
     
     if (!searchTerm.trim()) return responses;
     
@@ -38,7 +48,7 @@ const FormResponses = () => {
       (response.respondent_email && response.respondent_email.toLowerCase().includes(lowerSearch)) ||
       (response.ip_address && response.ip_address.includes(lowerSearch))
     );
-  }, [data, searchTerm]);
+  }, [responses, searchTerm]);
 
   if (error) {
     return (
