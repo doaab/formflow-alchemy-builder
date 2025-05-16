@@ -1,4 +1,5 @@
-import { Form, FormElement, FormResponse, FormStatus, QuestionType } from '../types/formTypes';
+
+import { Form, FormElement, FormResponse, FormStatus, QuestionType, FormResponsesResponse } from '../types/formTypes';
 import { API_URL } from './config';
 import { getAuthHeaders } from './authService';
 
