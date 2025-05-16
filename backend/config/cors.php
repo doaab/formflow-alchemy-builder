@@ -32,8 +32,6 @@ return [
         'https://e005b4a0-4ab9-477a-8ffb-cd1345d72df5.lovableproject.com',
         'https://lovable.dev/projects/e005b4a0-4ab9-477a-8ffb-cd1345d72df5',
         'https://preview--formflow-alchemy-builder.lovable.app',
-        // Add Lovable preview domain
-        'https://*.lovableproject.com',
     ],
 
     'allowed_origins_patterns' => [

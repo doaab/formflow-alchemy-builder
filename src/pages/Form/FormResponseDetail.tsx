@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft } from 'lucide-react';
 import { FormResponseWithAnswers } from '@/api/types/formTypes';
-import { getFormResponse } from '@/api/services/form/responseService';
+import { getFormResponse } from '@/api/services/formService';
 import { toast } from 'sonner';
 
 const FormResponseDetail = () => {
