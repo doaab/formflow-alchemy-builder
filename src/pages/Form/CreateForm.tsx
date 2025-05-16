@@ -56,7 +56,8 @@ const CreateForm = () => {
     mutationFn: createForm,
     onSuccess: (data) => {
       toast.success("Form created successfully!");
-      navigate(`/forms/${data.id}`);
+      // Redirect to form editor instead of form details
+      navigate(`/forms/${data.id}/edit`);
     },
     onError: (error: Error) => {
       toast.error(`Error creating form: ${error.message}`);

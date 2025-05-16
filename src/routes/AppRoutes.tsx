@@ -40,7 +40,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/users" element={<Users />} />
         <Route path="/users/:userId" element={<UserDetail />} />
         <Route path="/forms" element={<FormList />} />
-        <Route path="/create-form" element={<CreateForm />} />
         <Route path="/forms/:formId" element={<FormDetail />} />
         <Route path="/forms/edit/:formId" element={<FormDetail />} />
         <Route path="/settings" element={<div>Settings Page</div>} />
@@ -49,6 +48,7 @@ const AppRoutes: React.FC = () => {
       
       {/* Form editor routes with FormEditorLayout */}
       <Route element={<FormEditorLayout />}>
+        <Route path="/create-form" element={<CreateForm />} />
         <Route path="/forms/:formId/edit" element={
           <FormBuilderProvider>
             <FormBuilder />
