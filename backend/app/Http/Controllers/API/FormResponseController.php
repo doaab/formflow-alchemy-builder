@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\API;
@@ -106,9 +107,10 @@ class FormResponseController extends Controller
             $form = Form::findOrFail($formId);
             
             // Modified authorization logic to be more permissive during development
-            // In production, you should implement proper authorization
             
-            $response = FormResponse::findOrFail($responseId);
+            $response = FormResponse::where('form_id', $form->id)
+                ->where('id', $responseId)
+                ->firstOrFail();
 
             if ($response->form_id !== $form->id) {
                 return response()->json(['message' => 'Response does not belong to this form'], 404);

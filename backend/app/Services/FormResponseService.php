@@ -65,20 +65,36 @@ class FormResponseService
      */
     public function getResponseWithAnswers(FormResponse $response)
     {
-        $response->load(['answers.formElement']);
-        
-        // Process any JSON values for display
-        foreach ($response->answers as $answer) {
-            if ($answer->value && $this->isJson($answer->value)) {
-                try {
-                    $answer->value = json_decode($answer->value);
-                } catch (\Exception $e) {
-                    // Keep as string if it can't be decoded
+        try {
+            $response->load(['answers.formElement']);
+            
+            // Add question text from the form element to each answer for easier frontend display
+            foreach ($response->answers as $answer) {
+                if ($answer->formElement) {
+                    $answer->question = $answer->formElement->question;
+                }
+                
+                // Process any JSON values for display
+                if ($answer->value && $this->isJson($answer->value)) {
+                    try {
+                        $answer->value = json_decode($answer->value);
+                    } catch (\Exception $e) {
+                        // Keep as string if it can't be decoded
+                        Log::error('Error decoding JSON value: ' . $e->getMessage());
+                    }
+                }
+                
+                // Make sure answer field is set for frontend compatibility
+                if (!isset($answer->answer) && isset($answer->value)) {
+                    $answer->answer = $answer->value;
                 }
             }
+            
+            return $response;
+        } catch (\Exception $e) {
+            Log::error('Error in getResponseWithAnswers: ' . $e->getMessage());
+            throw $e;
         }
-        
-        return $response;
     }
     
     /**

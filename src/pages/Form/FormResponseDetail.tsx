@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft } from 'lucide-react';
 import { FormResponseWithAnswers } from '@/api/types/formTypes';
 import { getFormResponse } from '@/api/services/formService';
+import { toast } from 'sonner';
 
 const FormResponseDetail = () => {
   const { formId, responseId } = useParams<{ formId: string; responseId: string }>();
@@ -16,6 +17,13 @@ const FormResponseDetail = () => {
     queryKey: ['form-response', formId, responseId],
     queryFn: () => getFormResponse(Number(formId), Number(responseId)),
     enabled: !!formId && !!responseId,
+    retry: 1,
+    meta: {
+      onError: (e: Error) => {
+        toast.error(`Error loading response: ${e.message}`);
+        console.error('Response detail error:', e);
+      }
+    }
   });
 
   useEffect(() => {

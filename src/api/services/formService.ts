@@ -396,6 +396,7 @@ export const getFormResponses = async (formId: number): Promise<FormResponsesRes
  */
 export const getFormResponse = async (formId: number, responseId: number): Promise<FormResponse> => {
   try {
+    console.log(`Fetching form response: ${formId}/${responseId}`);
     const response = await fetch(`${API_URL}/forms/${formId}/responses/${responseId}`, {
       method: 'GET',
       headers: getAuthHeaders(),
@@ -403,10 +404,13 @@ export const getFormResponse = async (formId: number, responseId: number): Promi
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Response error (${response.status}):`, errorText);
       throw new Error(`Failed to fetch form response: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log('Successfully fetched response data:', data);
     return data;
   } catch (error) {
     console.error('Error fetching form response:', error);
