@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getFormResponses } from "@/api/services/formService";
-import { FormResponse } from "@/api/types/formTypes";
+import { FormResponse, FormResponsesResponse } from "@/api/types/formTypes";
 
 const FormResponses = () => {
   const { formId } = useParams<{ formId: string }>();
@@ -24,17 +24,12 @@ const FormResponses = () => {
     enabled: !!formId,
   });
 
-  // Process the response data to handle both paginated and non-paginated formats
+  // Process the response data to handle paginated format
   const responses = React.useMemo(() => {
     if (!responseData) return [];
     
-    // Check if the response is paginated (has data property)
-    if (responseData.data) {
-      return responseData.data;
-    }
-    
-    // Otherwise assume it's a direct array
-    return Array.isArray(responseData) ? responseData : [];
+    // Extract the data array from the paginated response
+    return responseData.data || [];
   }, [responseData]);
   
   // Filter responses by search term (email or IP)

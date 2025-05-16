@@ -369,7 +369,7 @@ export const submitFormResponse = async (slug: string, responseData: Record<stri
 /**
  * Fetch all responses for a form
  */
-export const getFormResponses = async (formId: number): Promise<FormResponse[]> => {
+export const getFormResponses = async (formId: number): Promise<FormResponsesResponse> => {
   try {
     const response = await fetch(`${API_URL}/forms/${formId}/responses`, {
       method: 'GET',
@@ -382,6 +382,7 @@ export const getFormResponses = async (formId: number): Promise<FormResponse[]> 
     }
 
     const data = await response.json();
+    console.log('Form responses data:', data);
     return data;
   } catch (error) {
     console.error('Error fetching form responses:', error);
