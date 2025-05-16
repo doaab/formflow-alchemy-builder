@@ -18,6 +18,7 @@ import { useAuth } from '@/context/AuthContext';
 import FormBuilder from '@/components/FormBuilder/FormBuilder';
 import FormEditorLayout from '@/components/Layout/FormEditorLayout';
 import AppLayout from '@/components/Layout/AppLayout';
+import CreateForm from "@/pages/Form/CreateForm.tsx";
 
 const AppRoutes: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -39,7 +40,9 @@ const AppRoutes: React.FC = () => {
         <Route path="/users" element={<Users />} />
         <Route path="/users/:userId" element={<UserDetail />} />
         <Route path="/forms" element={<FormList />} />
+        <Route path="/create-form" element={<CreateForm />} />
         <Route path="/forms/:formId" element={<FormDetail />} />
+        <Route path="/forms/edit/:formId" element={<FormDetail />} />
         <Route path="/settings" element={<div>Settings Page</div>} />
         <Route path="/help" element={<div>Help Page</div>} />
       </Route>

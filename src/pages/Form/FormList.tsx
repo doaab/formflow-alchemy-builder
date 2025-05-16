@@ -47,7 +47,7 @@ const FormList = () => {
             <Loader2 className="mr-2 h-4 w-4" />
             Refresh
           </Button>
-          <Link to="/">
+          <Link to="/create-form">
             <Button className="flex items-center">
               <File className="mr-2 h-4 w-4" />
               Create New Form

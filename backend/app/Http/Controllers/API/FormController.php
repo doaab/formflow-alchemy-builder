@@ -66,15 +66,16 @@ class FormController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Request $request, $id)
+    public function show(Request $request, $form)
     {
-        $form = Form::findOrFail($id);
+        $form = Form::where('id',$request->form)->first();
+//        $form = Form::findOrFail($form);
 
         // Skip authorization for now
         // $this->authorize('view', $form);
 
         $formWithElements = $this->formService->getFormWithElements($form);
-        
+
         // Debug output to ensure elements are loaded
         \Log::info("Form elements count: " . count($formWithElements->elements));
 
@@ -167,14 +168,14 @@ class FormController extends Controller
         ]);
 
         $form->status = $request->status;
-        
+
         // Keep is_published in sync with status
         $form->is_published = ($request->status === 'published');
-        
+
         $form->save();
 
         return response()->json([
-            'status' => $form->status, 
+            'status' => $form->status,
             'is_published' => $form->is_published,
             'status_label' => $form->status_label
         ]);
