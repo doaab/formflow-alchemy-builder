@@ -41,7 +41,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/users/:userId" element={<UserDetail />} />
         <Route path="/forms" element={<FormList />} />
         <Route path="/forms/:formId" element={<FormDetail />} />
-        <Route path="/forms/edit/:formId" element={<FormDetail />} />
         <Route path="/settings" element={<div>Settings Page</div>} />
         <Route path="/help" element={<div>Help Page</div>} />
       </Route>
