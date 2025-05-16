@@ -23,6 +23,8 @@ export const checkBackendConnection = async (): Promise<boolean> => {
     // If we get a CORS error, the server might be running but CORS is not configured
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
       console.log('CORS issue detected - backend might be running but blocking requests');
+      console.log('Frontend origin:', window.location.origin);
+      console.log('API URL:', API_URL);
     }
     return false;
   }

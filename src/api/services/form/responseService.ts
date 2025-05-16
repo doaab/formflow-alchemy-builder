@@ -1,4 +1,3 @@
-
 import { FormResponse, FormResponsesResponse } from '../../types/formTypes';
 import { API_URL } from '../config';
 import { getAuthHeaders } from '../authService';
@@ -16,6 +15,8 @@ export const submitFormResponse = async (slug: string, responseData: Record<stri
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Submit response error (${response.status}):`, errorText);
       throw new Error(`Failed to submit form response: ${response.status}`);
     }
 
@@ -23,6 +24,12 @@ export const submitFormResponse = async (slug: string, responseData: Record<stri
     return data;
   } catch (error) {
     console.error('Error submitting form response:', error);
+    
+    // Add more detailed logging for CORS errors
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.error('This could be a CORS issue. Check that your backend allows requests from this origin.');
+    }
+    
     throw error;
   }
 };
@@ -32,6 +39,7 @@ export const submitFormResponse = async (slug: string, responseData: Record<stri
  */
 export const getFormResponses = async (formId: number): Promise<FormResponsesResponse> => {
   try {
+    console.log(`Fetching form responses for form: ${formId}`);
     const response = await fetch(`${API_URL}/forms/${formId}/responses`, {
       method: 'GET',
       headers: getAuthHeaders(),
@@ -39,6 +47,8 @@ export const getFormResponses = async (formId: number): Promise<FormResponsesRes
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Form responses error (${response.status}):`, errorText);
       throw new Error(`Failed to fetch form responses: ${response.status}`);
     }
 
@@ -47,6 +57,12 @@ export const getFormResponses = async (formId: number): Promise<FormResponsesRes
     return data;
   } catch (error) {
     console.error('Error fetching form responses:', error);
+    
+    // Add more detailed logging for CORS errors
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.error('This could be a CORS issue. Check that your backend allows requests from this origin.');
+    }
+    
     throw error;
   }
 };
@@ -74,6 +90,12 @@ export const getFormResponse = async (formId: number, responseId: number): Promi
     return data;
   } catch (error) {
     console.error('Error fetching form response:', error);
+    
+    // Add more detailed logging for CORS errors
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.error('This could be a CORS issue. Check that your backend allows requests from this origin.');
+    }
+    
     throw error;
   }
 };
