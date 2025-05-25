@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
@@ -21,17 +22,21 @@ const Login: React.FC = () => {
   const { t, currentLanguage, toggleLanguage } = useTranslation();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<LoginFormData>();
-  const { login, isLoading } = useAuth();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const onSubmit = async (data: LoginFormData) => {
+    setIsLoggingIn(true);
     try {
       await login(data.email, data.password);
       // Navigation is handled inside the login function in AuthContext
     } catch (error) {
       console.error('Login error in component:', error);
       // Error is already handled in the login function
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -97,6 +102,7 @@ const Login: React.FC = () => {
                     type="email"
                     className="h-12 bg-gray-50 border-gray-200"
                     placeholder="name@example.com"
+                    disabled={isLoggingIn}
                     {...register('email', { 
                       required: loginMethod === 'email' ? 'Email is required' : false,
                       pattern: {
@@ -121,6 +127,7 @@ const Login: React.FC = () => {
                       type="tel"
                       className="h-12 bg-gray-50 border-gray-200 rounded-l-none"
                       placeholder="5xxxxxxxx"
+                      disabled={isLoggingIn}
                       {...register('phone', { 
                         required: loginMethod === 'phone' ? 'Phone number is required' : false,
                         pattern: {
@@ -146,6 +153,7 @@ const Login: React.FC = () => {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       className="h-12 bg-gray-50 border-gray-200 pr-10"
+                      disabled={isLoggingIn}
                       {...register('password', { 
                         required: loginMethod === 'email' ? 'Password is required' : false,
                         minLength: {
@@ -158,6 +166,7 @@ const Login: React.FC = () => {
                       type="button"
                       className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                       onClick={togglePasswordVisibility}
+                      disabled={isLoggingIn}
                       tabIndex={-1}
                     >
                       {showPassword ? (
@@ -176,9 +185,9 @@ const Login: React.FC = () => {
               <Button 
                 type="submit" 
                 className="w-full h-12 text-base bg-purple-600 hover:bg-purple-700" 
-                disabled={isLoading}
+                disabled={isLoggingIn}
               >
-                {isLoading ? (
+                {isLoggingIn ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
                     {t('loading')}...
@@ -217,6 +226,7 @@ const Login: React.FC = () => {
                     variant="outline" 
                     className="w-full h-12 flex items-center justify-center gap-2"
                     onClick={switchToPhoneLogin}
+                    disabled={isLoggingIn}
                   >
                     <span className="text-gray-700">{t('loginWithPhone')}</span>
                   </Button>
@@ -226,6 +236,7 @@ const Login: React.FC = () => {
                     variant="outline" 
                     className="w-full h-12 flex items-center justify-center gap-2"
                     onClick={switchToEmailLogin}
+                    disabled={isLoggingIn}
                   >
                     <span className="text-gray-700">{t('loginWithEmail')}</span>
                   </Button>
@@ -235,6 +246,7 @@ const Login: React.FC = () => {
                   type="button" 
                   variant="outline" 
                   className="w-full h-12 flex items-center justify-center gap-2 border-gray-300"
+                  disabled={isLoggingIn}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" className="w-5 h-5">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -249,6 +261,7 @@ const Login: React.FC = () => {
                   type="button" 
                   variant="outline" 
                   className="w-full h-12 flex items-center justify-center gap-2 border-gray-300"
+                  disabled={isLoggingIn}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                     <path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z" />

@@ -21,13 +21,20 @@ import FormBuilder from '@/components/FormBuilder/FormBuilder';
 import FormEditorLayout from '@/components/Layout/FormEditorLayout';
 import AppLayout from '@/components/Layout/AppLayout';
 import CreateForm from "@/pages/Form/CreateForm";
-
 import Landing from "@/pages/Landing";
+
 const AppRoutes: React.FC = () => {
   const { user, isLoading } = useAuth();
   
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -35,9 +42,9 @@ const AppRoutes: React.FC = () => {
       {/* Public routes */}
       <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" replace />} />
       <Route path="/register" element={!user ? <Register /> : <Navigate to="/dashboard" replace />} />
-        <Route path="/landing" element={<Landing />} />
+      <Route path="/landing" element={<Landing />} />
 
-        {/* Protected routes with AppLayout */}
+      {/* Protected routes with AppLayout */}
       <Route element={<AppLayout />}>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -52,8 +59,8 @@ const AppRoutes: React.FC = () => {
       {/* Form editor routes with FormEditorLayout */}
       <Route element={<FormEditorLayout />}>
         <Route path="/create-form" element={<CreateForm />} />
-          <Route path="forms/create" element={<CreateForm />} />
-          <Route path="/forms/:formId/edit" element={
+        <Route path="forms/create" element={<CreateForm />} />
+        <Route path="/forms/:formId/edit" element={
           <FormBuilderProvider>
             <FormBuilder />
           </FormBuilderProvider>

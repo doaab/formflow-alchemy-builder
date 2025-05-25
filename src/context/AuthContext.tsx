@@ -5,7 +5,7 @@ import { login as loginService, logout as logoutService, getCurrentUser } from '
 import { User } from '@/api/types/authTypes';
 import { toast } from 'sonner';
 import { useTranslation } from './TranslationContext';
-import { addLanguageToPath } from '@/i18n/languageUtils';
+import { addLanguageToPath, getLanguageFromUrl } from '@/i18n/languageUtils';
 
 interface AuthContextProps {
   user: User | null;
@@ -52,7 +52,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const loginHandler = async (email: string, password: string): Promise<void> => {
-    setIsLoading(true);
     try {
       const response = await loginService(email, password);
       const newToken = response.access_token || '';
@@ -60,15 +59,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(newToken);
       setUser(response.user);
       
+      // Get current language from URL or use current language
+      const urlLanguage = getLanguageFromUrl();
+      const languageToUse = urlLanguage || currentLanguage;
+      
       // Use the language parameter in the URL if it exists
-      navigate(addLanguageToPath('/dashboard', currentLanguage));
+      navigate(addLanguageToPath('/dashboard', languageToUse));
       toast.success('Login successful');
     } catch (error) {
       console.error('Login error:', error);
       toast.error('Login failed. Please check your credentials.');
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
