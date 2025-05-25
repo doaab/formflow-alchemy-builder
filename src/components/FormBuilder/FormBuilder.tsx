@@ -43,10 +43,11 @@ const FormBuilder: React.FC = () => {
   });
 
   useEffect(() => {
-    if (formApiData) {
+    if (formApiData && formApiData !== form) {
+      console.log('Updating form context with API data:', formApiData);
       updateFormInContext(formApiData);
     }
-  }, [formApiData, updateFormInContext]);
+  }, [formApiData, form, updateFormInContext]);
 
   if (isLoading) return (
     <div className="flex items-center justify-center min-h-screen">

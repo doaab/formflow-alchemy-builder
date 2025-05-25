@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Form, FormElementTypes, QuestionType, FormData, Condition } from '@/api/types/formTypes';
 
@@ -39,46 +38,42 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
     elements: []
   });
 
-  // Update the entire form
-  const updateForm = (formData: Form) => {
+  // Update the entire form - memoized to prevent infinite re-renders
+  const updateForm = useCallback((formData: Form) => {
     setForm(formData);
     setFormData({
       title: formData.title || 'New Form',
       description: formData.description || '',
       elements: formData.elements || []
     });
-  };
+  }, []);
 
-  // Update form title
-  const updateFormTitle = (title: string) => {
+  // Update form title - memoized
+  const updateFormTitle = useCallback((title: string) => {
     setFormData(prev => ({
       ...prev,
       title
     }));
-    if (form) {
-      setForm({
-        ...form,
-        title
-      });
-    }
-  };
+    setForm(prev => prev ? {
+      ...prev,
+      title
+    } : prev);
+  }, []);
 
-  // Update form description
-  const updateFormDescription = (description: string) => {
+  // Update form description - memoized
+  const updateFormDescription = useCallback((description: string) => {
     setFormData(prev => ({
       ...prev,
       description
     }));
-    if (form) {
-      setForm({
-        ...form,
-        description
-      });
-    }
-  };
+    setForm(prev => prev ? {
+      ...prev,
+      description
+    } : prev);
+  }, []);
 
-  // Add a new element
-  const addElement = (type: QuestionType) => {
+  // Add a new element - memoized
+  const addElement = useCallback((type: QuestionType) => {
     const newElementId = uuidv4();
     
     // Create basic element with defaults
@@ -152,22 +147,20 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
       elements: [...prev.elements, newElement]
     }));
     
-    if (form) {
-      setForm(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          elements: [...(prev.elements || []), newElement]
-        };
-      });
-    }
+    setForm(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        elements: [...(prev.elements || []), newElement]
+      };
+    });
     
     // Set the new element as active
     setActiveElement(newElementId);
-  };
+  }, []);
 
-  // Update an existing element
-  const updateElement = (elementId: string, updates: Partial<FormElementTypes>) => {
+  // Update an existing element - memoized
+  const updateElement = useCallback((elementId: string, updates: Partial<FormElementTypes>) => {
     setFormData(prev => ({
       ...prev,
       elements: prev.elements.map(el => 
@@ -175,163 +168,139 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
       )
     }));
     
-    if (form) {
-      setForm(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          elements: (prev.elements || []).map(el => 
-            el.id === elementId ? { ...el, ...updates } : el
-          )
-        };
-      });
-    }
-  };
+    setForm(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        elements: (prev.elements || []).map(el => 
+          el.id === elementId ? { ...el, ...updates } : el
+        )
+      };
+    });
+  }, []);
 
-  // Remove an element
-  const removeElement = (elementId: string) => {
+  // Remove an element - memoized
+  const removeElement = useCallback((elementId: string) => {
     // If the active element is being removed, clear the selection
-    if (activeElement === elementId) {
-      setActiveElement(null);
-    }
+    setActiveElement(prev => prev === elementId ? null : prev);
     
     setFormData(prev => ({
       ...prev,
       elements: prev.elements.filter(el => el.id !== elementId)
     }));
     
-    if (form) {
-      setForm(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          elements: (prev.elements || []).filter(el => el.id !== elementId)
-        };
-      });
-    }
-  };
+    setForm(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        elements: (prev.elements || []).filter(el => el.id !== elementId)
+      };
+    });
+  }, []);
 
-  // Alias for removeElement for compatibility
-  const deleteElement = removeElement;
-
-  // Duplicate an element
-  const duplicateElement = (elementId: string) => {
-    const elementToDuplicate = formData.elements.find(el => el.id === elementId);
-    if (!elementToDuplicate) return;
+  // Duplicate an element - memoized
+  const duplicateElement = useCallback((elementId: string) => {
+    setFormData(prev => {
+      const elementToDuplicate = prev.elements.find(el => el.id === elementId);
+      if (!elementToDuplicate) return prev;
+      
+      const newElementId = uuidv4();
+      const duplicatedElement = {
+        ...elementToDuplicate,
+        id: newElementId,
+        label: `${elementToDuplicate.label} (Copy)`
+      };
+      
+      // Set the duplicated element as active
+      setActiveElement(newElementId);
+      
+      return {
+        ...prev,
+        elements: [...prev.elements, duplicatedElement]
+      };
+    });
     
-    const newElementId = uuidv4();
-    const duplicatedElement = {
-      ...elementToDuplicate,
-      id: newElementId,
-      label: `${elementToDuplicate.label} (Copy)`
+    setForm(prev => {
+      if (!prev) return prev;
+      
+      const elementToDuplicate = prev.elements?.find(el => el.id === elementId);
+      if (!elementToDuplicate) return prev;
+      
+      const newElementId = uuidv4();
+      const duplicatedElement = {
+        ...elementToDuplicate,
+        id: newElementId,
+        label: `${elementToDuplicate.label} (Copy)`
+      };
+      
+      return {
+        ...prev,
+        elements: [...(prev.elements || []), duplicatedElement]
+      };
+    });
+  }, []);
+
+  // Move an element (reorder) - memoized
+  const moveElement = useCallback((dragId: string, hoverId: string) => {
+    const reorderFn = (elements: FormElementTypes[]) => {
+      const dragIndex = elements.findIndex(el => el.id === dragId);
+      const hoverIndex = elements.findIndex(el => el.id === hoverId);
+      
+      if (dragIndex === -1 || hoverIndex === -1) return elements;
+      
+      const newElements = [...elements];
+      const dragElement = newElements[dragIndex];
+      
+      newElements.splice(dragIndex, 1);
+      newElements.splice(hoverIndex, 0, dragElement);
+      
+      return newElements;
     };
     
     setFormData(prev => ({
       ...prev,
-      elements: [...prev.elements, duplicatedElement]
+      elements: reorderFn(prev.elements)
     }));
     
-    if (form) {
-      setForm(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          elements: [...(prev.elements || []), duplicatedElement]
-        };
-      });
-    }
-    
-    // Set the duplicated element as active
-    setActiveElement(newElementId);
-  };
-
-  // Move an element (reorder)
-  const moveElement = (dragId: string, hoverId: string) => {
-    setFormData(prev => {
-      const dragIndex = prev.elements.findIndex(el => el.id === dragId);
-      const hoverIndex = prev.elements.findIndex(el => el.id === hoverId);
-      
-      if (dragIndex === -1 || hoverIndex === -1) return prev;
-      
-      const newElements = [...prev.elements];
-      const dragElement = newElements[dragIndex];
-      
-      // Remove the dragged element
-      newElements.splice(dragIndex, 1);
-      // Insert it at the new position
-      newElements.splice(hoverIndex, 0, dragElement);
-      
+    setForm(prev => {
+      if (!prev || !prev.elements) return prev;
       return {
         ...prev,
-        elements: newElements
+        elements: reorderFn(prev.elements)
       };
     });
-    
-    if (form) {
-      setForm(prev => {
-        if (!prev || !prev.elements) return prev;
-        
-        const dragIndex = prev.elements.findIndex(el => el.id === dragId);
-        const hoverIndex = prev.elements.findIndex(el => el.id === hoverId);
-        
-        if (dragIndex === -1 || hoverIndex === -1) return prev;
-        
-        const newElements = [...prev.elements];
-        const dragElement = newElements[dragIndex];
-        
-        // Remove the dragged element
-        newElements.splice(dragIndex, 1);
-        // Insert it at the new position
-        newElements.splice(hoverIndex, 0, dragElement);
-        
-        return {
-          ...prev,
-          elements: newElements
-        };
-      });
-    }
-  };
+  }, []);
   
-  // Helper function for reordering elements by index
-  const reorderElements = (dragIndex: number, hoverIndex: number) => {
-    setFormData(prev => {
-      if (dragIndex === -1 || hoverIndex === -1) return prev;
+  // Helper function for reordering elements by index - memoized
+  const reorderElements = useCallback((dragIndex: number, hoverIndex: number) => {
+    const reorderFn = (elements: FormElementTypes[]) => {
+      if (dragIndex === -1 || hoverIndex === -1) return elements;
       
-      const newElements = [...prev.elements];
+      const newElements = [...elements];
       const dragElement = newElements[dragIndex];
       
-      // Remove the dragged element
       newElements.splice(dragIndex, 1);
-      // Insert it at the new position
       newElements.splice(hoverIndex, 0, dragElement);
       
+      return newElements;
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      elements: reorderFn(prev.elements)
+    }));
+    
+    setForm(prev => {
+      if (!prev || !prev.elements) return prev;
       return {
         ...prev,
-        elements: newElements
+        elements: reorderFn(prev.elements)
       };
     });
-    
-    if (form) {
-      setForm(prev => {
-        if (!prev || !prev.elements) return prev;
-        
-        if (dragIndex === -1 || hoverIndex === -1) return prev;
-        
-        const newElements = [...prev.elements];
-        const dragElement = newElements[dragIndex];
-        
-        // Remove the dragged element
-        newElements.splice(dragIndex, 1);
-        // Insert it at the new position
-        newElements.splice(hoverIndex, 0, dragElement);
-        
-        return {
-          ...prev,
-          elements: newElements
-        };
-      });
-    }
-  };
+  }, []);
+
+  // Alias for removeElement for compatibility - memoized
+  const deleteElement = removeElement;
 
   const value = {
     form,
