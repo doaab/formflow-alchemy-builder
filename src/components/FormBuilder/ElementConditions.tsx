@@ -25,6 +25,7 @@ const ElementConditions = ({ element }: ElementConditionsProps) => {
     formData.elements.indexOf(e) < formData.elements.indexOf(element)
   );
   
+  // Ensure we always have a valid conditionalLogic object
   const conditionalLogic = element.conditionalLogic || {
     enabled: false,
     action: 'show',
@@ -33,12 +34,21 @@ const ElementConditions = ({ element }: ElementConditionsProps) => {
   };
   
   const updateConditionalLogic = (updates: Partial<typeof conditionalLogic>) => {
+    console.log('Updating conditional logic:', updates);
+    const newConditionalLogic = {
+      ...conditionalLogic,
+      ...updates
+    };
+    console.log('New conditional logic:', newConditionalLogic);
+    
     updateElement(element.id, {
-      conditionalLogic: {
-        ...conditionalLogic,
-        ...updates
-      }
+      conditionalLogic: newConditionalLogic
     });
+  };
+  
+  const handleSwitchChange = (checked: boolean) => {
+    console.log('Switch changed to:', checked);
+    updateConditionalLogic({ enabled: checked });
   };
   
   const addCondition = () => {
@@ -79,6 +89,8 @@ const ElementConditions = ({ element }: ElementConditionsProps) => {
     return [];
   };
   
+  console.log('ElementConditions rendering, conditionalLogic.enabled:', conditionalLogic.enabled);
+  
   return (
     <ScrollArea className="h-[calc(100vh-250px)]">
       <div className="space-y-4 p-1">
@@ -86,7 +98,7 @@ const ElementConditions = ({ element }: ElementConditionsProps) => {
           <Switch
             id="conditions-enabled"
             checked={conditionalLogic.enabled}
-            onCheckedChange={(checked) => updateConditionalLogic({ enabled: checked })}
+            onCheckedChange={handleSwitchChange}
           />
           <Label htmlFor="conditions-enabled">Enable Conditional Logic</Label>
         </div>
