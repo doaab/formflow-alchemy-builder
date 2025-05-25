@@ -14,4 +14,8 @@ class WaSubscriptionsFeatureDescription extends Model
     {
         return $this->belongsTo(WaSubscriptions::class);
     }
+    public function subscription()
+    {
+        return $this->belongsTo(WaSubscriptions::class, 'wa_subscription_id');
+    }
 }

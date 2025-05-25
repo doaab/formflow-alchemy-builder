@@ -8,6 +8,7 @@ use App\Http\Controllers\API\FormController;
 use App\Http\Controllers\API\FormElementController;
 use App\Http\Controllers\API\FormResponseController;
 use App\Http\Controllers\API\QuestionTypeController;
+use App\Http\Controllers\API\PackagesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,7 @@ Route::middleware('auth:api')->group(function () {
 });
 // Question types - public access
 Route::get('/question-types', [QuestionTypeController::class, 'index']);
+Route::get('/packages', [PackagesController::class, 'getPackages']);
 
 // Public form access by slug - no authentication required
 Route::get('/forms/by-slug/{slug}', [FormController::class, 'getBySlug']);
@@ -60,7 +62,7 @@ Route::prefix('forms')->group(function () {
 
         // Form responses
         Route::get('/{form}/responses', [FormResponseController::class, 'index']);
-        Route::get('/{form}/responses/{response}', [FormResponseController::class, 'show']);
+        Route::get('/{form}/responses/{id}', [FormResponseController::class, 'show']);
         Route::delete('/{form}/responses/{response}', [FormResponseController::class, 'destroy']);
         Route::get('/{form}/responses/export', [FormResponseController::class, 'export']);
         Route::get('/{form}/responses/statistics', [FormResponseController::class, 'statistics']);

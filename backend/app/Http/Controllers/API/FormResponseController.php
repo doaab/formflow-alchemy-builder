@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\API;
@@ -104,15 +103,15 @@ class FormResponseController extends Controller
     public function show(Request $request, $formId, $responseId)
     {
         try {
-            $form = Form::findOrFail($formId);
-            
+//            $form = Form::where('id',$request->id)->first();
+
             // Modified authorization logic to be more permissive during development
-            
-            $response = FormResponse::where('form_id', $form->id)
+
+            $response = FormResponse::where('form_id',$request->id)
                 ->where('id', $responseId)
                 ->firstOrFail();
 
-            if ($response->form_id !== $form->id) {
+            if ($response->form_id !== $request->id) {
                 return response()->json(['message' => 'Response does not belong to this form'], 404);
             }
 

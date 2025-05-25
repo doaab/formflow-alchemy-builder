@@ -53,5 +53,22 @@ export const Landing = {
     proFeature4: "Number of specific responses up to 5000",
     proFeature5: "Activate participation via mobile numbers",
     proFeature6: "Diverse dashboard and advanced services",
-    proFeature7: "Sentiment analysis of customers"
+    proFeature7: "Sentiment analysis of customers",
+    faqTitle: "Frequently Asked Questions",
+
+    faqQuestion1: "Is it necessary to activate the reward system?",
+    faqAnswer1: "We always recommend activating the reward system to motivate the customer to provide an honest opinion of the brand to benefit from it in the development of the brand. You can determine the reward or incentive in proportion to your brand and the stage of progress in your project.",
+    faqQuestion2: "How accurate is the data that I will get?",
+    faqAnswer2: "We make sure that you get all customers' answers with the utmost accuracy in detailed reports that are easy to understand, without our interference or influence on their opinions.",
+    faqQuestion3: "How do we get customer reviews and opinions?",
+    faqAnswer3: "Determining the questions and the technique for presenting them is completely up to the customer and his desire to know the finer details of his service. We offer you different techniques and you choose the most suitable one for you.",
+    faqQuestion4: "What are the favorite prizes in the customer rewards system?",
+    faqAnswer4: "The rewards offered to customers are entirely up to the customer. We offer you some suggestions that you can benefit from, such as \"providing discount codes, offers, and other rewards\" that can be integrated with various accounting systems easily and simply.",
+    faqQuestion5: "Is it necessary to use QR code to get customer reviews?",
+    faqAnswer5: "The evaluation link via QR code is one of the available options, and you can also use the link and send it to customers by subscribing to the SMS messaging service or via WhatsApp, or even sharing it on social media.",
+    faqQuestion6: "Is it possible to upload the data?",
+    faqAnswer6: "Yes, you can download the data with the click of a button and analyze it easily through Excel.",
+    faqQuestion7: "Is it possible to add more than one questionnaire in one account?",
+    faqAnswer7: "You can add an unlimited number of questionnaires if you are subscribed to the professional package, you can find out the advantages of each package in the packages section."
+
 };

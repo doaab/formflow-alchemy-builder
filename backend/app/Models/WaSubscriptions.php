@@ -14,4 +14,13 @@ class WaSubscriptions extends Model
     {
         return $this->belongsTo(WaServiceProvider::class);
     }
+    public function serviceSubscriptions()
+    {
+        return $this->hasMany(WaServiceSubscriptions::class, 'wa_subscription_id');
+    }
+
+    public function featureDescriptions()
+    {
+        return $this->hasMany(WaSubscriptionsFeatureDescription::class, 'wa_subscription_id');
+    }
 }
