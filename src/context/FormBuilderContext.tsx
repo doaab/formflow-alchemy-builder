@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Form, FormElementTypes, QuestionType, FormData, Condition } from '@/api/types/formTypes';
@@ -40,6 +41,7 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   // Update the entire form - memoized to prevent infinite re-renders
   const updateForm = useCallback((formData: Form) => {
+    console.log('updateForm called with:', formData);
     setForm(formData);
     setFormData({
       title: formData.title || 'New Form',
@@ -75,6 +77,7 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
   // Add a new element - memoized
   const addElement = useCallback((type: QuestionType) => {
     const newElementId = uuidv4();
+    console.log('Adding element of type:', type, 'with ID:', newElementId);
     
     // Create basic element with defaults
     const newElement: FormElementTypes = {
@@ -141,26 +144,36 @@ export const FormBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
       logicGate: 'all'
     };
 
+    console.log('Created new element:', newElement);
+
     // Update the form with the new element
-    setFormData(prev => ({
-      ...prev,
-      elements: [...prev.elements, newElement]
-    }));
+    setFormData(prev => {
+      const updatedFormData = {
+        ...prev,
+        elements: [...prev.elements, newElement]
+      };
+      console.log('Updated formData:', updatedFormData);
+      return updatedFormData;
+    });
     
     setForm(prev => {
       if (!prev) return prev;
-      return {
+      const updatedForm = {
         ...prev,
         elements: [...(prev.elements || []), newElement]
       };
+      console.log('Updated form:', updatedForm);
+      return updatedForm;
     });
     
     // Set the new element as active
     setActiveElement(newElementId);
+    console.log('Set active element to:', newElementId);
   }, []);
 
   // Update an existing element - memoized
   const updateElement = useCallback((elementId: string, updates: Partial<FormElementTypes>) => {
+    console.log('Updating element:', elementId, 'with updates:', updates);
     setFormData(prev => ({
       ...prev,
       elements: prev.elements.map(el => 
